@@ -8,15 +8,11 @@
 #define _AdminRoute1_H_
 #include "Arduino.h"
 //add your includes for the project AdminRoute1 here
-
+#include "HeartbeatProtocol.h"
 
 //end of add your includes here
 
-
 //add your function definitions for the project AdminRoute1 here
-
-
-
 
 //Do not add code below this line
 #endif /* _AdminRoute1_H_ */

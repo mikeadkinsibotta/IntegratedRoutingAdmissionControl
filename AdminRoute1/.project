@@ -41,11 +41,6 @@
 			<locationURI>ArduinoPrivateLibPath/HeartBeatProtocol</locationURI>
 		</link>
 		<link>
-			<name>Libraries/NeighborhoodTable</name>
-			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/NeighborhoodTable</locationURI>
-		</link>
-		<link>
 			<name>Libraries/XBee</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/XBee</locationURI>
