@@ -14,6 +14,7 @@
 class HeartbeatMessage {
 
 	private:
+		static const XBeeAddress64 broadCastaddr64;
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
 		uint8_t seqNum;
@@ -47,6 +48,8 @@ class HeartbeatMessage {
 
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
+
+		Tx64Request generatePacket() const;
 
 };
 

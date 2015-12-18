@@ -6,6 +6,8 @@
  */
 #include "HeartbeatMessage.h"
 
+const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
+
 const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
 	return senderAddress;
 }
@@ -68,5 +70,17 @@ bool HeartbeatMessage::isRouteFlag() const {
 
 void HeartbeatMessage::setRouteFlag(bool routeFlag) {
 	this->routeFlag = routeFlag;
+}
+
+Tx64Request HeartbeatMessage::generatePacket() const {
+
+	byte payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
+			& 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
+			& 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
+			& 0xff, (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff,
+			(sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff,
+			(sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff,
+			seqNum, dataRate, neighborhoodCapacity, qualityOfPath, routeFlag };
+
 }
 
