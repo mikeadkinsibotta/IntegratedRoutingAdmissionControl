@@ -31,29 +31,19 @@
 			<locationURI>ArduinoPrivateLibPath/ADPCM</locationURI>
 		</link>
 		<link>
-			<name>Libraries/AODV</name>
-			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/AODV</locationURI>
-		</link>
-		<link>
-			<name>Libraries/AdmissionControl</name>
-			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/AdmissionControl</locationURI>
-		</link>
-		<link>
 			<name>Libraries/ArduinoThread</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/ArduinoThread</locationURI>
 		</link>
 		<link>
-			<name>Libraries/VoiceSettings</name>
+			<name>Libraries/HeartBeatProtocol</name>
 			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/VoiceSettings</locationURI>
+			<locationURI>ArduinoPrivateLibPath/HeartBeatProtocol</locationURI>
 		</link>
 		<link>
-			<name>Libraries/VoiceStatistics</name>
+			<name>Libraries/NeighborhoodTable</name>
 			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/VoiceStatistics</locationURI>
+			<locationURI>ArduinoPrivateLibPath/NeighborhoodTable</locationURI>
 		</link>
 		<link>
 			<name>Libraries/XBee</name>
