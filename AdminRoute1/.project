@@ -7,7 +7,6 @@
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -32,6 +31,16 @@
 			<locationURI>ArduinoPrivateLibPath/ADPCM</locationURI>
 		</link>
 		<link>
+			<name>Libraries/AODV</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/AODV</locationURI>
+		</link>
+		<link>
+			<name>Libraries/AdmissionControl</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/AdmissionControl</locationURI>
+		</link>
+		<link>
 			<name>Libraries/ArduinoThread</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/ArduinoThread</locationURI>
@@ -40,6 +49,16 @@
 			<name>Libraries/VoiceSettings</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/VoiceSettings</locationURI>
+		</link>
+		<link>
+			<name>Libraries/VoiceStatistics</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/VoiceStatistics</locationURI>
+		</link>
+		<link>
+			<name>Libraries/XBee</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/XBee</locationURI>
 		</link>
 		<link>
 			<name>arduino/core</name>

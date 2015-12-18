@@ -27,6 +27,21 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Libraries/ADPCM</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/ADPCM</locationURI>
+		</link>
+		<link>
+			<name>Libraries/ArduinoThread</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/ArduinoThread</locationURI>
+		</link>
+		<link>
+			<name>Libraries/XBee</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/XBee</locationURI>
+		</link>
+		<link>
 			<name>arduino/core</name>
 			<type>2</type>
 			<locationURI>ArduinoPlatformPath/arduino</locationURI>
