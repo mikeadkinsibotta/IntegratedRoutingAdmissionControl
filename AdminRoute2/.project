@@ -37,6 +37,11 @@
 			<locationURI>ArduinoPrivateLibPath/ArduinoThread</locationURI>
 		</link>
 		<link>
+			<name>Libraries/HeartBeatProtocol</name>
+			<type>2</type>
+			<locationURI>ArduinoPrivateLibPath/HeartBeatProtocol</locationURI>
+		</link>
+		<link>
 			<name>Libraries/XBee</name>
 			<type>2</type>
 			<locationURI>ArduinoPrivateLibPath/XBee</locationURI>
