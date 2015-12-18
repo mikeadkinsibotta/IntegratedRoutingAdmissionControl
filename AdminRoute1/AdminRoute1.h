@@ -9,10 +9,16 @@
 #include "Arduino.h"
 //add your includes for the project AdminRoute1 here
 #include "HeartbeatProtocol.h"
+#include <ThreadController.h>
 
 //end of add your includes here
 
 //add your function definitions for the project AdminRoute1 here
+void broadcastHeartbeat();
+void arduinoSetup();
+void clearBuffer();
+XBeeAddress64 getMyAddress();
+void setupThreads();
 
 //Do not add code below this line
 #endif /* _AdminRoute1_H_ */
