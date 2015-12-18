@@ -21,6 +21,9 @@
 								<option id="it.baeyens.arduino.compiler.cpp.sketch.option.incpath.2043532808" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/ADPCM}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/ArduinoThread}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/VoiceSettings}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.290128266" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -28,6 +31,9 @@
 								<option id="it.baeyens.arduino.compiler.c.sketch.option.incpath.1376782901" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/ADPCM}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/ArduinoThread}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRoute1/Libraries/VoiceSettings}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.1179845786" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>
@@ -54,4 +60,5 @@
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope"/>
 </cproject>
