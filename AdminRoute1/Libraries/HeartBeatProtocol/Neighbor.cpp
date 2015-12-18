@@ -8,11 +8,11 @@ void Neighbor::setNeighborAddress(const XBeeAddress64& neighborAddress) {
 	this->neighborAddress = neighborAddress;
 }
 
-double Neighbor::getNeighborDataRate() const {
+float Neighbor::getNeighborDataRate() const {
 	return neighborDataRate;
 }
 
-void Neighbor::setNeighborDataRate(double neighborDataRate) {
+void Neighbor::setNeighborDataRate(float neighborDataRate) {
 	this->neighborDataRate = neighborDataRate;
 }
 
@@ -32,27 +32,27 @@ void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 	this->sinkAddress = sinkAddress;
 }
 
-double Neighbor::getRelativeDistance() const {
+float Neighbor::getRelativeDistance() const {
 	return relativeDistance;
 }
 
-void Neighbor::setRelativeDistance(double relativeDistance) {
+void Neighbor::setRelativeDistance(float relativeDistance) {
 	this->relativeDistance = relativeDistance;
 }
 
-double Neighbor::getNeighborhoodCapacity() const {
+float Neighbor::getNeighborhoodCapacity() const {
 	return neighborhoodCapacity;
 }
 
-void Neighbor::setNeighborhoodCapacity(double neighborhoodCapacity) {
+void Neighbor::setNeighborhoodCapacity(float neighborhoodCapacity) {
 	this->neighborhoodCapacity = neighborhoodCapacity;
 }
 
-double Neighbor::getPacketLoss() const {
+float Neighbor::getPacketLoss() const {
 	return packetLoss;
 }
 
-void Neighbor::setPacketLoss(double packetLoss) {
+void Neighbor::setPacketLoss(float packetLoss) {
 	this->packetLoss = packetLoss;
 }
 

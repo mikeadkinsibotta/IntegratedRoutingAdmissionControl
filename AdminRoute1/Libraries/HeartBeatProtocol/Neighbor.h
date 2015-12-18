@@ -15,10 +15,10 @@ class Neighbor {
 		XBeeAddress64 neighborAddress;
 		XBeeAddress64 streamSourceAddress;
 		XBeeAddress64 sinkAddress;
-		double relativeDistance;
-		double neighborDataRate;
-		double neighborhoodCapacity;
-		double packetLoss;
+		float relativeDistance;
+		float neighborDataRate;
+		float neighborhoodCapacity;
+		float packetLoss;
 		uint8_t seqNum;
 		uint8_t qosCost;
 		bool routeFlag;
@@ -36,17 +36,17 @@ class Neighbor {
 		const XBeeAddress64& getSinkAddress() const;
 		void setSinkAddress(const XBeeAddress64& sinkAddress);
 
-		double getRelativeDistance() const;
-		void setRelativeDistance(double relativeDistance);
+		float getRelativeDistance() const;
+		void setRelativeDistance(float relativeDistance);
 
-		double getNeighborDataRate() const;
-		void setNeighborDataRate(double neighborDataRate);
+		float getNeighborDataRate() const;
+		void setNeighborDataRate(float neighborDataRate);
 
-		double getNeighborhoodCapacity() const;
-		void setNeighborhoodCapacity(double neighborhoodCapacity);
+		float getNeighborhoodCapacity() const;
+		void setNeighborhoodCapacity(float neighborhoodCapacity);
 
-		double getPacketLoss() const;
-		void setPacketLoss(double packetLoss);
+		float getPacketLoss() const;
+		void setPacketLoss(float packetLoss);
 
 		uint8_t getSeqNum() const;
 		void setSeqNum(uint8_t seqNum);

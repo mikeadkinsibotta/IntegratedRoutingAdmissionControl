@@ -18,13 +18,20 @@ class HeartbeatMessage {
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
 		uint8_t seqNum;
-		double dataRate;
-		double rssi;
-		double qualityOfPath;
-		double neighborhoodCapacity;
+		float dataRate;
+		uint8_t rssi;
+		uint8_t qualityOfPath;
+		float neighborhoodCapacity;
 		bool routeFlag;
 
 	public:
+
+		HeartbeatMessage(XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum, float dataRate,
+				uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag);
+
+		HeartbeatMessage(XBeeAddress64& senderAddress, XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum,
+				float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag);
+
 		const XBeeAddress64& getSenderAddress() const;
 		void setSenderAddress(const XBeeAddress64& senderAddress);
 
@@ -34,22 +41,24 @@ class HeartbeatMessage {
 		uint8_t getSeqNum() const;
 		void setSeqNum(uint8_t seqNum);
 
-		double getDataRate() const;
-		void setDataRate(double dataRate);
+		float getDataRate() const;
+		void setDataRate(float dataRate);
 
-		double getRssi() const;
-		void setRssi(double rssi);
+		float getRssi() const;
+		void setRssi(float rssi);
 
-		double getQualityOfPath() const;
-		void setQualityOfPath(double qualityOfPath);
+		uint8_t getQualityOfPath() const;
+		void setQualityOfPath(uint8_t qualityOfPath);
 
-		double getNeighborhoodCapacity() const;
-		void setNeighborhoodCapacity(double neighborhoodCapacity);
+		float getNeighborhoodCapacity() const;
+		void setNeighborhoodCapacity(float neighborhoodCapacity);
 
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
-		Tx64Request generatePacket() const;
+		Tx64Request generatePacket();
+
+		void printMessage();
 
 };
 

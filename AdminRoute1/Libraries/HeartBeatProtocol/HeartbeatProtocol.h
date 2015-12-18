@@ -16,18 +16,26 @@
 
 using namespace std;
 
-class HeartBeatProtcool {
+union conversion {
+		uint8_t b[4];
+		float rate;
+};
+
+class HeartbeatProtocol {
 
 	private:
 		vector<Neighbor> neighborhoodTable;
-		XBeeAddress64 senderAddress;
-
-		double seqNum;
+		XBee xbee;
+		float seqNum;
+		conversion dataRateU;
+		conversion neighborhoodCapacityRateU;
 
 	public:
+		HeartbeatProtocol(XBee& xbee);
 		void broadcastHeartBeat();
-		void receivedHeartBeat();
+		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
+		HeartbeatMessage transcribeHeartbeatPacket(const Rx64Response& response);
 
 };
 
