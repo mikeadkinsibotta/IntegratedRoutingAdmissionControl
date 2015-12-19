@@ -118,30 +118,12 @@ void HeartbeatMessage::printMessage() {
 	Serial.println('>');
 }
 
-Tx64Request HeartbeatMessage::generatePacket() {
+void HeartbeatMessage::sendMessage(XBee& xbee) {
 
-	uint8_t payload[24];
-	payload[0] = 'B';
-	payload[1] = 'E';
-	payload[2] = 'A';
-	payload[3] = 'T';
-	payload[4] = '\0';
-	payload[5] = static_cast<uint8_t>((sinkAddress.getMsb() >> 24) & 0xff);
-	payload[6] = static_cast<uint8_t>((sinkAddress.getMsb() >> 16) & 0xff);
-	payload[7] = static_cast<uint8_t>((sinkAddress.getMsb() >> 8) & 0xff);
-	payload[8] = static_cast<uint8_t>(sinkAddress.getMsb() & 0xff);
-	payload[9] = static_cast<uint8_t>((sinkAddress.getLsb() >> 24) & 0xff);
-	payload[10] = static_cast<uint8_t>((sinkAddress.getLsb() >> 16) & 0xff);
-	payload[11] = static_cast<uint8_t>((sinkAddress.getLsb() >> 8) & 0xff);
-	payload[12] = static_cast<uint8_t>(sinkAddress.getLsb() & 0xff);
-	payload[13] = seqNum;
-	memcpy(&dataRate, payload + 14, sizeof dataRate);
-	memcpy(&neighborhoodCapacity, payload + 18, sizeof neighborhoodCapacity);
-	payload[22] = qualityOfPath;
-	payload[23] = routeFlag;
+	uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0'};
 
 	Tx64Request tx = Tx64Request(broadCastaddr64, 0, payload, sizeof(payload), 0);
-	return tx;
+	xbee.send(tx);
 
 }
 

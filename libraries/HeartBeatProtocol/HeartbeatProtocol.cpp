@@ -19,9 +19,9 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 	XBeeAddress64 sink = XBeeAddress64();
 
 	HeartbeatMessage message = HeartbeatMessage(sink, 0.0, seqNum, 0.0, 0, 0, 0);
-	Tx64Request heartbeatPacket = message.generatePacket();
+	message.sendMessage(xbee);
 
-	xbee.send(heartbeatPacket);
+
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {

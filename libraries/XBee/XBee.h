@@ -551,8 +551,10 @@ class XBee {
 		uint8_t read() const;
 		void flush();
 		void write(uint8_t val);
+		void writeln(uint8_t val);
 		void write(const uint8_t *buffer, size_t size);
 		void sendByte(uint8_t b, bool escape);
+		void sendByteEndline(uint8_t b, bool escape);
 		void resetResponse();
 		XBeeResponse _response;
 		bool _escape;

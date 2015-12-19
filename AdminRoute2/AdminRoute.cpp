@@ -94,8 +94,8 @@ XBeeAddress64 getMyAddress() {
 		}
 	}
 
-	Serial.print("ThisAddress");
-	address.printAddress(&Serial);
+	SerialUSB.print("ThisAddress");
+	address.printAddress(&SerialUSB);
 
 	return address;
 }
@@ -146,7 +146,7 @@ void setupThreads() {
 	responseThread.onRun(listenForResponses);
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
-	heartbeat.enabled = false;
+	heartbeat.enabled = true;
 	heartbeat.setInterval(1000);
 	heartbeat.onRun(broadcastHeartbeat);
 
