@@ -345,7 +345,7 @@ class Rx64Response: public RxResponse {
 		Rx64Response();
 		virtual ~Rx64Response();
 		uint8_t getRssiOffset() const;
-		XBeeAddress64& getRemoteAddress64();
+		XBeeAddress64 getRemoteAddress64() const;
 	private:
 		XBeeAddress64 _remoteAddress;
 };

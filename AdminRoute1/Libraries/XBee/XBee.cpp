@@ -122,7 +122,7 @@ RxResponse::~RxResponse() {
 
 }
 
-XBeeAddress64& Rx64Response::getRemoteAddress64() {
+XBeeAddress64 Rx64Response::getRemoteAddress64() const {
 	return _remoteAddress;
 }
 
