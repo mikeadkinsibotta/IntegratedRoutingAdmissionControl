@@ -7,7 +7,6 @@
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -27,9 +26,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Libraries/ADPCM</name>
+			<name>Libraries/ADPCMNew</name>
 			<type>2</type>
-			<locationURI>ArduinoPrivateLibPath/ADPCM</locationURI>
+			<locationURI>ArduinoPrivateLibPath/ADPCMNew</locationURI>
 		</link>
 		<link>
 			<name>Libraries/ArduinoThread</name>
