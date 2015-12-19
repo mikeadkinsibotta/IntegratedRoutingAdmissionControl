@@ -992,7 +992,7 @@ void XBee::packageSend(const XBeeRequest &request) {
 
 	packageByte(buffer, checksum, true, index);
 
-	Serial.write(buffer, index);
+	_serial->write(buffer, index);
 	//Serial.print("index");
 	//Serial.println(index);
 	flush();
