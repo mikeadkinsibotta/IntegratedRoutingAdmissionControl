@@ -6,7 +6,7 @@
  */
 #include "HeartbeatMessage.h"
 
-const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x0013A200, 0x40B519CC);
+const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
 
 HeartbeatMessage::HeartbeatMessage(XBeeAddress64& senderAddress, XBeeAddress64& sinkAddress, uint8_t rssi,
 		uint8_t seqNum, float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
