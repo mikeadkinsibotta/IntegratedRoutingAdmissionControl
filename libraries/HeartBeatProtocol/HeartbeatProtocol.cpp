@@ -24,7 +24,7 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 }
 
-void HeartbeatProtocol::receiveHeartBeat(Rx64Response& response) {
+void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
 	//message.printMessage();
 }
@@ -33,11 +33,12 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 }
 
-HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(Rx64Response& response) {
+HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	uint8_t* dataPtr = response.getData();
 
 	XBeeAddress64 senderAddress = response.getRemoteAddress64();
+
 	uint8_t rssi = response.getRssi();
 	XBeeAddress64 sinkAddress;
 

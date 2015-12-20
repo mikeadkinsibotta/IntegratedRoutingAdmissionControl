@@ -122,8 +122,12 @@ RxResponse::~RxResponse() {
 
 }
 
-XBeeAddress64& Rx64Response::getRemoteAddress64() {
+XBeeAddress64 Rx64Response::getRemoteAddress64() const {
 	return _remoteAddress;
+}
+
+void Rx64Response::setRemoteAddress64(const XBeeAddress64& remoteAddress) {
+ _remoteAddress = remoteAddress;
 }
 
 Rx64Response::Rx64Response()
@@ -193,12 +197,16 @@ void XBeeResponse::getRx64Response(XBeeResponse &rx64Response) const {
 	rx64->setFrameData(getFrameData());
 	setCommon(rx64Response);
 
-	rx64->getRemoteAddress64().setMsb(
-			(uint32_t(getFrameData()[0]) << 24) + (uint32_t(getFrameData()[1]) << 16)
-					+ (uint16_t(getFrameData()[2]) << 8) + getFrameData()[3]);
-	rx64->getRemoteAddress64().setLsb(
-			(uint32_t(getFrameData()[4]) << 24) + (uint32_t(getFrameData()[5]) << 16)
-					+ (uint16_t(getFrameData()[6]) << 8) + getFrameData()[7]);
+	XBeeAddress64 remoteAddress;
+
+	remoteAddress.setMsb((uint32_t(getFrameData()[0]) << 24) + (uint32_t(getFrameData()[1]) << 16)
+						+ (uint16_t(getFrameData()[2]) << 8) + getFrameData()[3]);
+	remoteAddress.setLsb(
+				(uint32_t(getFrameData()[4]) << 24) + (uint32_t(getFrameData()[5]) << 16)
+						+ (uint16_t(getFrameData()[6]) << 8) + getFrameData()[7]);
+
+	rx64->setRemoteAddress64(remoteAddress);
+
 }
 
 RemoteAtCommandResponse::RemoteAtCommandResponse()

@@ -33,9 +33,9 @@ class HeartbeatProtocol {
 	public:
 		HeartbeatProtocol(XBee& xbee);
 		void broadcastHeartBeat();
-		void receiveHeartBeat(Rx64Response& response);
+		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
-		HeartbeatMessage transcribeHeartbeatPacket(Rx64Response& response);
+		HeartbeatMessage transcribeHeartbeatPacket(const Rx64Response& response);
 
 };
 
