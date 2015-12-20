@@ -6,7 +6,7 @@
  */
 #include "HeartbeatMessage.h"
 
-const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
+const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x0013A200, 0x40B519CC);
 
 HeartbeatMessage::HeartbeatMessage(XBeeAddress64& senderAddress, XBeeAddress64& sinkAddress, uint8_t rssi,
 		uint8_t seqNum, float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
@@ -102,9 +102,9 @@ void HeartbeatMessage::setRouteFlag(bool routeFlag) {
 void HeartbeatMessage::printMessage() {
 
 	Serial.print('<');
-	senderAddress.printAddress(&Serial);
+	senderAddress.printAddressASCII(&Serial);
 	Serial.print(',');
-	sinkAddress.printAddress(&Serial);
+	sinkAddress.printAddressASCII(&Serial);
 	Serial.print(',');
 	Serial.print(seqNum);
 	Serial.print(',');

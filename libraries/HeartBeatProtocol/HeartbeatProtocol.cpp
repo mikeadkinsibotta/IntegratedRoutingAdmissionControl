@@ -24,16 +24,16 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 }
 
-void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
+void HeartbeatProtocol::receiveHeartBeat(Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
-	message.printMessage();
+	//message.printMessage();
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
 }
 
-HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
+HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(Rx64Response& response) {
 
 	uint8_t* dataPtr = response.getData();
 

@@ -122,7 +122,7 @@ RxResponse::~RxResponse() {
 
 }
 
-XBeeAddress64 Rx64Response::getRemoteAddress64() const {
+XBeeAddress64& Rx64Response::getRemoteAddress64() {
 	return _remoteAddress;
 }
 
@@ -407,12 +407,6 @@ void XBee::flush() {
 
 void XBee::write(const uint8_t val) {
 	_serial->write(val);
-	SerialUSB.print(val, HEX);
-}
-
-void XBee::writeln(const uint8_t val) {
-	_serial->write(val);
-	SerialUSB.println(val, HEX);
 }
 
 void XBee::write(const uint8_t *buffer, size_t size) {
@@ -992,7 +986,7 @@ void XBee::packageSend(const XBeeRequest &request) {
 
 	packageByte(buffer, checksum, true, index);
 
-	_serial->write(buffer, index);
+	Serial.write(buffer, index);
 	//Serial.print("index");
 	//Serial.println(index);
 	flush();
@@ -1035,7 +1029,7 @@ void XBee::send(const XBeeRequest &request) {
 //	std::cout << "checksum is " << static_cast<unsigned int>(checksum) << std::endl;
 
 	// send checksum
-	sendByteEndline(checksum, true);
+	sendByte(checksum, true);
 
 	// send packet (Note: prior to Arduino 1.0 this flushed the incoming buffer, which of course was not so great)
 	flush();
@@ -1049,17 +1043,6 @@ void XBee::sendByte(const uint8_t b, const bool escape) {
 		write(b ^ 0x20);
 	} else {
 		write(b);
-	}
-}
-
-void XBee::sendByteEndline(const uint8_t b, const bool escape) {
-
-	if(escape && (b == START_BYTE || b == ESCAPE || b == XON || b == XOFF)) {
-//		std::cout << "escaping byte [" << toHexString(b) << "] " << std::endl;
-		write (ESCAPE);
-		writeln(b ^ 0x20);
-	} else {
-		writeln(b);
 	}
 }
 
