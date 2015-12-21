@@ -79,7 +79,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
 
-	uint8_t* dataPtr = response.getData();
+	uint8_t* dataPtr = response.getData() + 5;
 
 	XBeeAddress64 senderAddress = response.getRemoteAddress64();
 
@@ -88,28 +88,25 @@ HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response
 	XBeeAddress64 sourceStreamAddress;
 
 	sinkAddress.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
 
 	sinkAddress.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
 
 	sourceStreamAddress.setMsb(
-			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
 
 	sourceStreamAddress.setLsb(
-			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
 
-	uint8_t seqNum = dataPtr[21];
-	uint8_t qualityOfPath = dataPtr[22];
-	uint8_t routeFlag = dataPtr[23];
+	uint8_t seqNum = dataPtr[16];
+	uint8_t qualityOfPath = dataPtr[17];
+	uint8_t routeFlag = dataPtr[18];
 
-	float * dataRateP = (float*) dataPtr[24];
+	float * dataRateP = (float*) dataPtr + 19;
 	float dataRate = *dataPtr;
 
-	SerialUSB.print("DataRateTranscribe ");
-	SerialUSB.println(dataRate);
-
-	dataRateP = (float*) dataPtr[28];
+	dataRateP = (float*) dataPtr + 23;
 	float neighborhoodCapacity = *dataRateP;
 
 	HeartbeatMessage message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRate,
