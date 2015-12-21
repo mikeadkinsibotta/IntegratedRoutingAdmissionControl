@@ -16,19 +16,12 @@
 
 using namespace std;
 
-union conversion {
-		uint8_t b[4];
-		float rate;
-};
-
 class HeartbeatProtocol {
 
 	private:
 		vector<Neighbor> neighborhoodTable;
 		XBee xbee;
 		float seqNum;
-		conversion dataRateU;
-		conversion neighborhoodCapacityRateU;
 
 	public:
 		HeartbeatProtocol(XBee& xbee);

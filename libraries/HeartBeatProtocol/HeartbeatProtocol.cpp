@@ -19,14 +19,14 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 	XBeeAddress64 sink = XBeeAddress64();
 
 	HeartbeatMessage message = HeartbeatMessage(sink, 0.0, seqNum, 0.0, 0, 0, 0);
-	message.sendMessage(xbee);
-
+	message.sendDataMessage(xbee);
+	seqNum++;
 
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
-	//message.printMessage();
+	message.printMessage();
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
@@ -49,15 +49,18 @@ HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	uint8_t seqNum = dataPtr[13];
-	dataRateU.b[0] = dataPtr[14];
+	uint8_t qualityOfPath = dataPtr[14];
+	uint8_t routeFlag = dataPtr[15];
 
-	neighborhoodCapacityRateU.b[0] = dataPtr[18];
+	float * dataRateP = (float*) dataPtr + 16;
+	float dataRate = *dataPtr;
 
-	uint8_t qualityOfPath = dataPtr[22];
-	uint8_t routeFlag = dataPtr[23];
+	dataPtr = dataPtr + 20;
+	dataRateP = (float*) dataPtr;
+	float neighborhoodCapacity = *dataRateP;
 
-	HeartbeatMessage message = HeartbeatMessage(senderAddress, sinkAddress, rssi, seqNum, dataRateU.rate, qualityOfPath,
-			neighborhoodCapacityRateU.rate, routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(senderAddress, sinkAddress, rssi, seqNum, dataRate, qualityOfPath,
+			neighborhoodCapacity, routeFlag);
 
 	return message;
 

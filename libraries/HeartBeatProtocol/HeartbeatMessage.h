@@ -11,6 +11,11 @@
 #include "Arduino.h"
 #include "XBee.h"
 
+union injectRate {
+		uint8_t b[4];
+		float rate;
+};
+
 class HeartbeatMessage {
 
 	private:
@@ -56,7 +61,7 @@ class HeartbeatMessage {
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
-		void sendMessage(XBee& xbee);
+		void sendDataMessage(XBee& xbee);
 
 		void printMessage();
 

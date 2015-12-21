@@ -38,7 +38,7 @@ void arduinoSetup() {
 
 	clearBuffer();
 
-	while(millis() - start < 5000) {
+	while (millis() - start < 5000) {
 
 	}
 
@@ -50,7 +50,7 @@ void broadcastHeartbeat() {
 }
 
 void clearBuffer() {
-	while(Serial.available())
+	while (Serial.available())
 		Serial.read();
 }
 
@@ -69,16 +69,16 @@ XBeeAddress64 getMyAddress() {
 	xbee.send(atCommandRequest);
 	uint8_t notfound = 0;
 
-	while(notfound < 2) {
-		if(xbee.readPacket(1000, DEBUG)) {
+	while (notfound < 2) {
+		if (xbee.readPacket(1000, DEBUG)) {
 
 			// should be an AT command response
-			if(xbee.getResponse().getApiId() == AT_COMMAND_RESPONSE) {
+			if (xbee.getResponse().getApiId() == AT_COMMAND_RESPONSE) {
 				AtCommandResponse atResponse = AtCommandResponse();
 				xbee.getResponse().getAtCommandResponse(atResponse);
 
-				if(atResponse.isOk()) {
-					if(!notfound) {
+				if (atResponse.isOk()) {
+					if (!notfound) {
 						address.setMsb(
 								(atResponse.getValue()[0] << 24) + (atResponse.getValue()[1] << 16)
 										+ (atResponse.getValue()[2] << 8) + atResponse.getValue()[3]);
@@ -103,19 +103,19 @@ XBeeAddress64 getMyAddress() {
 void listenForResponses() {
 	//checkTimers();
 
-	if(xbee.readPacketNoTimeout(DEBUG)) {
-		if(xbee.getResponse().getApiId() == RX_64_RESPONSE) {
+	if (xbee.readPacketNoTimeout(DEBUG)) {
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
 			Rx64Response response;
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
 			char control[5];
 
-			for(int i = 0; i < 5; i++) {
+			for (int i = 0; i < 5; i++) {
 				control[i] = data[i];
 			}
 
-			if(!strcmp(control, "BEAT")) {
+			if (!strcmp(control, "BEAT")) {
 				//routing data
 				heartbeatProtocol.receiveHeartBeat(response);
 			} /*else if(!strcmp(control, "DATA")) {
@@ -146,7 +146,7 @@ void setupThreads() {
 	responseThread.onRun(listenForResponses);
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
-	heartbeat.enabled = false;
+	heartbeat.enabled = true;
 	heartbeat.setInterval(1000);
 	heartbeat.onRun(broadcastHeartbeat);
 

@@ -118,9 +118,16 @@ void HeartbeatMessage::printMessage() {
 	Serial.println('>');
 }
 
-void HeartbeatMessage::sendMessage(XBee& xbee) {
+void HeartbeatMessage::sendDataMessage(XBee& xbee) {
 
-	uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0'};
+	uint8_t * dataRateP = (uint8_t *) &dataRate;
+	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
+
+	uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
+			& 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
+			& 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
+			& 0xff, seqNum, qualityOfPath, routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3],
+			neighborhoodCapacityP[0], neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };
 
 	Tx64Request tx = Tx64Request(broadCastaddr64, 0, payload, sizeof(payload), 0);
 	xbee.send(tx);
