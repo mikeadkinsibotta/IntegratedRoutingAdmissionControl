@@ -17,7 +17,7 @@
 void broadcastHeartbeat();
 void arduinoSetup();
 void clearBuffer();
-XBeeAddress64 getMyAddress();
+const XBeeAddress64& getMyAddress();
 void setupThreads();
 
 //Do not add code below this line

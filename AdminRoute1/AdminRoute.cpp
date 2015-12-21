@@ -54,7 +54,7 @@ void clearBuffer() {
 		Serial.read();
 }
 
-XBeeAddress64 getMyAddress() {
+const XBeeAddress64& getMyAddress() {
 	XBeeAddress64 address = XBeeAddress64();
 
 	uint8_t shCmd[] = { 'S', 'H' };

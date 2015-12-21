@@ -43,7 +43,8 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 		routeFlag = message.isRouteFlag();
 	}
 
-	message.printMessage();
+	updateNeighborHoodTable(message);
+	printNeighborHoodTable();
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
@@ -77,7 +78,34 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 }
 
-HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
+void HeartbeatProtocol::printNeighborHoodTable() {
+
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+
+		SerialUSB.print("NeighborAddress: ");
+		neighborhoodTable.at(i).getNeighborAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", NeighborDataRate: ");
+		SerialUSB.print(neighborhoodTable.at(i).getNeighborDataRate());
+		SerialUSB.print(", SeqNum: ");
+		SerialUSB.print(neighborhoodTable.at(i).getSeqNum());
+		SerialUSB.print(", QualityOfPath: ");
+		SerialUSB.print(neighborhoodTable.at(i).getQualityOfPath());
+		SerialUSB.print(", NeighborhoodCapacity: ");
+		SerialUSB.print(neighborhoodTable.at(i).getNeighborhoodCapacity());
+		SerialUSB.print(", RouteFlag: ");
+		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
+		SerialUSB.print(", StreamSourceAddress: ");
+		neighborhoodTable.at(i).getStreamSourceAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", SinkAddress: ");
+		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", RelativeDistance: ");
+		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance());
+
+	}
+
+}
+
+const HeartbeatMessage& HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	uint8_t* dataPtr = response.getData() + 5;
 

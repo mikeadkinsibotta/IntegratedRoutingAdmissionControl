@@ -32,7 +32,8 @@ class HeartbeatProtocol {
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
-		HeartbeatMessage transcribeHeartbeatPacket(const Rx64Response& response);
+		const HeartbeatMessage& transcribeHeartbeatPacket(const Rx64Response& response);
+		void printNeighborHoodTable();
 
 };
 
