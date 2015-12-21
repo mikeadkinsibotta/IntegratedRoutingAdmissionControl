@@ -20,12 +20,15 @@ class Neighbor {
 		float neighborhoodCapacity;
 		float packetLoss;
 		uint8_t seqNum;
-		uint8_t qosCost;
+		uint8_t qualityOfPath;
 		bool routeFlag;
 
 	public:
 		Neighbor();
-		Neighbor(const XBeeAddress64 &address, const float dateRate);
+		Neighbor(const XBeeAddress64 &neighborAddress, const float neighborDataRate, const uint8_t seqNum,
+				const float qosCost, const float neighborhoodCapacity, const bool routeFlag,
+				const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
+				const float relativeDistance);
 
 		const XBeeAddress64& getNeighborAddress() const;
 		void setNeighborAddress(const XBeeAddress64& neighborAddress);
@@ -51,14 +54,15 @@ class Neighbor {
 		uint8_t getSeqNum() const;
 		void setSeqNum(uint8_t seqNum);
 
-		uint8_t getQosCost() const;
-		void setQosCost(uint8_t qosCost);
+		uint8_t getQualityOfPath() const;
+		void setQualityOfPath(uint8_t qualityOfPath);
 
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
+
 };
 
 #endif

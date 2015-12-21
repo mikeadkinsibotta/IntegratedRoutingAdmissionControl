@@ -1,5 +1,21 @@
 #include "Neighbor.h"
 
+Neighbor::Neighbor(const XBeeAddress64& neighborAddress, const float neighborDataRate, const uint8_t seqNum,
+		const float qualityOfPath, const float neighborhoodCapacity, const bool routeFlag,
+		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const float relativeDistance) {
+
+	this->neighborAddress = neighborAddress;
+	this->neighborDataRate = neighborDataRate;
+	this->seqNum = seqNum;
+	this->qualityOfPath = qualityOfPath;
+	this->neighborhoodCapacity = neighborhoodCapacity;
+	this->routeFlag = routeFlag;
+	this->streamSourceAddress = streamSourceAddress;
+	this->sinkAddress = sinkAddress;
+	this->relativeDistance = relativeDistance;
+	this->packetLoss = 0;
+}
+
 const XBeeAddress64& Neighbor::getNeighborAddress() const {
 	return neighborAddress;
 }
@@ -64,12 +80,12 @@ void Neighbor::setSeqNum(uint8_t seqNum) {
 	this->seqNum = seqNum;
 }
 
-uint8_t Neighbor::getQosCost() const {
-	return qosCost;
+uint8_t Neighbor::getQualityOfPath() const {
+	return qualityOfPath;
 }
 
-void Neighbor::setQosCost(uint8_t qosCost) {
-	this->qosCost = qosCost;
+void Neighbor::setQualityOfPath(uint8_t qualityOfPath) {
+	this->qualityOfPath = qualityOfPath;
 }
 
 bool Neighbor::isRouteFlag() const {
@@ -95,3 +111,4 @@ void Neighbor::printNeighbor() const {
 	Serial.print('>');
 
 }
+

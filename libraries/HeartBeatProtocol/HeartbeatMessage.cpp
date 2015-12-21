@@ -8,10 +8,12 @@
 
 const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
 
-HeartbeatMessage::HeartbeatMessage(XBeeAddress64& senderAddress, XBeeAddress64& sinkAddress, uint8_t rssi,
-		uint8_t seqNum, float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
+HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
+		const XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum, float dataRate, uint8_t qualityOfPath,
+		float neighborhoodCapacity, bool routeFlag) {
 
 	this->senderAddress = senderAddress;
+	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
 	this->rssi = rssi;
 	this->seqNum = seqNum;
@@ -22,17 +24,27 @@ HeartbeatMessage::HeartbeatMessage(XBeeAddress64& senderAddress, XBeeAddress64& 
 
 }
 
-HeartbeatMessage::HeartbeatMessage(XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum, float dataRate,
-		uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
+HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
+		uint8_t seqNum, float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
 
+	this->senderAddress = XBeeAddress64();
+	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
-	this->rssi = rssi;
+	this->rssi = 0;
 	this->seqNum = seqNum;
 	this->dataRate = dataRate;
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
 
+}
+
+const XBeeAddress64& HeartbeatMessage::getStreamSourceAddress() const {
+	return streamSourceAddress;
+}
+
+void HeartbeatMessage::setStreamSourceAddress(const XBeeAddress64& streamSourceAddress) {
+	this->streamSourceAddress = streamSourceAddress;
 }
 
 const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
@@ -101,19 +113,23 @@ void HeartbeatMessage::setRouteFlag(bool routeFlag) {
 
 void HeartbeatMessage::printMessage() {
 
-	SerialUSB.print('<');
+	SerialUSB.print('<SenderAddress: ');
 	senderAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(', SinkAddress: ');
 	sinkAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(', StreamSourceAddress: ');
+	streamSourceAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(', seqNum: ');
 	SerialUSB.print(seqNum);
-	SerialUSB.print(',');
+	SerialUSB.print(', RSSI: ');
+	SerialUSB.print(rssi);
+	SerialUSB.print(', DataRate: ');
 	SerialUSB.print(dataRate);
-	SerialUSB.print(',');
+	SerialUSB.print(', NeighborhoodCapacity: ');
 	SerialUSB.print(neighborhoodCapacity);
-	SerialUSB.print(',');
+	SerialUSB.print(', QualityOfPath: ');
 	SerialUSB.print(qualityOfPath);
-	SerialUSB.print(',');
+	SerialUSB.print(', RouteFlag: ');
 	SerialUSB.print(routeFlag);
 	SerialUSB.println('>');
 }
@@ -126,8 +142,12 @@ void HeartbeatMessage::sendDataMessage(XBee& xbee) {
 	uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
 			& 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
 			& 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
-			& 0xff, seqNum, qualityOfPath, routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3],
-			neighborhoodCapacityP[0], neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };
+			& 0xff, (streamSourceAddress.getMsb() >> 24) & 0xff, (streamSourceAddress.getMsb() >> 16) & 0xff,
+			(streamSourceAddress.getMsb() >> 8) & 0xff, streamSourceAddress.getMsb() & 0xff,
+			(streamSourceAddress.getLsb() >> 24) & 0xff, (streamSourceAddress.getLsb() >> 16) & 0xff,
+			(streamSourceAddress.getLsb() >> 8) & 0xff, streamSourceAddress.getLsb() & 0xff, seqNum, qualityOfPath,
+			routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3], neighborhoodCapacityP[0],
+			neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };
 
 	Tx64Request tx = Tx64Request(broadCastaddr64, 0, payload, sizeof(payload), 0);
 	xbee.send(tx);
