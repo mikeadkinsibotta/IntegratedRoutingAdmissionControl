@@ -33,11 +33,12 @@ class HeartbeatMessage {
 	public:
 
 		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
-				const XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum, float dataRate, uint8_t qualityOfPath,
-				float neighborhoodCapacity, bool routeFlag);
+				const XBeeAddress64& sinkAddress, const uint8_t rssi, const uint8_t seqNum, const float dataRate,
+				const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag);
 
-		HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, uint8_t seqNum,
-				float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag);
+		HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
+				const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
+				const float neighborhoodCapacity, const bool routeFlag);
 
 		const XBeeAddress64& getStreamSourceAddress() const;
 		void setStreamSourceAddress(const XBeeAddress64& streamSourceAddress);

@@ -9,8 +9,8 @@
 const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
-		const XBeeAddress64& sinkAddress, uint8_t rssi, uint8_t seqNum, float dataRate, uint8_t qualityOfPath,
-		float neighborhoodCapacity, bool routeFlag) {
+		const XBeeAddress64& sinkAddress, const uint8_t rssi, const uint8_t seqNum, const float dataRate,
+		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
 
 	this->senderAddress = senderAddress;
 	this->streamSourceAddress = streamSourceAddress;
@@ -25,7 +25,8 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBe
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
-		uint8_t seqNum, float dataRate, uint8_t qualityOfPath, float neighborhoodCapacity, bool routeFlag) {
+		const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
+		const bool routeFlag) {
 
 	this->senderAddress = XBeeAddress64();
 	this->streamSourceAddress = streamSourceAddress;
@@ -113,28 +114,31 @@ void HeartbeatMessage::setRouteFlag(bool routeFlag) {
 
 void HeartbeatMessage::printMessage() {
 
-	SerialUSB.print('<SenderAddress: ');
+	SerialUSB.print("<SenderAddress: ");
 	senderAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(', SinkAddress: ');
+	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(', StreamSourceAddress: ');
+	SerialUSB.print(", StreamSourceAddress: ");
 	streamSourceAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(', seqNum: ');
+	SerialUSB.print(", seqNum: ");
 	SerialUSB.print(seqNum);
-	SerialUSB.print(', RSSI: ');
+	SerialUSB.print(", RSSI: ");
 	SerialUSB.print(rssi);
-	SerialUSB.print(', DataRate: ');
+	SerialUSB.print(", DataRate: ");
 	SerialUSB.print(dataRate);
-	SerialUSB.print(', NeighborhoodCapacity: ');
+	SerialUSB.print(", NeighborhoodCapacity: ");
 	SerialUSB.print(neighborhoodCapacity);
-	SerialUSB.print(', QualityOfPath: ');
+	SerialUSB.print(", QualityOfPath: ");
 	SerialUSB.print(qualityOfPath);
-	SerialUSB.print(', RouteFlag: ');
+	SerialUSB.print(", RouteFlag: ");
 	SerialUSB.print(routeFlag);
 	SerialUSB.println('>');
 }
 
 void HeartbeatMessage::sendDataMessage(XBee& xbee) {
+
+	SerialUSB.print("DataRateSend ");
+	SerialUSB.println(dataRate);
 
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;

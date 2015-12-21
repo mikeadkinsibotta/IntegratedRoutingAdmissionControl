@@ -30,7 +30,7 @@ HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
 
 void HeartbeatProtocol::broadcastHeartBeat() {
 
-	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, 0, seqNum, 0, 0.0, routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, 0.0, 0, 0.0, routeFlag);
 	message.sendDataMessage(xbee);
 	seqNum++;
 
@@ -103,11 +103,13 @@ HeartbeatMessage HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response
 	uint8_t qualityOfPath = dataPtr[22];
 	uint8_t routeFlag = dataPtr[23];
 
-	float * dataRateP = (float*) dataPtr + 24;
+	float * dataRateP = (float*) dataPtr[24];
 	float dataRate = *dataPtr;
 
-	dataPtr = dataPtr + 28;
-	dataRateP = (float*) dataPtr;
+	SerialUSB.print("DataRateTranscribe ");
+	SerialUSB.println(dataRate);
+
+	dataRateP = (float*) dataPtr[28];
 	float neighborhoodCapacity = *dataRateP;
 
 	HeartbeatMessage message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRate,
