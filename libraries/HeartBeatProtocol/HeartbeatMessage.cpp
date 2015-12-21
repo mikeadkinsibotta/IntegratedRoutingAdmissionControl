@@ -137,9 +137,6 @@ void HeartbeatMessage::printMessage() {
 
 void HeartbeatMessage::sendDataMessage(XBee& xbee) {
 
-	SerialUSB.print("DataRateSend ");
-	SerialUSB.println(dataRate);
-
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
 
