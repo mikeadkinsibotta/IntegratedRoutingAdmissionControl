@@ -18,6 +18,8 @@ void setup() {
 	XBeeAddress64 myAddress = getMyAddress();
 	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
 	setupThreads();
+
+	digitalWrite(13, LOW);
 }
 
 void loop() {
@@ -38,7 +40,7 @@ void arduinoSetup() {
 
 	clearBuffer();
 
-	while (millis() - start < 5000) {
+	while (millis() - start < 8000) {
 
 	}
 
@@ -54,7 +56,7 @@ void clearBuffer() {
 		Serial.read();
 }
 
-XBeeAddress64 getMyAddress() {
+const XBeeAddress64& getMyAddress() {
 	XBeeAddress64 address = XBeeAddress64();
 
 	uint8_t shCmd[] = { 'S', 'H' };
@@ -147,7 +149,7 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(1000);
+	heartbeat.setInterval(1000 + (rand() % 100 + 1));
 	heartbeat.onRun(broadcastHeartbeat);
 
 	controller.add(&heartbeat);

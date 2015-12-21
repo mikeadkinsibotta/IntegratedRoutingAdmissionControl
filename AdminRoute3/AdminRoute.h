@@ -10,6 +10,7 @@
 //add your includes for the project AdminRoute1 here
 #include "HeartbeatProtocol.h"
 #include <ThreadController.h>
+#include <cstdlib>
 
 //end of add your includes here
 
@@ -17,7 +18,7 @@
 void broadcastHeartbeat();
 void arduinoSetup();
 void clearBuffer();
-XBeeAddress64 getMyAddress();
+const XBeeAddress64& getMyAddress();
 void setupThreads();
 
 //Do not add code below this line

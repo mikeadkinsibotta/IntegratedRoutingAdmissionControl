@@ -14,6 +14,8 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->myAddress = XBeeAddress64();
 	this->routeFlag = false;
 	this->sinkAddress = XBeeAddress64();
+	this->nextHopAddress = XBeeAddress64();
+	this->qualityOfPath = 0;
 }
 
 HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
@@ -22,6 +24,8 @@ HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
 	this->myAddress = myAddress;
 	this->sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	this->routeFlag = false;
+	this->nextHopAddress = XBeeAddress64();
+	this->qualityOfPath = 0;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -30,8 +34,9 @@ HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
 
 void HeartbeatProtocol::broadcastHeartBeat() {
 
-	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, 0.0, 0, 0.0, routeFlag);
-	message.sendDataMessage(xbee);
+	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, 0.0, qualityOfPath, 0.0,
+			routeFlag);
+	message.sendBeatMessage(xbee);
 	seqNum++;
 
 }
@@ -45,11 +50,19 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	updateNeighborHoodTable(message);
 	printNeighborHoodTable();
+
+	if (!myAddress.equals(sinkAddress)) {
+		//calculatePathQualityNextHop();
+	}
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
 	bool found = false;
+
+	SerialUSB.print("GotMessageFrom ");
+	heartbeatMessage.getSenderAddress().printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		if (neighborhoodTable.at(i).getNeighborAddress().equals(heartbeatMessage.getSenderAddress())) {
@@ -80,6 +93,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 void HeartbeatProtocol::printNeighborHoodTable() {
 
+	SerialUSB.println("Print Neighbor Table");
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 
 		SerialUSB.print("NeighborAddress: ");
@@ -141,6 +155,33 @@ const HeartbeatMessage& HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64R
 			qualityOfPath, neighborhoodCapacity, routeFlag);
 
 	return message;
+
+}
+
+void HeartbeatProtocol::calculatePathQualityNextHop() {
+	//Add 1 to include myself
+	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
+	uint8_t qop = UINT8_MAX;
+	XBeeAddress64 neighbor;
+
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+		SerialUSB.print("CalcNeighborQoP ");
+		neighborhoodTable.at(i).getNeighborAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(" CheckPath ");
+		SerialUSB.println(path);
+		if (path < qop) {
+			qop = path;
+			neighbor = neighborhoodTable.at(i).getNeighborAddress();
+		}
+	}
+
+	qualityOfPath = qop;
+	nextHopAddress = neighbor;
+
+	SerialUSB.print("NextHopAddress ");
+	nextHopAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 
 }
 

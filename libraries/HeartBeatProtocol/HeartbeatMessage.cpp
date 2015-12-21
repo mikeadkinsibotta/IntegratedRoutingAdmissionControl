@@ -135,7 +135,9 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.println('>');
 }
 
-void HeartbeatMessage::sendDataMessage(XBee& xbee) {
+void HeartbeatMessage::sendBeatMessage(XBee& xbee) {
+
+	//XBeeAddress64 broadcast = XBeeAddress64(0x0013A200, 0x40B31805);
 
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;

@@ -13,6 +13,7 @@
 #include "Neighbor.h"
 #include "HeartbeatMessage.h"
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -25,6 +26,8 @@ class HeartbeatProtocol {
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		bool routeFlag;
+		XBeeAddress64 nextHopAddress;
+		uint8_t qualityOfPath;
 
 	public:
 		HeartbeatProtocol();
@@ -33,6 +36,7 @@ class HeartbeatProtocol {
 		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		const HeartbeatMessage& transcribeHeartbeatPacket(const Rx64Response& response);
+		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();
 
 };
