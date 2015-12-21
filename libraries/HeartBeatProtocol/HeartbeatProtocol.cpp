@@ -6,7 +6,8 @@
  */
 #include "HeartbeatProtocol.h"
 
-#define SINK_ADDRESS 0x40b519cc
+#define SINK_ADDRESS_1 0x0013A200
+#define SINK_ADDRESS_2 0x40B519CC
 
 HeartbeatProtocol::HeartbeatProtocol(XBee& xbee) {
 	this->seqNum = 0;
@@ -16,7 +17,7 @@ HeartbeatProtocol::HeartbeatProtocol(XBee& xbee) {
 
 void HeartbeatProtocol::broadcastHeartBeat() {
 
-	XBeeAddress64 sink = XBeeAddress64();
+	XBeeAddress64 sink = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 
 	HeartbeatMessage message = HeartbeatMessage(sink, 0.0, seqNum, 0.0, 0, 0, 0);
 	message.sendDataMessage(xbee);

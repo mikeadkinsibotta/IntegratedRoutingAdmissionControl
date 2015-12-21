@@ -146,7 +146,7 @@ void setupThreads() {
 	responseThread.onRun(listenForResponses);
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
-	heartbeat.enabled = false;
+	heartbeat.enabled = true;
 	heartbeat.setInterval(1000);
 	heartbeat.onRun(broadcastHeartbeat);
 

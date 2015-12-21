@@ -101,21 +101,21 @@ void HeartbeatMessage::setRouteFlag(bool routeFlag) {
 
 void HeartbeatMessage::printMessage() {
 
-	Serial.print('<');
-	senderAddress.printAddressASCII(&Serial);
-	Serial.print(',');
-	sinkAddress.printAddressASCII(&Serial);
-	Serial.print(',');
-	Serial.print(seqNum);
-	Serial.print(',');
-	Serial.print(dataRate);
-	Serial.print(',');
-	Serial.print(neighborhoodCapacity);
-	Serial.print(',');
-	Serial.print(qualityOfPath);
-	Serial.print(',');
-	Serial.print(routeFlag);
-	Serial.println('>');
+	SerialUSB.print('<');
+	senderAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	sinkAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	SerialUSB.print(seqNum);
+	SerialUSB.print(',');
+	SerialUSB.print(dataRate);
+	SerialUSB.print(',');
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.print(',');
+	SerialUSB.print(qualityOfPath);
+	SerialUSB.print(',');
+	SerialUSB.print(routeFlag);
+	SerialUSB.println('>');
 }
 
 void HeartbeatMessage::sendDataMessage(XBee& xbee) {
