@@ -6,7 +6,7 @@
 #define DEBUG false
 
 XBee xbee = XBee();
-HeartbeatProtocol heartbeatProtocol = HeartbeatProtocol(xbee);
+HeartbeatProtocol heartbeatProtocol;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -15,8 +15,8 @@ Thread responseThread = Thread();
 void setup() {
 	arduinoSetup();
 
-	//XBeeAddress64 myAddress = getMyAddress();
-
+	XBeeAddress64 myAddress = getMyAddress();
+	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
 	setupThreads();
 }
 

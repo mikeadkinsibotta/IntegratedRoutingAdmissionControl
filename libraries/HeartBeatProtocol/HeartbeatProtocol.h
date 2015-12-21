@@ -22,9 +22,13 @@ class HeartbeatProtocol {
 		vector<Neighbor> neighborhoodTable;
 		XBee xbee;
 		float seqNum;
+		XBeeAddress64 myAddress;
+		XBeeAddress64 sinkAddress;
+		bool routeFlag;
 
 	public:
-		HeartbeatProtocol(XBee& xbee);
+		HeartbeatProtocol();
+		HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee);
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);

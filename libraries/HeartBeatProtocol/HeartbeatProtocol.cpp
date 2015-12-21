@@ -9,17 +9,28 @@
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 
-HeartbeatProtocol::HeartbeatProtocol(XBee& xbee) {
+HeartbeatProtocol::HeartbeatProtocol() {
+	this->seqNum = 0;
+	this->myAddress = XBeeAddress64();
+	this->routeFlag = false;
+	this->sinkAddress = XBeeAddress64();
+}
+
+HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
+	this->myAddress = myAddress;
+	this->sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
+	this->routeFlag = false;
 
+	if (myAddress.equals(sinkAddress)) {
+		routeFlag = true;
+	}
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
 
-	XBeeAddress64 sink = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
-
-	HeartbeatMessage message = HeartbeatMessage(sink, 0.0, seqNum, 0.0, 0, 0, 0);
+	HeartbeatMessage message = HeartbeatMessage(sinkAddress, 0.0, seqNum, 0.0, 0, 0, routeFlag);
 	message.sendDataMessage(xbee);
 	seqNum++;
 
@@ -27,6 +38,12 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
+
+	if (!myAddress.equals(sinkAddress)) {
+		SerialUSB.print("UpdatingFlag");
+		routeFlag = message.isRouteFlag();
+	}
+
 	message.printMessage();
 }
 
