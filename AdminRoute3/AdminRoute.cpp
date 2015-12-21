@@ -149,7 +149,7 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(1000 + (rand() % 100 + 1));
+	heartbeat.setInterval(3000 + (rand() % 100 + 1));
 	heartbeat.onRun(broadcastHeartbeat);
 
 	controller.add(&heartbeat);

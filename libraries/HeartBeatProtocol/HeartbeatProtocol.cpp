@@ -52,7 +52,7 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	printNeighborHoodTable();
 
 	if (!myAddress.equals(sinkAddress)) {
-		//calculatePathQualityNextHop();
+		calculatePathQualityNextHop();
 	}
 }
 
@@ -60,7 +60,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	bool found = false;
 
-	SerialUSB.print("GotMessageFrom ");
+	SerialUSB.print("NewMessage ");
 	heartbeatMessage.getSenderAddress().printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
@@ -165,19 +165,32 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	XBeeAddress64 neighbor;
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
-		SerialUSB.print("CalcNeighborQoP ");
-		neighborhoodTable.at(i).getNeighborAddress().printAddressASCII(&SerialUSB);
-		SerialUSB.print(" CheckPath ");
-		SerialUSB.println(path);
-		if (path < qop) {
-			qop = path;
-			neighbor = neighborhoodTable.at(i).getNeighborAddress();
+
+		if (neighborhoodTable.at(i).isRouteFlag()) {
+			uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+			SerialUSB.print("CalcNeighborQoP ");
+			neighborhoodTable.at(i).getNeighborAddress().printAddressASCII(&SerialUSB);
+			SerialUSB.print(" CheckPath ");
+			SerialUSB.println(path);
+			if (path < qop) {
+				qop = path;
+				neighbor = neighborhoodTable.at(i).getNeighborAddress();
+			}
 		}
 	}
 
-	qualityOfPath = qop;
-	nextHopAddress = neighbor;
+	//Make sure route exists
+	if (qop != UINT8_MAX) {
+		qualityOfPath = qop;
+		nextHopAddress = neighbor;
+	} else {
+		//reset path if path does not exist
+		qualityOfPath = 0;
+		nextHopAddress = XBeeAddress64();
+	}
+
+	SerialUSB.print("QualityOfPath ");
+	SerialUSB.println(qualityOfPath);
 
 	SerialUSB.print("NextHopAddress ");
 	nextHopAddress.printAddressASCII(&SerialUSB);
