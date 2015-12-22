@@ -102,6 +102,58 @@ void VoicePacketSender::generateVoicePacket() {
 
 }
 
+void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
+
+	//Extract the packet's final destination
+	XBeeAddress64 packetDestination;
+	XBeeAddress64 packetSource;
+	XBeeAddress64 previousHop;
+
+	uint8_t * dataPtr = response.getData();
+
+	packetSource.setMsb(
+			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+
+	packetSource.setLsb(
+			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+
+	packetDestination.setMsb(
+			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+
+	packetDestination.setLsb(
+			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+
+	previousHop.setMsb(
+			(uint32_t(response.getFrameData()[0]) << 24) + (uint32_t(response.getFrameData()[1]) << 16)
+					+ (uint16_t(response.getFrameData()[2]) << 8) + response.getFrameData()[3]);
+	previousHop.setLsb(
+			(uint32_t(response.getFrameData()[4]) << 24) + (uint32_t(response.getFrameData()[5]) << 16)
+					+ (uint16_t(response.getFrameData()[6]) << 8) + response.getFrameData()[7]);
+
+//check to see if the packet final destination is this node's address
+//If not setup another request to forward it.
+	if (!myAddress.equals(packetDestination)) {
+		//need to forward to next hop
+		Serial.print("ForwardData");
+		XBeeAddress64 nextHop;
+
+		uint8_t combinedSize = 0;
+		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, response.getData(), response.getDataLength(), 0);
+
+		xbee.send(tx);
+
+		uint8_t packetSize = response.getFrameDataLength() - 31;
+
+		//Update Total Data Rate
+		//admissionController.updateFlowList(packetSource);
+
+	} else {
+		//voiceStreamStatManager.updateVoiceLoss(packetSource, dataPtr);
+		//pathLoss.enabled = true;
+	}
+
+}
+
 uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetSource,
 		const XBeeAddress64& packetDestination, const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize,
 		const uint8_t frameId) {

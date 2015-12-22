@@ -4,12 +4,15 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
+#define VOICE_DATA_INTERVAL 2
 
 XBee xbee = XBee();
 HeartbeatProtocol heartbeatProtocol;
+VoicePacketSender voicePacketSender;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
+Thread sendData = Thread();
 Thread responseThread = Thread();
 
 void setup() {
@@ -17,6 +20,7 @@ void setup() {
 
 	XBeeAddress64 myAddress = getMyAddress();
 	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
+	voicePacketSender = VoicePacketSender(xbee, myAddress, XBeeAddress64(), XBeeAddress64(), 2, 0);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -44,6 +48,10 @@ void arduinoSetup() {
 
 	}
 
+}
+
+void sendVoicePacket() {
+	voicePacketSender.generateVoicePacket();
 }
 
 void broadcastHeartbeat() {
@@ -120,10 +128,10 @@ void listenForResponses() {
 			if (!strcmp(control, "BEAT")) {
 				//routing data
 				heartbeatProtocol.receiveHeartBeat(response);
-			} /*else if(!strcmp(control, "DATA")) {
-			 //voice data
-			 handleDataPacket(response);
-			 } else if(!strcmp(control, "PATH")) {
+			} else if (!strcmp(control, "DATA")) {
+				//voice data
+				voicePacketSender.handleDataPacket(response);
+			} /*else if(!strcmp(control, "PATH")) {
 			 //path loss packet
 			 handlePathPacket(response);
 			 } else if(!strcmp(control, "ASM_")) {
@@ -152,6 +160,12 @@ void setupThreads() {
 	heartbeat.setInterval(3000 + (rand() % 100 + 1));
 	heartbeat.onRun(broadcastHeartbeat);
 
+	sendData.ThreadName = "Send Voice Data";
+	sendData.enabled = false;
+	sendData.setInterval(VOICE_DATA_INTERVAL);
+	sendData.onRun(sendVoicePacket);
+
 	controller.add(&heartbeat);
 	controller.add(&responseThread);
+	controller.add(&sendData);
 }

@@ -22,14 +22,15 @@ class VoicePacketSender {
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
 		uint8_t frameId;
+		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
+				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 
 	public:
 		VoicePacketSender();
 		VoicePacketSender(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress,
 				const XBeeAddress64& myNextHop, const uint8_t codecSetting, const float dupSetting);
 		void generateVoicePacket();
-		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
-				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
+		void handleDataPacket(const Rx64Response &response);
 
 		const XBeeAddress64& getMyNextHop() const;
 		void setMyNextHop(const XBeeAddress64& myNextHop);
