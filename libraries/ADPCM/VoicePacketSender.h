@@ -11,6 +11,8 @@
 #include <pcadpcm.h>
 #include <XBee.h>
 #include <VoiceStreamsManager.h>
+#include <VoicePacketSender.h>
+
 #include <math.h>
 
 class VoicePacketSender {
@@ -22,8 +24,8 @@ class VoicePacketSender {
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
-		uint8_t frameId;
 		VoiceStreamStatManager voiceStreamStatManager;
+		uint8_t frameId;
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 

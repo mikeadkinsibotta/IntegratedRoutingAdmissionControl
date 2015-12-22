@@ -14,6 +14,7 @@ class VoiceStreamStats {
 
 	private:
 		XBeeAddress64 senderAddress;
+		XBeeAddress64 upStreamNeighborAddress;
 		double throughput;
 		unsigned long totalPacketsRecieved;
 		uint8_t expectedFrameId;
@@ -27,6 +28,7 @@ class VoiceStreamStats {
 
 	public:
 		VoiceStreamStats(const XBeeAddress64& senderAddress);
+		VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress);
 		const XBeeAddress64& getSenderAddress() const;
 		double getThroughput() const;
 		void calculateThroughput();
@@ -34,6 +36,8 @@ class VoiceStreamStats {
 		void printRouteEnd() const;
 		void startStream() const;
 		uint8_t getPacketLoss() const;
+		const XBeeAddress64& getUpStreamNeighborAddress() const;
+		void setUpStreamNeighborAddress(const XBeeAddress64& upStreamNeighborAddress);
 };
 
 #endif /* LIBRARIES_VOICESTATISTICS_VOICESTREAMSTATS_H_ */

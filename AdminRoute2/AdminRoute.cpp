@@ -15,6 +15,7 @@ ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
 Thread sendData = Thread();
 Thread responseThread = Thread();
+Thread pathLoss = Thread();
 
 void setup() {
 
@@ -172,6 +173,11 @@ void setupThreads() {
 	heartbeat.enabled = true;
 	heartbeat.setInterval(3000 + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
+
+	pathLoss.ThreadName = "Send Path Loss";
+	pathLoss.enabled = false;
+	pathLoss.setInterval(1000);
+	//pathLoss.onRun(sendPathPacket);
 
 	sendData.ThreadName = "Send Voice Data";
 	sendData.enabled = false;

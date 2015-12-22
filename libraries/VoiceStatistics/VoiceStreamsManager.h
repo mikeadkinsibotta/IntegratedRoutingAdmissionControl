@@ -18,13 +18,18 @@ class VoiceStreamStatManager {
 
 	private:
 		vector<VoiceStreamStats> streams;
+		XBee xbee;
 
 	public:
+		VoiceStreamStatManager();
+		VoiceStreamStatManager(const XBee& xbee);
 		void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const uint8_t * dataPtr);
 		bool removeStream(const XBeeAddress64& packetSource);
 		const vector<VoiceStreamStats> & getStreams() const;
 		void setStreams(const vector<VoiceStreamStats>& streams);
+		void sendPathPacket();
+
 };
 
 #endif /* LIBRARIES_VOICESTATISTICS_VOICESTREAMSMANAGER_H_ */

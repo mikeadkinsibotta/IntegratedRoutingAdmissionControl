@@ -7,7 +7,24 @@
  *      Author: mike
  */
 
+VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress) {
+	this->upStreamNeighborAddress = upStreamNeighborAddress;
+	this->senderAddress = senderAddress;
+	throughput = 0;
+	totalPacketsRecieved = 0;
+	expectedFrameId = 1;
+	packetLoss = 0;
+	receivedFrame = 0;
+	intervalStartFrame = 1;
+	totalPacketsSent = 0;
+	timeStamp = (millis() / 1000.0);
+	voiceQuality = 0;
+	duplicateFrame = 0;
+
+}
+
 VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress) {
+	this->upStreamNeighborAddress = XBeeAddress64();
 	this->senderAddress = senderAddress;
 	throughput = 0;
 	totalPacketsRecieved = 0;
@@ -79,7 +96,7 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 	const uint8_t codecSetting = dataPtr[22];
 
 	//Ignore duplicate if we received the original packet
-	if(receivedFrame != duplicateFrame) {
+	if (receivedFrame != duplicateFrame) {
 
 		duplicateFrame = receivedFrame;
 
@@ -94,7 +111,7 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
 
-		if(rounded > 24.5)
+		if (rounded > 24.5)
 			rounded = 24;
 
 		packetLoss = rounded;
@@ -104,7 +121,7 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 		double X = 0;
 		double compression = 0;
 
-		switch(codecSetting) {
+		switch (codecSetting) {
 
 			case 5:
 				x = 0.16;
@@ -161,3 +178,10 @@ void VoiceStreamStats::startStream() const {
 
 }
 
+const XBeeAddress64& VoiceStreamStats::getUpStreamNeighborAddress() const {
+	return upStreamNeighborAddress;
+}
+
+void VoiceStreamStats::setUpStreamNeighborAddress(const XBeeAddress64& upStreamNeighborAddress) {
+	this->upStreamNeighborAddress = upStreamNeighborAddress;
+}
