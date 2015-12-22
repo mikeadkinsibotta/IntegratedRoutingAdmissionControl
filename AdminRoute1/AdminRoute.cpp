@@ -57,6 +57,13 @@ void sendVoicePacket() {
 void broadcastHeartbeat() {
 	heartbeatProtocol.broadcastHeartBeat();
 
+	if (heartbeatProtocol.isRouteFlag()) {
+		voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
+	} else {
+		//No Next Hop
+		voicePacketSender.setMyNextHop(XBeeAddress64());
+	}
+
 }
 
 void clearBuffer() {

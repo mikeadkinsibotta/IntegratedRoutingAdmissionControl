@@ -175,10 +175,12 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	if (qop != UINT8_MAX) {
 		qualityOfPath = qop;
 		nextHopAddress = neighbor;
+		routeFlag = true;
 	} else {
 		//reset path if path does not exist
 		qualityOfPath = 0;
 		nextHopAddress = XBeeAddress64();
+		routeFlag = false;
 	}
 
 	/*SerialUSB.print("QualityOfPath ");
@@ -188,5 +190,13 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	 nextHopAddress.printAddressASCII(&SerialUSB);
 	 SerialUSB.println();*/
 
+}
+
+bool HeartbeatProtocol::isRouteFlag() const {
+	return routeFlag;
+}
+
+const XBeeAddress64& HeartbeatProtocol::getNextHopAddress() const {
+	return nextHopAddress;
 }
 

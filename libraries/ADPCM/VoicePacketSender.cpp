@@ -137,18 +137,15 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		Serial.print("ForwardData");
 		XBeeAddress64 nextHop;
 
-		uint8_t combinedSize = 0;
-		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, response.getData(), response.getDataLength(), 0);
+		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 
 		xbee.send(tx);
-
-		uint8_t packetSize = response.getFrameDataLength() - 31;
 
 		//Update Total Data Rate
 		//admissionController.updateFlowList(packetSource);
 
 	} else {
-		//voiceStreamStatManager.updateVoiceLoss(packetSource, dataPtr);
+		voiceStreamStatManager.updateVoiceLoss(packetSource, dataPtr);
 		//pathLoss.enabled = true;
 	}
 

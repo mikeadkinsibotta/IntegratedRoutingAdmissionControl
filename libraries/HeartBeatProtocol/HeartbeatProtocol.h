@@ -38,7 +38,8 @@ class HeartbeatProtocol {
 		const HeartbeatMessage& transcribeHeartbeatPacket(const Rx64Response& response);
 		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();
-
+		bool isRouteFlag() const;
+		const XBeeAddress64& getNextHopAddress() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */
