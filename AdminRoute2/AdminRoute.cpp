@@ -5,6 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
+#define SENDER false
 
 XBee xbee = XBee();
 HeartbeatProtocol heartbeatProtocol;
@@ -16,6 +17,7 @@ Thread sendData = Thread();
 Thread responseThread = Thread();
 
 void setup() {
+
 	arduinoSetup();
 
 	XBeeAddress64 myAddress = getMyAddress();
@@ -33,6 +35,8 @@ void loop() {
 void arduinoSetup() {
 	pinMode(STATUS_LED, OUTPUT);
 	pinMode(ERROR_LED, OUTPUT);
+
+	randomSeed(analogRead(0));
 
 	Serial.begin(111111);
 	SerialUSB.begin(111111);
@@ -59,6 +63,8 @@ void broadcastHeartbeat() {
 
 	if (heartbeatProtocol.isRouteFlag()) {
 		voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
+		if (SENDER)
+			sendData.enabled = true;
 	} else {
 		//No Next Hop
 		voicePacketSender.setMyNextHop(XBeeAddress64());
@@ -164,7 +170,7 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(3000 + (rand() % 100 + 1));
+	heartbeat.setInterval(3000 + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
 
 	sendData.ThreadName = "Send Voice Data";
