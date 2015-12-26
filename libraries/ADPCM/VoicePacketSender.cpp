@@ -40,9 +40,12 @@ void VoicePacketSender::generateVoicePacket() {
 
 	bool hasNextHop = heartbeatProtocol.isRouteFlag();
 
-	if (hasNextHop && myNextHop.equals(XBeeAddress64())) {
-		myNextHop = heartbeatProtocol.getNextHopAddress();
-	} else if (hasNextHop) {
+	if (hasNextHop) {
+
+		if (myNextHop.equals(XBeeAddress64())) {
+			SerialUSB.println("Has Route to Sink");
+			myNextHop = heartbeatProtocol.getNextHopAddress();
+		}
 
 		uint8_t payload[PAYLOAD_SIZE] = { 0 };
 		uint8_t code = 0;
