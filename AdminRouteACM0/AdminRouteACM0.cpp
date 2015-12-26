@@ -6,6 +6,8 @@
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
 #define SENDER false
+#define SINK_ADDRESS_1 0x0013A200
+#define SINK_ADDRESS_2 0x40B519CC
 
 XBee xbee = XBee();
 HeartbeatProtocol heartbeatProtocol;
@@ -15,13 +17,14 @@ ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
 Thread sendData = Thread();
 Thread responseThread = Thread();
+Thread pathLoss = Thread();
 
 void setup() {
-
 	arduinoSetup();
 
+	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	XBeeAddress64 myAddress = getMyAddress();
-	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
+	heartbeatProtocol = HeartbeatProtocol(myAddress, sinkAddress, xbee);
 	voicePacketSender = VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
 	setupThreads();
 
@@ -172,6 +175,11 @@ void setupThreads() {
 	heartbeat.enabled = true;
 	heartbeat.setInterval(3000 + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
+
+	pathLoss.ThreadName = "Send Path Loss";
+	pathLoss.enabled = false;
+	pathLoss.setInterval(1000);
+	//pathLoss.onRun(sendPathPacket);
 
 	sendData.ThreadName = "Send Voice Data";
 	sendData.enabled = false;

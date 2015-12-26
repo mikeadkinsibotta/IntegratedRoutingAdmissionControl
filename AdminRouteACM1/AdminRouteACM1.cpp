@@ -1,10 +1,13 @@
 // Do not remove the include below
-#include "AdminRouteACM2.h"
+#include "AdminRouteACM1.h"
 
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
+#define SENDER false
+#define SINK_ADDRESS_1 0x0013A200
+#define SINK_ADDRESS_2 0x40B519CC
 
 XBee xbee = XBee();
 HeartbeatProtocol heartbeatProtocol;
@@ -14,12 +17,14 @@ ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
 Thread sendData = Thread();
 Thread responseThread = Thread();
+Thread pathLoss = Thread();
 
 void setup() {
 	arduinoSetup();
 
+	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	XBeeAddress64 myAddress = getMyAddress();
-	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
+	heartbeatProtocol = HeartbeatProtocol(myAddress, sinkAddress, xbee);
 	voicePacketSender = VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
 	setupThreads();
 
@@ -33,6 +38,8 @@ void loop() {
 void arduinoSetup() {
 	pinMode(STATUS_LED, OUTPUT);
 	pinMode(ERROR_LED, OUTPUT);
+
+	randomSeed(analogRead(0));
 
 	Serial.begin(111111);
 	SerialUSB.begin(111111);
@@ -59,6 +66,8 @@ void broadcastHeartbeat() {
 
 	if (heartbeatProtocol.isRouteFlag()) {
 		voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
+		if (SENDER)
+			sendData.enabled = true;
 	} else {
 		//No Next Hop
 		voicePacketSender.setMyNextHop(XBeeAddress64());
@@ -164,8 +173,13 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(3000 + (rand() % 100 + 1));
+	heartbeat.setInterval(3000 + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
+
+	pathLoss.ThreadName = "Send Path Loss";
+	pathLoss.enabled = false;
+	pathLoss.setInterval(1000);
+	//pathLoss.onRun(sendPathPacket);
 
 	sendData.ThreadName = "Send Voice Data";
 	sendData.enabled = false;

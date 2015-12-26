@@ -18,11 +18,12 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->qualityOfPath = 0;
 }
 
-HeartbeatProtocol::HeartbeatProtocol(XBeeAddress64 &myAddress, XBee& xbee) {
+HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress,
+		const XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
-	this->sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
+	this->sinkAddress = sinkAdress;
 	this->routeFlag = false;
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
