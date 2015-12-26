@@ -1,5 +1,5 @@
 // Do not remove the include below
-#include "AdminRoute.h"
+#include "AdminRouteACM2.h"
 
 #define STATUS_LED 13
 #define ERROR_LED 12
@@ -20,7 +20,7 @@ void setup() {
 
 	XBeeAddress64 myAddress = getMyAddress();
 	heartbeatProtocol = HeartbeatProtocol(myAddress, xbee);
-	voicePacketSender = VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), XBeeAddress64(), 2, 0);
+	voicePacketSender = VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
 	setupThreads();
 
 	digitalWrite(13, LOW);

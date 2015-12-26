@@ -34,8 +34,7 @@ class VoicePacketSender {
 	public:
 		VoicePacketSender();
 		VoicePacketSender(const XBee& xbee, const HeartbeatProtocol& heartbeatProtocol, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop, const uint8_t codecSetting,
-				const float dupSetting);
+				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
