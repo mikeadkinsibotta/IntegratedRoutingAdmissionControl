@@ -38,81 +38,89 @@ VoicePacketSender::VoicePacketSender(const XBee& xbee, const HeartbeatProtocol& 
 
 void VoicePacketSender::generateVoicePacket() {
 
-	uint8_t payload[PAYLOAD_SIZE] = { 0 };
-	uint8_t code = 0;
-	int actualPayloadSize = 0;
-	int i = 0;
+	bool hasNextHop = heartbeatProtocol.isRouteFlag();
 
-	while (i <= PAYLOAD_SIZE) {
+	if (hasNextHop && myNextHop.equals(XBeeAddress64())) {
+		myNextHop = heartbeatProtocol.getNextHopAddress();
+	} else if (hasNextHop) {
 
-		switch (codecSetting) {
-			case 2:
-				code = admcpm.twoBitEncode();
-				payload[i] = code;
-				i++;
-				actualPayloadSize = i;
-				break;
-			case 3:
-				if (i + 3 <= PAYLOAD_SIZE) {
-					uint8_t buffer[3] = { 0 };
-					admcpm.threeBitEncode(buffer);
-					for (int j = 0; j < 3; ++j) {
-						payload[i] = buffer[j];
-						i++;
+		uint8_t payload[PAYLOAD_SIZE] = { 0 };
+		uint8_t code = 0;
+		int actualPayloadSize = 0;
+		int i = 0;
+
+		while (i <= PAYLOAD_SIZE) {
+
+			switch (codecSetting) {
+				case 2:
+					code = admcpm.twoBitEncode();
+					payload[i] = code;
+					i++;
+					actualPayloadSize = i;
+					break;
+				case 3:
+					if (i + 3 <= PAYLOAD_SIZE) {
+						uint8_t buffer[3] = { 0 };
+						admcpm.threeBitEncode(buffer);
+						for (int j = 0; j < 3; ++j) {
+							payload[i] = buffer[j];
+							i++;
+						}
+						actualPayloadSize = i;
+					} else {
+						actualPayloadSize = i;
+						i += 3;
 					}
+					break;
+				case 4:
+					code = admcpm.fourBitEncode();
+					payload[i] = code;
+					i++;
 					actualPayloadSize = i;
-				} else {
-					actualPayloadSize = i;
-					i += 3;
-				}
-				break;
-			case 4:
-				code = admcpm.fourBitEncode();
-				payload[i] = code;
-				i++;
-				actualPayloadSize = i;
-				break;
-			case 5:
-				if (i + 5 <= PAYLOAD_SIZE) {
-					uint8_t buffer[5] = { 0 };
-					admcpm.fiveBitEncode(buffer);
+					break;
+				case 5:
+					if (i + 5 <= PAYLOAD_SIZE) {
+						uint8_t buffer[5] = { 0 };
+						admcpm.fiveBitEncode(buffer);
 
-					for (int j = 0; j < 5; ++j) {
-						payload[i] = buffer[j];
-						i++;
+						for (int j = 0; j < 5; ++j) {
+							payload[i] = buffer[j];
+							i++;
+						}
+						actualPayloadSize = i;
+					} else {
+						actualPayloadSize = i;
+						i += 5;
 					}
-					actualPayloadSize = i;
-				} else {
-					actualPayloadSize = i;
-					i += 5;
-				}
-				break;
+					break;
+			}
 		}
-	}
 
-	uint8_t combinedSize = 0;
-	uint8_t* combined = addDestinationToPayload(myAddress, sinkAddress, payload, actualPayloadSize, combinedSize,
-			frameId);
+		uint8_t combinedSize = 0;
+		uint8_t* combined = addDestinationToPayload(myAddress, sinkAddress, payload, actualPayloadSize, combinedSize,
+				frameId);
 
-	Tx64Request tx = Tx64Request(myNextHop, combined, combinedSize);
+		Tx64Request tx = Tx64Request(myNextHop, combined, combinedSize);
 
-	xbee.send(tx);
-	frameId++;
-
-	if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
-		Tx64Request duptx = Tx64Request(myNextHop, ACK_OPTION, combined, combinedSize, 0);
-		xbee.send(duptx);
+		xbee.send(tx);
 		frameId++;
+
+		if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
+			Tx64Request duptx = Tx64Request(myNextHop, ACK_OPTION, combined, combinedSize, 0);
+			xbee.send(duptx);
+			frameId++;
+		}
+
+		//free malloc data
+		free(combined);
+	} else {
+		myNextHop = XBeeAddress64();
 	}
-
-	//free malloc data
-	free(combined);
-
 }
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
-	//Extract the packet's final destination
+//Extract the packet's final destination
 	XBeeAddress64 packetDestination;
 	XBeeAddress64 packetSource;
 	XBeeAddress64 previousHop;
