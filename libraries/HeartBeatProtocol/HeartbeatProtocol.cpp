@@ -16,10 +16,11 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->sinkAddress = XBeeAddress64();
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
+	//Serial.print("HasRouteD");
+	//Serial.print(routeFlag);
 }
 
-HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress,
-		const XBee& xbee) {
+HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -31,6 +32,9 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
 	}
+
+	//Serial.print("HasRouteE");
+	//Serial.print(routeFlag);
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
@@ -45,10 +49,13 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
 
+	Serial.print("HasRouteA");
+	Serial.print(routeFlag);
+
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
-	}
 
+	}
 	updateNeighborHoodTable(message);
 
 	if (!myAddress.equals(sinkAddress)) {
@@ -174,14 +181,17 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 
 	//Make sure route exists
 	if (qop != UINT8_MAX) {
+
 		qualityOfPath = qop;
 		nextHopAddress = neighbor;
 		routeFlag = true;
+
 	} else {
 		//reset path if path does not exist
 		qualityOfPath = 0;
 		nextHopAddress = XBeeAddress64();
 		routeFlag = false;
+
 	}
 
 	/*SerialUSB.print("QualityOfPath ");
@@ -194,6 +204,8 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 }
 
 bool HeartbeatProtocol::isRouteFlag() const {
+	Serial.print("HasRouteC");
+	Serial.print(routeFlag);
 	return routeFlag;
 }
 

@@ -22,7 +22,7 @@ class VoiceStreamStatManager {
 
 	public:
 		VoiceStreamStatManager();
-		VoiceStreamStatManager(const XBee& xbee);
+		VoiceStreamStatManager(XBee& xbee);
 		void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const uint8_t * dataPtr);
 		bool removeStream(const XBeeAddress64& packetSource);

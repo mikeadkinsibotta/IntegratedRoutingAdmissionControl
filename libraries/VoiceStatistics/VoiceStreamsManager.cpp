@@ -11,7 +11,7 @@ VoiceStreamStatManager::VoiceStreamStatManager() {
 	xbee = XBee();
 }
 
-VoiceStreamStatManager::VoiceStreamStatManager(const XBee& xbee) {
+VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee) {
 	this->xbee = xbee;
 }
 

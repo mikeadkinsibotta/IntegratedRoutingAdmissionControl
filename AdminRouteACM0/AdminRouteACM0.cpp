@@ -4,14 +4,14 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
+#define VOICE_DATA_INTERVAL 3000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 
 XBee xbee = XBee();
-HeartbeatProtocol heartbeatProtocol;
-VoicePacketSender voicePacketSender;
+HeartbeatProtocol * heartbeatProtocol;
+VoicePacketSender * voicePacketSender;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -24,8 +24,8 @@ void setup() {
 
 	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	XBeeAddress64 myAddress = getMyAddress();
-	heartbeatProtocol = HeartbeatProtocol(myAddress, sinkAddress, xbee);
-	voicePacketSender = VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
+	heartbeatProtocol = new HeartbeatProtocol(myAddress, sinkAddress, xbee);
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -58,20 +58,20 @@ void arduinoSetup() {
 }
 
 void sendVoicePacket() {
-	voicePacketSender.generateVoicePacket();
+	voicePacketSender->generateVoicePacket();
 }
 
 void broadcastHeartbeat() {
-	heartbeatProtocol.broadcastHeartBeat();
+	heartbeatProtocol->broadcastHeartBeat();
 
-	if (heartbeatProtocol.isRouteFlag()) {
-		voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
-		if (SENDER)
-			sendData.enabled = true;
-	} else {
-		//No Next Hop
-		voicePacketSender.setMyNextHop(XBeeAddress64());
-	}
+	/*if (heartbeatProtocol.isRouteFlag()) {
+	 voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
+	 if (SENDER)
+	 sendData.enabled = true;
+	 } else {
+	 //No Next Hop
+	 voicePacketSender.setMyNextHop(XBeeAddress64());
+	 }*/
 
 }
 
@@ -143,10 +143,10 @@ void listenForResponses() {
 
 			if (!strcmp(control, "BEAT")) {
 				//routing data
-				heartbeatProtocol.receiveHeartBeat(response);
+				heartbeatProtocol->receiveHeartBeat(response);
 			} else if (!strcmp(control, "DATA")) {
 				//voice data
-				voicePacketSender.handleDataPacket(response);
+				voicePacketSender->handleDataPacket(response);
 			} /*else if(!strcmp(control, "PATH")) {
 			 //path loss packet
 			 handlePathPacket(response);
@@ -182,7 +182,11 @@ void setupThreads() {
 	//pathLoss.onRun(sendPathPacket);
 
 	sendData.ThreadName = "Send Voice Data";
-	sendData.enabled = false;
+	if (SENDER) {
+		sendData.enabled = true;
+	} else {
+		sendData.enabled = false;
+	}
 	sendData.setInterval(VOICE_DATA_INTERVAL);
 	sendData.onRun(sendVoicePacket);
 

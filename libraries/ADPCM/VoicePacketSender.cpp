@@ -15,14 +15,14 @@ VoicePacketSender::VoicePacketSender() {
 	sinkAddress = XBeeAddress64();
 	frameId = 0;
 	myNextHop = XBeeAddress64();
-	heartbeatProtocol = HeartbeatProtocol();
+	heartbeatProtocol = 0;
 	xbee = XBee();
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+
 }
 
-VoicePacketSender::VoicePacketSender(const XBee& xbee, const HeartbeatProtocol& heartbeatProtocol,
-		const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
-		const float dupSetting) {
+VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, const XBeeAddress64& myAddress,
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -34,17 +34,18 @@ VoicePacketSender::VoicePacketSender(const XBee& xbee, const HeartbeatProtocol& 
 	this->heartbeatProtocol = heartbeatProtocol;
 	this->xbee = xbee;
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+
 }
 
 void VoicePacketSender::generateVoicePacket() {
 
-	bool hasNextHop = heartbeatProtocol.isRouteFlag();
+	bool hasNextHop = heartbeatProtocol->isRouteFlag();
 
 	if (hasNextHop) {
 
 		if (myNextHop.equals(XBeeAddress64())) {
 			SerialUSB.println("Has Route to Sink");
-			myNextHop = heartbeatProtocol.getNextHopAddress();
+			myNextHop = heartbeatProtocol->getNextHopAddress();
 		}
 
 		uint8_t payload[PAYLOAD_SIZE] = { 0 };
