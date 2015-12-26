@@ -16,8 +16,9 @@ VoicePacketSender::VoicePacketSender() {
 
 }
 
-VoicePacketSender::VoicePacketSender(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress,
-		const XBeeAddress64& myNextHop, const uint8_t codecSetting, const float dupSetting) {
+VoicePacketSender::VoicePacketSender(const XBee& xbee, const HeartbeatProtocol& heartbeatProtocol,
+		const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop,
+		const uint8_t codecSetting, const float dupSetting) {
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -26,6 +27,7 @@ VoicePacketSender::VoicePacketSender(const XBee& xbee, const XBeeAddress64& myAd
 	this->myNextHop = myNextHop;
 	admcpm = ADPCM();
 	this->xbee = xbee;
+	this->heartbeatProtocol = heartbeatProtocol;
 	frameId = 0;
 }
 
