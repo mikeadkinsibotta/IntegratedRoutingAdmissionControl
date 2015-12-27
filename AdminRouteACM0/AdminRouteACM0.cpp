@@ -182,7 +182,7 @@ void setupThreads() {
 
 	pathLoss.ThreadName = "Send Path Loss";
 	pathLoss.enabled = false;
-	pathLoss.setInterval(1000);
+	pathLoss.setInterval(3000 + random(100));
 	pathLoss.onRun(sendPathPacket);
 
 	sendData.ThreadName = "Send Voice Data";
