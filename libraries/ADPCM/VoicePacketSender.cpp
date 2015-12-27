@@ -131,7 +131,9 @@ void VoicePacketSender::generateVoicePacket() {
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
-//Extract the packet's final destination
+	myNextHop = heartbeatProtocol->getNextHopAddress();
+
+	//Extract the packet's final destination
 	XBeeAddress64 packetDestination;
 	XBeeAddress64 packetSource;
 	XBeeAddress64 previousHop;
