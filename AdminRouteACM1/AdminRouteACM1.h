@@ -17,6 +17,7 @@
 //add your function definitions for the project AdminRoute1 here
 void broadcastHeartbeat();
 void sendVoicePacket();
+void sendPathPacket();
 void arduinoSetup();
 void clearBuffer();
 const XBeeAddress64& getMyAddress();

@@ -109,6 +109,9 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 		double packetLRatio = ((double) lostPackets / totalPacketsSent) * 100.0;
 
+		SerialUSB.print("Packet Loss: ");
+		SerialUSB.println(packetLRatio);
+
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
 
 		if (rounded > 24.5)

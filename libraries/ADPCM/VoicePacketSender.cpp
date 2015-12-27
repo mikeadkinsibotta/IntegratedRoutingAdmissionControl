@@ -18,11 +18,13 @@ VoicePacketSender::VoicePacketSender() {
 	heartbeatProtocol = 0;
 	xbee = XBee();
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+	pathLoss = 0;
 
 }
 
-VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting) {
+VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
+		const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
+		const float dupSetting) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -31,9 +33,15 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->sinkAddress = sinkAddress;
 	frameId = 0;
 	myNextHop = XBeeAddress64();
+
+	//If I don't past the pointer, it just makes a copy of the heartbeat protocol during assignment,
+	//If I make changes to the heartbeat protocol outside the class the member variable does not pick up the changes.
+	//Thats why I need the pointer.
 	this->heartbeatProtocol = heartbeatProtocol;
+
 	this->xbee = xbee;
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+	this->pathLoss = pathLoss;
 
 }
 
@@ -165,7 +173,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	} else {
 		voiceStreamStatManager.updateVoiceLoss(packetSource, dataPtr);
-		//pathLoss.enabled = true;
+		(*pathLoss).enabled = true;
 	}
 
 }
@@ -189,6 +197,10 @@ uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetS
 
 	return result;
 
+}
+
+void VoicePacketSender::sendPathPacket() {
+	voiceStreamStatManager.sendPathPacket();
 }
 
 const XBeeAddress64& VoicePacketSender::getMyNextHop() const {

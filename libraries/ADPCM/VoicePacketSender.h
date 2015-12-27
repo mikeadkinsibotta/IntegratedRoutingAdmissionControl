@@ -13,7 +13,7 @@
 #include <VoiceStreamsManager.h>
 #include <VoicePacketSender.h>
 #include <HeartbeatProtocol.h>>
-
+#include <ThreadController.h>
 #include <math.h>
 
 class VoicePacketSender {
@@ -27,14 +27,17 @@ class VoicePacketSender {
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
 		VoiceStreamStatManager voiceStreamStatManager;
+		Thread * pathLoss;
+
 		uint8_t frameId;
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 
 	public:
 		VoicePacketSender();
-		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting);
+		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
+				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
+				const float dupSetting);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
@@ -46,6 +49,7 @@ class VoicePacketSender {
 		void setCodecSetting(uint8_t codecSetting);
 		float getDupSetting() const;
 		void setDupSetting(float dupSetting);
+		void sendPathPacket();
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */
