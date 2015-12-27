@@ -162,9 +162,10 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 	if (!myAddress.equals(packetDestination)) {
 		//need to forward to next hop
 		Serial.print("ForwardData");
-		XBeeAddress64 nextHop;
 
-		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
+		voiceStreamStatManager.updateStreamsIntermediateNode(packetSource, previousHop);
+
+		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
 
 		xbee.send(tx);
 
@@ -172,10 +173,44 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		//admissionController.updateFlowList(packetSource);
 
 	} else {
-		voiceStreamStatManager.updateVoiceLoss(packetSource, dataPtr);
+		voiceStreamStatManager.updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
 	}
 
+}
+
+void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
+
+	XBeeAddress64 packetSource;
+
+	uint8_t * dataPtr = response.getData();
+
+	packetSource.setMsb(
+			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+
+	packetSource.setLsb(
+			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+
+	if (!myAddress.equals(packetSource)) {
+
+		//if (aodv.hasRoute(packetSource, nextHop)) {
+		XBeeAddress64 nextHop = voiceStreamStatManager.getStreamPreviousHop(packetSource);
+
+		Serial.print("ForwardPathPacket");
+
+		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, response.getData(), response.getDataLength(), 0);
+		xbee.send(tx);
+		//} else {
+		//	Serial.print("No Path");
+		//}
+	} else {
+		SerialUSB.println("Received Path Packet");
+		uint8_t dataLoss = dataPtr[13];
+
+		//Returned to the orignal sender, update packet loss
+		//updateDataRate(dataLoss);
+
+	}
 }
 
 uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetSource,

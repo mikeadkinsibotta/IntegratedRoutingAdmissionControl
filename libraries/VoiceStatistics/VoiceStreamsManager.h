@@ -24,7 +24,11 @@ class VoiceStreamStatManager {
 		VoiceStreamStatManager();
 		VoiceStreamStatManager(XBee& xbee);
 		void calcuateThroughput(const XBeeAddress64& packetSource);
-		void updateVoiceLoss(const XBeeAddress64& packetSource, const uint8_t * dataPtr);
+		void updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
+				const uint8_t * dataPtr);
+		void updateStreamsIntermediateNode(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop);
+		const XBeeAddress64& getStreamPreviousHop(const XBeeAddress64& packetSource);
+
 		bool removeStream(const XBeeAddress64& packetSource);
 		const vector<VoiceStreamStats> & getStreams() const;
 		void setStreams(const vector<VoiceStreamStats>& streams);

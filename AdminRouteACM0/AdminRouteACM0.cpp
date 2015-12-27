@@ -151,10 +151,10 @@ void listenForResponses() {
 			} else if (!strcmp(control, "DATA")) {
 				//voice data
 				voicePacketSender->handleDataPacket(response);
-			} /*else if(!strcmp(control, "PATH")) {
-			 //path loss packet
-			 handlePathPacket(response);
-			 } else if(!strcmp(control, "ASM_")) {
+			} else if (!strcmp(control, "PATH")) {
+				//path loss packet
+				voicePacketSender->handlePathPacket(response);
+			} /*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.
 			 admissionController.updateNeighborRatesCalculateMyNeighborhoodRate(response);
 			 } else if(!strcmp(control, "INIT")) {

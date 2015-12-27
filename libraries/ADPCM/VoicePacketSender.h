@@ -50,6 +50,7 @@ class VoicePacketSender {
 		float getDupSetting() const;
 		void setDupSetting(float dupSetting);
 		void sendPathPacket();
+		void handlePathPacket(const Rx64Response &response);
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */
