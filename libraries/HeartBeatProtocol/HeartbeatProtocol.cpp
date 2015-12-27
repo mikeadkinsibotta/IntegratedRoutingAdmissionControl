@@ -37,11 +37,11 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	//Serial.print(routeFlag);
 }
 
-void HeartbeatProtocol::broadcastHeartBeat() {
+void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress) {
 
 	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, 0.0, qualityOfPath, 0.0,
 			routeFlag);
-	message.sendBeatMessage(xbee);
+	message.sendBeatMessage(xbee, heartbeatAddress);
 	seqNum++;
 
 }

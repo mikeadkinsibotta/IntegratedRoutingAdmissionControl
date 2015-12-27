@@ -8,6 +8,10 @@
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
+#define HEARTBEAT_ADDRESS_1 0x00000000
+#define HEARTBEAT_ADDRESS_2 0x0000FFFF
+//#define HEARTBEAT_ADDRESS_1 0x0013A200
+//#define HEARTBEAT_ADDRESS_2 0x40B31805
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -18,6 +22,8 @@ Thread heartbeat = Thread();
 Thread sendData = Thread();
 Thread responseThread = Thread();
 Thread pathLoss = Thread();
+
+XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 
 void setup() {
 	arduinoSetup();
@@ -62,7 +68,7 @@ void sendVoicePacket() {
 }
 
 void broadcastHeartbeat() {
-	heartbeatProtocol->broadcastHeartBeat();
+	heartbeatProtocol->broadcastHeartBeat(heartBeatAddress);
 
 	/*if (heartbeatProtocol.isRouteFlag()) {
 	 voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());

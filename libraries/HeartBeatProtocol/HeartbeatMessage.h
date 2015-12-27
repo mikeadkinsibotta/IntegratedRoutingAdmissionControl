@@ -19,7 +19,6 @@ union injectRate {
 class HeartbeatMessage {
 
 	private:
-		static const XBeeAddress64 broadCastaddr64;
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 streamSourceAddress;
@@ -67,7 +66,7 @@ class HeartbeatMessage {
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
-		void sendBeatMessage(XBee& xbee);
+		void sendBeatMessage(XBee& xbee, const XBeeAddress64& heartbeatAddress);
 
 		void printMessage();
 

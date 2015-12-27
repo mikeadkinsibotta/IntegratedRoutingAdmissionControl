@@ -6,8 +6,6 @@
  */
 #include "HeartbeatMessage.h"
 
-const XBeeAddress64 HeartbeatMessage::broadCastaddr64 = XBeeAddress64(0x00000000, 0x0000FFFF);
-
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
 		const XBeeAddress64& sinkAddress, const uint8_t rssi, const uint8_t seqNum, const float dataRate,
 		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
@@ -135,9 +133,9 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.println('>');
 }
 
-void HeartbeatMessage::sendBeatMessage(XBee& xbee) {
+void HeartbeatMessage::sendBeatMessage(XBee& xbee, const XBeeAddress64& heartbeatAddress) {
 
-	//XBeeAddress64 broadcast = XBeeAddress64(0x0013A200, 0x40B31805);
+	//XBeeAddress64 broadcast = XBeeAddress64(HEARTBEAT_ADDRESS_1, 0x40B31805);
 
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
@@ -152,7 +150,7 @@ void HeartbeatMessage::sendBeatMessage(XBee& xbee) {
 			routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3], neighborhoodCapacityP[0],
 			neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };
 
-	Tx64Request tx = Tx64Request(broadCastaddr64, 0, payload, sizeof(payload), 0);
+	Tx64Request tx = Tx64Request(heartbeatAddress, 0, payload, sizeof(payload), 0);
 	xbee.send(tx);
 
 }
