@@ -25,7 +25,7 @@ void setup() {
 	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	XBeeAddress64 myAddress = getMyAddress();
 	heartbeatProtocol = new HeartbeatProtocol(myAddress, sinkAddress, xbee);
-	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, myAddress, XBeeAddress64(), 2, 0);
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, myAddress, sinkAddress, 2, 0);
 	setupThreads();
 
 	digitalWrite(13, LOW);

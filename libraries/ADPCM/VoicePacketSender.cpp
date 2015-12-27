@@ -110,8 +110,7 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 
 		if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
-			Tx64Request duptx = Tx64Request(myNextHop, ACK_OPTION, combined, combinedSize, 0);
-			xbee.send(duptx);
+			xbee.send(tx);
 			frameId++;
 		}
 

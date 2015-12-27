@@ -49,9 +49,6 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message = transcribeHeartbeatPacket(response);
 
-	Serial.print("HasRouteA");
-	Serial.print(routeFlag);
-
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
 
@@ -204,8 +201,6 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 }
 
 bool HeartbeatProtocol::isRouteFlag() const {
-	Serial.print("HasRouteC");
-	Serial.print(routeFlag);
 	return routeFlag;
 }
 
