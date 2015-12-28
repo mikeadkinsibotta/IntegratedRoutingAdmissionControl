@@ -18,8 +18,6 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = 0;
-	//Serial.print("HasRouteD");
-	//Serial.print(routeFlag);
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee) {
@@ -36,19 +34,12 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
 	}
-
-	//Serial.print("HasRouteE");
-	//Serial.print(routeFlag);
 }
 
 void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress) {
 
 	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
 			neighborhoodCapacity, routeFlag);
-
-	//message.printMessage();
-	//Serial.print("InjectionRateA");
-	//Serial.print(dataRate);
 
 	uint8_t payload[32];
 
@@ -193,9 +184,6 @@ void HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response, 
 
 	dataRateP = (float*) (dataPtr + 23);
 	float neighborhoodCapacity = *dataRateP;
-
-	Serial.print("NeighborRate");
-	Serial.print(dataRateNeighbor);
 
 	message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRateNeighbor,
 			qualityOfPath, neighborhoodCapacity, routeFlag);
