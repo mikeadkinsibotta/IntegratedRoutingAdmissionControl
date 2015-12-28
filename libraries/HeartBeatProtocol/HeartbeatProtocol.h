@@ -28,6 +28,7 @@ class HeartbeatProtocol {
 		bool routeFlag;
 		XBeeAddress64 nextHopAddress;
 		uint8_t qualityOfPath;
+		float dataRate;
 
 	public:
 		HeartbeatProtocol();
@@ -40,6 +41,8 @@ class HeartbeatProtocol {
 		void printNeighborHoodTable();
 		bool isRouteFlag() const;
 		const XBeeAddress64& getNextHopAddress() const;
+		float getDataRate() const;
+		void setDataRate(float dataRate);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

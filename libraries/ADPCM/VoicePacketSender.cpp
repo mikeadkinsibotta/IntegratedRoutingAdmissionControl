@@ -251,6 +251,8 @@ void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 
+	heartbeatProtocol->setDataRate(injectionRate);
+
 }
 
 void VoicePacketSender::sendPathPacket() {

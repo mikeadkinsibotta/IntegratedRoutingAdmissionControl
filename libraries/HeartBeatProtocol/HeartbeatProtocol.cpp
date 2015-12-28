@@ -16,6 +16,8 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->sinkAddress = XBeeAddress64();
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
+	this->dataRate = 0;
+
 	//Serial.print("HasRouteD");
 	//Serial.print(routeFlag);
 }
@@ -28,6 +30,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	this->routeFlag = false;
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
+	this->dataRate = 0;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -39,7 +42,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 
 void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress) {
 
-	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, 0.0, qualityOfPath, 0.0,
+	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath, 0.0,
 			routeFlag);
 	message.sendBeatMessage(xbee, heartbeatAddress);
 	seqNum++;
@@ -208,3 +211,10 @@ const XBeeAddress64& HeartbeatProtocol::getNextHopAddress() const {
 	return nextHopAddress;
 }
 
+float HeartbeatProtocol::getDataRate() const {
+	return dataRate;
+}
+
+void HeartbeatProtocol::setDataRate(float dataRate) {
+	this->dataRate = dataRate;
+}
