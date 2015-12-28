@@ -133,58 +133,56 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.println('>');
 }
 
-void HeartbeatMessage::generateBeatMessage(const XBeeAddress64& heartbeatAddress, Tx64Request& tx) {
+void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
 	//XBeeAddress64 broadcast = XBeeAddress64(HEARTBEAT_ADDRESS_1, 0x40B31805);
 
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
 
-	/*payload[0] = 'B';
-	 payload[1] = 'E';
-	 payload[2] = 'A';
-	 payload[3] = 'T';
-	 payload[4] = '\0';
-	 payload[5] = (sinkAddress.getMsb() >> 24) & 0xff;
-	 payload[6] = (sinkAddress.getMsb() >> 16) & 0xff;
-	 payload[7] = (sinkAddress.getMsb() >> 8) & 0xff;
-	 payload[8] = sinkAddress.getMsb() & 0xff;
-	 payload[9] = (sinkAddress.getLsb() >> 24) & 0xff;
-	 payload[10] = (sinkAddress.getLsb() >> 16) & 0xff;
-	 payload[11] = (sinkAddress.getLsb() >> 8) & 0xff;
-	 payload[12] = sinkAddress.getLsb() & 0xff;
-	 payload[13] = (streamSourceAddress.getMsb() >> 24) & 0xff;
-	 payload[14] = (streamSourceAddress.getMsb() >> 16) & 0xff;
-	 payload[15] = (streamSourceAddress.getMsb() >> 8) & 0xff;
-	 payload[16] = streamSourceAddress.getMsb() & 0xff;
-	 payload[17] = (streamSourceAddress.getLsb() >> 24) & 0xff;
-	 payload[18] = (streamSourceAddress.getLsb() >> 16) & 0xff;
-	 payload[19] = (streamSourceAddress.getLsb() >> 8) & 0xff;
-	 payload[20] = streamSourceAddress.getLsb() & 0xff;
-	 payload[21] = seqNum;
-	 payload[22] = qualityOfPath;
-	 payload[23] = routeFlag;
-	 payload[24] = dataRateP[0];
-	 payload[25] = dataRateP[1];
-	 payload[26] = dataRateP[2];
-	 payload[27] = dataRateP[3];
-	 payload[28] = neighborhoodCapacityP[0];
-	 payload[29] = neighborhoodCapacityP[1];
-	 payload[30] = neighborhoodCapacityP[2];
-	 payload[31] = neighborhoodCapacityP[3];*/
+	payload[0] = 'B';
+	payload[1] = 'E';
+	payload[2] = 'A';
+	payload[3] = 'T';
+	payload[4] = '\0';
+	payload[5] = (sinkAddress.getMsb() >> 24) & 0xff;
+	payload[6] = (sinkAddress.getMsb() >> 16) & 0xff;
+	payload[7] = (sinkAddress.getMsb() >> 8) & 0xff;
+	payload[8] = sinkAddress.getMsb() & 0xff;
+	payload[9] = (sinkAddress.getLsb() >> 24) & 0xff;
+	payload[10] = (sinkAddress.getLsb() >> 16) & 0xff;
+	payload[11] = (sinkAddress.getLsb() >> 8) & 0xff;
+	payload[12] = sinkAddress.getLsb() & 0xff;
+	payload[13] = (streamSourceAddress.getMsb() >> 24) & 0xff;
+	payload[14] = (streamSourceAddress.getMsb() >> 16) & 0xff;
+	payload[15] = (streamSourceAddress.getMsb() >> 8) & 0xff;
+	payload[16] = streamSourceAddress.getMsb() & 0xff;
+	payload[17] = (streamSourceAddress.getLsb() >> 24) & 0xff;
+	payload[18] = (streamSourceAddress.getLsb() >> 16) & 0xff;
+	payload[19] = (streamSourceAddress.getLsb() >> 8) & 0xff;
+	payload[20] = streamSourceAddress.getLsb() & 0xff;
+	payload[21] = seqNum;
+	payload[22] = qualityOfPath;
+	payload[23] = routeFlag;
+	payload[24] = dataRateP[0];
+	payload[25] = dataRateP[1];
+	payload[26] = dataRateP[2];
+	payload[27] = dataRateP[3];
+	payload[28] = neighborhoodCapacityP[0];
+	payload[29] = neighborhoodCapacityP[1];
+	payload[30] = neighborhoodCapacityP[2];
+	payload[31] = neighborhoodCapacityP[3];
 
-	uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
-			& 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
-			& 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
-			& 0xff, (streamSourceAddress.getMsb() >> 24) & 0xff, (streamSourceAddress.getMsb() >> 16) & 0xff,
-			(streamSourceAddress.getMsb() >> 8) & 0xff, streamSourceAddress.getMsb() & 0xff,
-			(streamSourceAddress.getLsb() >> 24) & 0xff, (streamSourceAddress.getLsb() >> 16) & 0xff,
-			(streamSourceAddress.getLsb() >> 8) & 0xff, streamSourceAddress.getLsb() & 0xff, seqNum, qualityOfPath,
-			routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3], neighborhoodCapacityP[0],
-			neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };
+	/*uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
+	 & 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
+	 & 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
+	 & 0xff, (streamSourceAddress.getMsb() >> 24) & 0xff, (streamSourceAddress.getMsb() >> 16) & 0xff,
+	 (streamSourceAddress.getMsb() >> 8) & 0xff, streamSourceAddress.getMsb() & 0xff,
+	 (streamSourceAddress.getLsb() >> 24) & 0xff, (streamSourceAddress.getLsb() >> 16) & 0xff,
+	 (streamSourceAddress.getLsb() >> 8) & 0xff, streamSourceAddress.getLsb() & 0xff, seqNum, qualityOfPath,
+	 routeFlag, dataRateP[0], dataRateP[1], dataRateP[2], dataRateP[3], neighborhoodCapacityP[0],
+	 neighborhoodCapacityP[1], neighborhoodCapacityP[2], neighborhoodCapacityP[3] };*/
 
-	tx = Tx64Request(heartbeatAddress, payload, sizeof(payload));
 	//xbee.send(tx);
-
 }
 

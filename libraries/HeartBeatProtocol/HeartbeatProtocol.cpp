@@ -48,9 +48,11 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 
 	message.printMessage();
 
-	Tx64Request tx = Tx64Request();
+	uint8_t payload[32];
 
-	message.generateBeatMessage(heartbeatAddress, tx);
+	message.generateBeatMessage(payload);
+
+	Tx64Request tx = Tx64Request(heartbeatAddress, payload, sizeof(payload));
 
 	xbee.send(tx);
 
