@@ -196,7 +196,8 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 	if (!myAddress.equals(packetSource)) {
 
 		//if (aodv.hasRoute(packetSource, nextHop)) {
-		XBeeAddress64 nextHop = voiceStreamStatManager.getStreamPreviousHop(packetSource);
+		XBeeAddress64 nextHop;
+		voiceStreamStatManager.getStreamPreviousHop(packetSource, nextHop);
 
 		Serial.print("ForwardPathPacket");
 

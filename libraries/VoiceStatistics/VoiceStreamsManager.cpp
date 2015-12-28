@@ -118,17 +118,14 @@ void VoiceStreamStatManager::sendPathPacket() {
 	}
 }
 
-const XBeeAddress64& VoiceStreamStatManager::getStreamPreviousHop(const XBeeAddress64& packetSource) {
+void VoiceStreamStatManager::getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop) {
 
-	XBeeAddress64 previousHop;
 	for (int i = 0; i < streams.size(); i++) {
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
 			previousHop = streams.at(i).getUpStreamNeighborAddress();
 			break;
 		}
 	}
-
-	return previousHop;
 }
 
 const vector<VoiceStreamStats> & VoiceStreamStatManager::getStreams() const {
