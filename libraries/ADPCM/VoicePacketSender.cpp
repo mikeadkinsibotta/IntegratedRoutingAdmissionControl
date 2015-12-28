@@ -19,6 +19,8 @@ VoicePacketSender::VoicePacketSender() {
 	xbee = XBee();
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
 	pathLoss = 0;
+	injectionRate = 0;
+	compressionTable.buildCompressionLookUpTable();
 
 }
 
@@ -32,6 +34,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	frameId = 0;
+	injectionRate = 0;
 	myNextHop = XBeeAddress64();
 
 	//If I don't past the pointer, it just makes a copy of the heartbeat protocol during assignment,
@@ -42,6 +45,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->xbee = xbee;
 	voiceStreamStatManager = VoiceStreamStatManager(xbee);
 	this->pathLoss = pathLoss;
+	compressionTable.buildCompressionLookUpTable();
 
 }
 
@@ -201,7 +205,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 		Serial.print("ForwardPathPacket");
 
-		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, response.getData(), response.getDataLength(), 0);
+		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
 		//} else {
 		//	Serial.print("No Path");
@@ -211,7 +215,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		uint8_t dataLoss = dataPtr[13];
 
 		//Returned to the orignal sender, update packet loss
-		//updateDataRate(dataLoss);
+		updateDataRate(dataLoss);
 
 	}
 }
@@ -234,6 +238,18 @@ uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetS
 	memcpy(result + sizeof(destination), payload, sizePayload);
 
 	return result;
+
+}
+
+void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
+
+	VoiceSetting * v = compressionTable.getCompressionTable();
+	VoiceSetting newSetting = *(v + dataLoss);
+
+	dupSetting = newSetting.getDupRatio();
+	codecSetting = newSetting.getCompressionSetting();
+
+	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 
 }
 
