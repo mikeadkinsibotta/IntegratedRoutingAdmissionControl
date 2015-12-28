@@ -58,7 +58,7 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 
 }
 
-void HeartbeatProtocol::calculateNeighborhoodCapacity() {
+void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	float neighborhoodRate = 0;
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
