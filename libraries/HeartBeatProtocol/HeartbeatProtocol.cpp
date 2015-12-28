@@ -87,7 +87,9 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
-	HeartbeatMessage message = transcribeHeartbeatPacket(response);
+	HeartbeatMessage message;
+
+	transcribeHeartbeatPacket(response, message);
 
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
@@ -160,7 +162,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 
 }
 
-const HeartbeatMessage& HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response) {
+void HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response, HeartbeatMessage& message) {
 
 	uint8_t* dataPtr = response.getData() + 5;
 
@@ -186,19 +188,17 @@ const HeartbeatMessage& HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64R
 	uint8_t qualityOfPath = dataPtr[17];
 	uint8_t routeFlag = dataPtr[18];
 
-	float * dataRateP = (float*) dataPtr + 19;
+	float * dataRateP = (float*) (dataPtr + 19);
 	float dataRateNeighbor = *dataRateP;
 
-	dataRateP = (float*) dataPtr + 23;
+	dataRateP = (float*) (dataPtr + 23);
 	float neighborhoodCapacity = *dataRateP;
 
-	Serial.print("DataRateNeighbor");
+	Serial.print("NeighborRate");
 	Serial.print(dataRateNeighbor);
 
-	HeartbeatMessage message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum,
-			dataRateNeighbor, qualityOfPath, neighborhoodCapacity, routeFlag);
-
-	return message;
+	message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRateNeighbor,
+			qualityOfPath, neighborhoodCapacity, routeFlag);
 
 }
 

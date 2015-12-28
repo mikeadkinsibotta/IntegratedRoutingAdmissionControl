@@ -30,6 +30,7 @@ class HeartbeatMessage {
 		bool routeFlag;
 
 	public:
+		HeartbeatMessage();
 
 		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
 				const XBeeAddress64& sinkAddress, const uint8_t rssi, const uint8_t seqNum, const float dataRate,

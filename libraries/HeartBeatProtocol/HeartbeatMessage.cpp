@@ -6,6 +6,18 @@
  */
 #include "HeartbeatMessage.h"
 
+HeartbeatMessage::HeartbeatMessage() {
+	senderAddress = XBeeAddress64();
+	streamSourceAddress = XBeeAddress64();
+	sinkAddress = XBeeAddress64();
+	rssi = 0;
+	seqNum = 0;
+	dataRate = 0.0;
+	qualityOfPath = 0;
+	neighborhoodCapacity = 0.0;
+	routeFlag = false;
+}
+
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
 		const XBeeAddress64& sinkAddress, const uint8_t rssi, const uint8_t seqNum, const float dataRate,
 		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
