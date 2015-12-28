@@ -12,6 +12,7 @@
 #include "XBee.h"
 #include "Neighbor.h"
 #include "HeartbeatMessage.h"
+#include <Saturation.h>
 #include <vector>
 #include <set>
 
@@ -29,12 +30,16 @@ class HeartbeatProtocol {
 		XBeeAddress64 nextHopAddress;
 		uint8_t qualityOfPath;
 		float dataRate;
+		float neighborhoodCapacity;
+		Saturation satT[4];
+		void buildSaturationTable();
 
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee);
 		void broadcastHeartBeat(const XBeeAddress64& heartbeatAddress);
 		void receiveHeartBeat(const Rx64Response& response);
+		void calculateNeighborhoodCapacity();
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		const HeartbeatMessage& transcribeHeartbeatPacket(const Rx64Response& response);
 		void calculatePathQualityNextHop();

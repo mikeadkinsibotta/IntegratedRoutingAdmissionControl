@@ -17,7 +17,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
-
+	this->neighborhoodCapacity = 0;
 	//Serial.print("HasRouteD");
 	//Serial.print(routeFlag);
 }
@@ -31,6 +31,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	this->nextHopAddress = XBeeAddress64();
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
+	this->neighborhoodCapacity = 0;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -42,11 +43,35 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 
 void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress) {
 
-	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath, 0.0,
-			routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
+			neighborhoodCapacity, routeFlag);
 	message.sendBeatMessage(xbee, heartbeatAddress);
 	seqNum++;
 
+}
+
+void HeartbeatProtocol::calculateNeighborhoodCapacity() {
+	float neighborhoodRate = 0;
+
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		neighborhoodRate += neighborhoodTable.at(i).getNeighborDataRate();
+	}
+
+	//Don't forget to include myself
+	neighborhoodRate += dataRate;
+
+	uint8_t neighborhoodSize = neighborhoodTable.size();
+
+	if (dataRate > 0) {
+		neighborhoodSize++;
+	}
+
+	if (neighborhoodSize == 1 || neighborhoodSize == 0) {
+		neighborhoodCapacity = UINT32_MAX;
+	} else if (neighborhoodSize > 1) {
+		float saturationRate = satT[neighborhoodSize - 2].getRate();
+		neighborhoodCapacity = saturationRate;
+	}
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
@@ -200,6 +225,15 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	 SerialUSB.print("NextHopAddress ");
 	 nextHopAddress.printAddressASCII(&SerialUSB);
 	 SerialUSB.println();*/
+
+}
+
+void HeartbeatProtocol::buildSaturationTable() {
+	satT[0] = Saturation(2, 120.90);
+	satT[1] = Saturation(3, 153.39);
+	satT[2] = Saturation(4, 151.2);
+	satT[3] = Saturation(5, 154.45);
+	satT[4] = Saturation(6, 111.42);
 
 }
 
