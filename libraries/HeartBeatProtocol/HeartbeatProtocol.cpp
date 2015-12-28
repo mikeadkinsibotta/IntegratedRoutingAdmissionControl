@@ -142,8 +142,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(neighborhoodTable.at(i).getNeighborhoodCapacity());
 		SerialUSB.print(", RouteFlag: ");
 		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
-		SerialUSB.print(", StreamSourceAddress: ");
-		neighborhoodTable.at(i).getStreamSourceAddress().printAddressASCII(&SerialUSB);
+		//SerialUSB.print(", StreamSourceAddress: ");
+		//neighborhoodTable.at(i).getStreamSourceAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RelativeDistance: ");

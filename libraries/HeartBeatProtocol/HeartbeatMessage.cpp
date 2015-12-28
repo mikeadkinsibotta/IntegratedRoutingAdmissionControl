@@ -128,8 +128,8 @@ void HeartbeatMessage::printMessage() {
 	senderAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(", StreamSourceAddress: ");
-	streamSourceAddress.printAddressASCII(&SerialUSB);
+	//SerialUSB.print(", StreamSourceAddress: ");
+	//streamSourceAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", seqNum: ");
 	SerialUSB.print(seqNum);
 	SerialUSB.print(", RSSI: ");
