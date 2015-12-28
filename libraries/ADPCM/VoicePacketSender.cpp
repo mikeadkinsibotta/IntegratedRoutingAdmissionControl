@@ -55,6 +55,9 @@ void VoicePacketSender::generateVoicePacket() {
 
 	if (hasNextHop) {
 
+		injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
+		heartbeatProtocol->setDataRate(injectionRate);
+
 		if (myNextHop.equals(XBeeAddress64())) {
 			SerialUSB.println("Has Route to Sink");
 			myNextHop = heartbeatProtocol->getNextHopAddress();
@@ -211,7 +214,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		//	Serial.print("No Path");
 		//}
 	} else {
-		SerialUSB.println("Received Path Packet");
+		Serial.println("Received Path Packet");
 		uint8_t dataLoss = dataPtr[13];
 
 		//Returned to the orignal sender, update packet loss
@@ -248,10 +251,6 @@ void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
 	dupSetting = newSetting.getDupRatio();
 	codecSetting = newSetting.getCompressionSetting();
-
-	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
-
-	heartbeatProtocol->setDataRate(injectionRate);
 
 }
 

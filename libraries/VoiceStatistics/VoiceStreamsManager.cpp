@@ -102,7 +102,7 @@ void VoiceStreamStatManager::sendPathPacket() {
 	int i = 0;
 
 	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
-		Serial.print("SENDPATH");
+
 		const XBeeAddress64 &dataSenderAddress = streams.at(i).getSenderAddress();
 		const uint8_t dataLoss = streams.at(i).getPacketLoss();
 

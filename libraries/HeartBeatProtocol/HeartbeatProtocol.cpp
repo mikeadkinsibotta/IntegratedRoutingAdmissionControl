@@ -46,7 +46,9 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
 			neighborhoodCapacity, routeFlag);
 
-	message.printMessage();
+	//message.printMessage();
+	//Serial.print("InjectionRateA");
+	//Serial.print(dataRate);
 
 	uint8_t payload[32];
 
@@ -185,13 +187,16 @@ const HeartbeatMessage& HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64R
 	uint8_t routeFlag = dataPtr[18];
 
 	float * dataRateP = (float*) dataPtr + 19;
-	float dataRate = *dataPtr;
+	float dataRateNeighbor = *dataRateP;
 
 	dataRateP = (float*) dataPtr + 23;
 	float neighborhoodCapacity = *dataRateP;
 
-	HeartbeatMessage message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRate,
-			qualityOfPath, neighborhoodCapacity, routeFlag);
+	Serial.print("DataRateNeighbor");
+	Serial.print(dataRateNeighbor);
+
+	HeartbeatMessage message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum,
+			dataRateNeighbor, qualityOfPath, neighborhoodCapacity, routeFlag);
 
 	return message;
 

@@ -137,8 +137,17 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
 	//XBeeAddress64 broadcast = XBeeAddress64(HEARTBEAT_ADDRESS_1, 0x40B31805);
 
+	//Serial.print("InjectionRateB");
+	//Serial.print(dataRate);
+
 	uint8_t * dataRateP = (uint8_t *) &dataRate;
 	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
+
+	//float * dataRateFloat = (float *) dataRateP;
+	//float dataRateFloatt = *dataRateFloat;
+
+	//Serial.print("InjectionRateC");
+	//Serial.print(dataRateFloatt);
 
 	payload[0] = 'B';
 	payload[1] = 'E';
@@ -173,7 +182,13 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 	payload[30] = neighborhoodCapacityP[2];
 	payload[31] = neighborhoodCapacityP[3];
 
-	/*uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
+	/*uint8_t * dataRateP2 = payload + 24;
+	 float * dataRateNeighborP = (float *) dataRateP2;
+	 float dataRateNeighbor = *dataRateNeighborP;
+
+	 //Serial.print("InjectionRateD");
+	 //Serial.print(dataRateNeighbor);
+	 /*uint8_t payload[] = { 'B', 'E', 'A', 'T', '\0', (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16)
 	 & 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24)
 	 & 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb()
 	 & 0xff, (streamSourceAddress.getMsb() >> 24) & 0xff, (streamSourceAddress.getMsb() >> 16) & 0xff,
