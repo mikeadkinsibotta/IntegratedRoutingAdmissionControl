@@ -45,7 +45,15 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 
 	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
 			neighborhoodCapacity, routeFlag);
-	message.sendBeatMessage(xbee, heartbeatAddress);
+
+	message.printMessage();
+
+	Tx64Request tx = Tx64Request();
+
+	message.generateBeatMessage(heartbeatAddress, tx);
+
+	xbee.send(tx);
+
 	seqNum++;
 
 }
@@ -82,6 +90,7 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	}
 	updateNeighborHoodTable(message);
+	printNeighborHoodTable();
 
 	if (!myAddress.equals(sinkAddress)) {
 		calculatePathQualityNextHop();

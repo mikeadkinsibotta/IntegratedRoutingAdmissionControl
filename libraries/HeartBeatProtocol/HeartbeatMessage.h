@@ -66,7 +66,7 @@ class HeartbeatMessage {
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
-		void sendBeatMessage(XBee& xbee, const XBeeAddress64& heartbeatAddress);
+		void generateBeatMessage(const XBeeAddress64& heartbeatAddress, Tx64Request& tx);
 
 		void printMessage();
 
