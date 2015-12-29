@@ -5,6 +5,7 @@
  *      Author: mike
  */
 #include "HeartbeatProtocol.h"
+#include <math.h>
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -82,6 +83,8 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	message.transcribeHeartbeatPacket(response);
 
+	message.printMessage();
+
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
 
@@ -145,7 +148,21 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RelativeDistance: ");
-		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance());
+		SerialUSB.print(neighborhoodTable.at(i).getRelativeDistance());
+
+		double milliWatts = pow(10.0, (neighborhoodTable.at(i).getRelativeDistance() / 10.0));
+
+		SerialUSB.print(", milliWatts ");
+		SerialUSB.print(milliWatts, 12);
+
+		double milliwatts = 0.0000000199526231;
+
+		double distance = 5.5;
+
+		double measuredDistance = distance * pow((milliwatts / distance), (-1.0 / -1.095));
+
+		SerialUSB.print(", measuredDistance ");
+		SerialUSB.println(measuredDistance, 12);
 
 	}
 

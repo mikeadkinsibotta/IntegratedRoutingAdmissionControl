@@ -2,7 +2,7 @@
 
 Neighbor::Neighbor(const XBeeAddress64& neighborAddress, const float neighborDataRate, const uint8_t seqNum,
 		const float qualityOfPath, const float neighborhoodCapacity, const bool routeFlag,
-		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const float relativeDistance) {
+		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const int relativeDistance) {
 
 	this->neighborAddress = neighborAddress;
 	this->neighborDataRate = neighborDataRate;

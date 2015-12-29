@@ -27,8 +27,7 @@ class Neighbor {
 		Neighbor();
 		Neighbor(const XBeeAddress64 &neighborAddress, const float neighborDataRate, const uint8_t seqNum,
 				const float qosCost, const float neighborhoodCapacity, const bool routeFlag,
-				const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
-				const float relativeDistance);
+				const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const int relativeDistance);
 
 		const XBeeAddress64& getNeighborAddress() const;
 		void setNeighborAddress(const XBeeAddress64& neighborAddress);
