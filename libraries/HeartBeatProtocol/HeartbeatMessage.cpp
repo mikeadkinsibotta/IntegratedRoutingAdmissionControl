@@ -190,7 +190,7 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	senderAddress = response.getRemoteAddress64();
 
-	rssi = response.getRssi();
+	rssi = response.getRssi() * -1;
 
 	sinkAddress.setMsb(
 			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
