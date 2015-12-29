@@ -184,3 +184,34 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 	payload[31] = neighborhoodCapacityP[3];
 }
 
+void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
+
+	uint8_t* dataPtr = response.getData() + 5;
+
+	senderAddress = response.getRemoteAddress64();
+
+	rssi = response.getRssi();
+
+	sinkAddress.setMsb(
+			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
+
+	sinkAddress.setLsb(
+			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
+
+	streamSourceAddress.setMsb(
+			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
+
+	streamSourceAddress.setLsb(
+			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
+
+	seqNum = dataPtr[16];
+	qualityOfPath = dataPtr[17];
+	routeFlag = dataPtr[18];
+
+	float * dataRateP = (float*) (dataPtr + 19);
+	dataRate = *dataRateP;
+
+	dataRateP = (float*) (dataPtr + 23);
+	neighborhoodCapacity = *dataRateP;
+
+}

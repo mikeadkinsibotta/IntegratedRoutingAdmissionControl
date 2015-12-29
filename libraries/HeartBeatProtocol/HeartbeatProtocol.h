@@ -41,7 +41,6 @@ class HeartbeatProtocol {
 		void receiveHeartBeat(const Rx64Response& response);
 
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
-		void transcribeHeartbeatPacket(const Rx64Response& response, HeartbeatMessage& message);
 		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();
 		bool isRouteFlag() const;

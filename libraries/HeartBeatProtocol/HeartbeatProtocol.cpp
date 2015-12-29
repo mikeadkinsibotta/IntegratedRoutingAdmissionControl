@@ -80,7 +80,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message;
 
-	transcribeHeartbeatPacket(response, message);
+	message.transcribeHeartbeatPacket(response);
 
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
@@ -142,51 +142,12 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(neighborhoodTable.at(i).getNeighborhoodCapacity());
 		SerialUSB.print(", RouteFlag: ");
 		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
-		//SerialUSB.print(", StreamSourceAddress: ");
-		//neighborhoodTable.at(i).getStreamSourceAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RelativeDistance: ");
 		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance());
 
 	}
-
-}
-
-void HeartbeatProtocol::transcribeHeartbeatPacket(const Rx64Response& response, HeartbeatMessage& message) {
-
-	uint8_t* dataPtr = response.getData() + 5;
-
-	XBeeAddress64 senderAddress = response.getRemoteAddress64();
-
-	uint8_t rssi = response.getRssi();
-	XBeeAddress64 sinkAddress;
-	XBeeAddress64 sourceStreamAddress;
-
-	sinkAddress.setMsb(
-			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
-
-	sinkAddress.setLsb(
-			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
-
-	sourceStreamAddress.setMsb(
-			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
-
-	sourceStreamAddress.setLsb(
-			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
-
-	uint8_t seqNum = dataPtr[16];
-	uint8_t qualityOfPath = dataPtr[17];
-	uint8_t routeFlag = dataPtr[18];
-
-	float * dataRateP = (float*) (dataPtr + 19);
-	float dataRateNeighbor = *dataRateP;
-
-	dataRateP = (float*) (dataPtr + 23);
-	float neighborhoodCapacity = *dataRateP;
-
-	message = HeartbeatMessage(senderAddress, sourceStreamAddress, sinkAddress, rssi, seqNum, dataRateNeighbor,
-			qualityOfPath, neighborhoodCapacity, routeFlag);
 
 }
 

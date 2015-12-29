@@ -69,6 +69,8 @@ class HeartbeatMessage {
 
 		void generateBeatMessage(uint8_t payload[]);
 
+		void transcribeHeartbeatPacket(const Rx64Response& response);
+
 		void printMessage();
 
 };
