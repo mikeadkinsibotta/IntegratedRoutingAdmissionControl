@@ -5,10 +5,13 @@
  *      Author: mike
  */
 #include "HeartbeatProtocol.h"
-#include <math.h>
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
+
+const double MILLIWATTS = 0.0000000199526231;
+const double DISTANCE = 5.5;
+const double N_P = -1.095;
 
 HeartbeatProtocol::HeartbeatProtocol() {
 	this->seqNum = 0;
@@ -110,7 +113,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 			neighborhoodTable.at(i).setRouteFlag(heartbeatMessage.isRouteFlag());
 			neighborhoodTable.at(i).setStreamSourceAddress(heartbeatMessage.getStreamSourceAddress());
 			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
-			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRssi());
+			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
 
 			found = true;
 			break;
@@ -122,7 +125,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getStreamSourceAddress(), heartbeatMessage.getSinkAddress(),
-				heartbeatMessage.getRssi());
+				heartbeatMessage.getRelativeDistance());
 		neighborhoodTable.push_back(neighbor);
 	}
 
@@ -148,21 +151,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RelativeDistance: ");
-		SerialUSB.print(neighborhoodTable.at(i).getRelativeDistance());
-
-		double milliWatts = pow(10.0, (neighborhoodTable.at(i).getRelativeDistance() / 10.0));
-
-		SerialUSB.print(", milliWatts ");
-		SerialUSB.print(milliWatts, 12);
-
-		double milliwatts = 0.0000000199526231;
-
-		double distance = 5.5;
-
-		double measuredDistance = distance * pow((milliwatts / distance), (-1.0 / -1.095));
-
-		SerialUSB.print(", measuredDistance ");
-		SerialUSB.println(measuredDistance, 12);
+		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance(), 12);
 
 	}
 

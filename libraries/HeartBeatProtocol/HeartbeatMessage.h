@@ -10,11 +10,9 @@
 
 #include "Arduino.h"
 #include "XBee.h"
+#include <math.h>
 
-union injectRate {
-		uint8_t b[4];
-		float rate;
-};
+using namespace std;
 
 class HeartbeatMessage {
 
@@ -24,7 +22,7 @@ class HeartbeatMessage {
 		XBeeAddress64 streamSourceAddress;
 		uint8_t seqNum;
 		float dataRate;
-		float rssi;
+		double relativeDistance;
 		uint8_t qualityOfPath;
 		float neighborhoodCapacity;
 		bool routeFlag;
@@ -39,6 +37,10 @@ class HeartbeatMessage {
 		HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
 				const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
 				const float neighborhoodCapacity, const bool routeFlag);
+
+		void generateBeatMessage(uint8_t payload[]);
+		void transcribeHeartbeatPacket(const Rx64Response& response);
+		void printMessage();
 
 		const XBeeAddress64& getStreamSourceAddress() const;
 		void setStreamSourceAddress(const XBeeAddress64& streamSourceAddress);
@@ -55,9 +57,6 @@ class HeartbeatMessage {
 		float getDataRate() const;
 		void setDataRate(float dataRate);
 
-		float getRssi() const;
-		void setRssi(float rssi);
-
 		uint8_t getQualityOfPath() const;
 		void setQualityOfPath(uint8_t qualityOfPath);
 
@@ -67,11 +66,8 @@ class HeartbeatMessage {
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 
-		void generateBeatMessage(uint8_t payload[]);
-
-		void transcribeHeartbeatPacket(const Rx64Response& response);
-
-		void printMessage();
+		double getRelativeDistance() const;
+		void setRelativeDistance(double relativeDistance);
 
 };
 

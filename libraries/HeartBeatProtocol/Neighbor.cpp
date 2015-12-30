@@ -2,7 +2,7 @@
 
 Neighbor::Neighbor(const XBeeAddress64& neighborAddress, const float neighborDataRate, const uint8_t seqNum,
 		const float qualityOfPath, const float neighborhoodCapacity, const bool routeFlag,
-		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const int relativeDistance) {
+		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const double relativeDistance) {
 
 	this->neighborAddress = neighborAddress;
 	this->neighborDataRate = neighborDataRate;
@@ -48,14 +48,6 @@ void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 	this->sinkAddress = sinkAddress;
 }
 
-float Neighbor::getRelativeDistance() const {
-	return relativeDistance;
-}
-
-void Neighbor::setRelativeDistance(float relativeDistance) {
-	this->relativeDistance = relativeDistance;
-}
-
 float Neighbor::getNeighborhoodCapacity() const {
 	return neighborhoodCapacity;
 }
@@ -94,6 +86,14 @@ bool Neighbor::isRouteFlag() const {
 
 void Neighbor::setRouteFlag(bool routeFlag) {
 	this->routeFlag = routeFlag;
+}
+
+double Neighbor::getRelativeDistance() const {
+	return relativeDistance;
+}
+
+void Neighbor::setRelativeDistance(double relativeDistance) {
+	this->relativeDistance = relativeDistance;
 }
 
 bool Neighbor::compare(const Neighbor &b) {

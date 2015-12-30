@@ -6,11 +6,15 @@
  */
 #include "HeartbeatMessage.h"
 
+const double MILLIWATTS = 0.0000000199526231;
+const double DISTANCE = 5.5;
+const double N_P = -1.095;
+
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
 	streamSourceAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
-	rssi = 0;
+	relativeDistance = 0;
 	seqNum = 0;
 	dataRate = 0.0;
 	qualityOfPath = 0;
@@ -25,7 +29,7 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBe
 	this->senderAddress = senderAddress;
 	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
-	this->rssi = rssi;
+	this->relativeDistance = rssi;
 	this->seqNum = seqNum;
 	this->dataRate = dataRate;
 	this->qualityOfPath = qualityOfPath;
@@ -41,85 +45,13 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& streamSourceAddress, con
 	this->senderAddress = XBeeAddress64();
 	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
-	this->rssi = 0.0;
+	this->relativeDistance = 0.0;
 	this->seqNum = seqNum;
 	this->dataRate = dataRate;
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
 
-}
-
-const XBeeAddress64& HeartbeatMessage::getStreamSourceAddress() const {
-	return streamSourceAddress;
-}
-
-void HeartbeatMessage::setStreamSourceAddress(const XBeeAddress64& streamSourceAddress) {
-	this->streamSourceAddress = streamSourceAddress;
-}
-
-const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
-	return senderAddress;
-}
-
-void HeartbeatMessage::setSenderAddress(const XBeeAddress64& senderAddress) {
-	this->senderAddress = senderAddress;
-}
-
-const XBeeAddress64& HeartbeatMessage::getSinkAddress() const {
-	return sinkAddress;
-}
-
-void HeartbeatMessage::setSinkAddress(const XBeeAddress64& sinkAddress) {
-	this->sinkAddress = sinkAddress;
-}
-
-uint8_t HeartbeatMessage::getSeqNum() const {
-	return seqNum;
-}
-
-void HeartbeatMessage::setSeqNum(uint8_t seqNum) {
-	this->seqNum = seqNum;
-}
-
-float HeartbeatMessage::getDataRate() const {
-	return dataRate;
-}
-
-void HeartbeatMessage::setDataRate(float dataRate) {
-	this->dataRate = dataRate;
-}
-
-float HeartbeatMessage::getRssi() const {
-	return rssi;
-}
-
-void HeartbeatMessage::setRssi(float rssi) {
-	this->rssi = rssi;
-}
-
-float HeartbeatMessage::getNeighborhoodCapacity() const {
-	return neighborhoodCapacity;
-}
-
-void HeartbeatMessage::setNeighborhoodCapacity(float neighborhoodCapacity) {
-	this->neighborhoodCapacity = neighborhoodCapacity;
-}
-
-uint8_t HeartbeatMessage::getQualityOfPath() const {
-	return qualityOfPath;
-}
-
-void HeartbeatMessage::setQualityOfPath(uint8_t qualityOfPath) {
-	this->qualityOfPath = qualityOfPath;
-}
-
-bool HeartbeatMessage::isRouteFlag() const {
-	return routeFlag;
-}
-
-void HeartbeatMessage::setRouteFlag(bool routeFlag) {
-	this->routeFlag = routeFlag;
 }
 
 void HeartbeatMessage::printMessage() {
@@ -133,7 +65,7 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.print(", seqNum: ");
 	SerialUSB.print(seqNum);
 	SerialUSB.print(", RSSI: ");
-	SerialUSB.print(rssi);
+	SerialUSB.print(relativeDistance);
 	SerialUSB.print(", DataRate: ");
 	SerialUSB.print(dataRate);
 	SerialUSB.print(", NeighborhoodCapacity: ");
@@ -190,7 +122,10 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	senderAddress = response.getRemoteAddress64();
 
-	rssi = response.getRssi() * -1;
+	relativeDistance = response.getRssi() * -1;
+
+	double milliWatts = pow(10.0, (relativeDistance / 10.0));
+	double measuredDistance = DISTANCE * pow((MILLIWATTS / DISTANCE), (-1.0 / N_P));
 
 	sinkAddress.setMsb(
 			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
@@ -214,4 +149,76 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	dataRateP = (float*) (dataPtr + 23);
 	neighborhoodCapacity = *dataRateP;
 
+}
+
+const XBeeAddress64& HeartbeatMessage::getStreamSourceAddress() const {
+	return streamSourceAddress;
+}
+
+void HeartbeatMessage::setStreamSourceAddress(const XBeeAddress64& streamSourceAddress) {
+	this->streamSourceAddress = streamSourceAddress;
+}
+
+const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
+	return senderAddress;
+}
+
+void HeartbeatMessage::setSenderAddress(const XBeeAddress64& senderAddress) {
+	this->senderAddress = senderAddress;
+}
+
+const XBeeAddress64& HeartbeatMessage::getSinkAddress() const {
+	return sinkAddress;
+}
+
+void HeartbeatMessage::setSinkAddress(const XBeeAddress64& sinkAddress) {
+	this->sinkAddress = sinkAddress;
+}
+
+uint8_t HeartbeatMessage::getSeqNum() const {
+	return seqNum;
+}
+
+void HeartbeatMessage::setSeqNum(uint8_t seqNum) {
+	this->seqNum = seqNum;
+}
+
+float HeartbeatMessage::getDataRate() const {
+	return dataRate;
+}
+
+void HeartbeatMessage::setDataRate(float dataRate) {
+	this->dataRate = dataRate;
+}
+
+float HeartbeatMessage::getNeighborhoodCapacity() const {
+	return neighborhoodCapacity;
+}
+
+void HeartbeatMessage::setNeighborhoodCapacity(float neighborhoodCapacity) {
+	this->neighborhoodCapacity = neighborhoodCapacity;
+}
+
+uint8_t HeartbeatMessage::getQualityOfPath() const {
+	return qualityOfPath;
+}
+
+void HeartbeatMessage::setQualityOfPath(uint8_t qualityOfPath) {
+	this->qualityOfPath = qualityOfPath;
+}
+
+bool HeartbeatMessage::isRouteFlag() const {
+	return routeFlag;
+}
+
+void HeartbeatMessage::setRouteFlag(bool routeFlag) {
+	this->routeFlag = routeFlag;
+}
+
+double HeartbeatMessage::getRelativeDistance() const {
+	return relativeDistance;
+}
+
+void HeartbeatMessage::setRelativeDistance(double relativeDistance) {
+	this->relativeDistance = relativeDistance;
 }
