@@ -8,7 +8,7 @@
 
 const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;
-const double N_P = -1.095;
+const double N_P = 1.095;
 
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
@@ -79,8 +79,8 @@ void HeartbeatMessage::printMessage() {
 
 void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
-	uint8_t * dataRateP = (uint8_t *) &dataRate;
-	uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
+	const uint8_t * dataRateP = (uint8_t *) &dataRate;
+	const uint8_t * neighborhoodCapacityP = (uint8_t *) &neighborhoodCapacity;
 
 	payload[0] = 'B';
 	payload[1] = 'E';
@@ -118,14 +118,13 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
 void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
-	uint8_t* dataPtr = response.getData() + 5;
+	const uint8_t* dataPtr = response.getData() + 5;
 
 	senderAddress = response.getRemoteAddress64();
 
-	double rssi = response.getRssi() * -1;
-
-	double milliWatts = pow(10.0, (rssi / 10.0));
-	relativeDistance = DISTANCE * pow((MILLIWATTS / DISTANCE), (-1.0 / N_P));
+	const double rssi = response.getRssi() * -1;
+	const double milliWatts = pow(10.0, (rssi / 10.0));
+	relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
 
 	sinkAddress.setMsb(
 			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
