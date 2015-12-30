@@ -31,8 +31,9 @@ class HeartbeatMessage {
 		HeartbeatMessage();
 
 		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
-				const XBeeAddress64& sinkAddress, const float rssi, const uint8_t seqNum, const float dataRate,
-				const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag);
+				const XBeeAddress64& sinkAddress, const double relativeDistance, const uint8_t seqNum,
+				const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
+				const bool routeFlag);
 
 		HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
 				const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,

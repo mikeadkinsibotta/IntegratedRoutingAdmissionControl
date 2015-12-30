@@ -8,6 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
+#define DEBUG false
 
 const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;
@@ -86,14 +87,16 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	message.transcribeHeartbeatPacket(response);
 
-	message.printMessage();
-
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
 
 	}
 	updateNeighborHoodTable(message);
-	printNeighborHoodTable();
+
+	if (DEBUG) {
+		message.printMessage();
+		printNeighborHoodTable();
+	}
 
 	if (!myAddress.equals(sinkAddress)) {
 		calculatePathQualityNextHop();

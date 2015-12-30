@@ -14,7 +14,7 @@ HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
 	streamSourceAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
-	relativeDistance = 0;
+	relativeDistance = 0.0;
 	seqNum = 0;
 	dataRate = 0.0;
 	qualityOfPath = 0;
@@ -23,13 +23,13 @@ HeartbeatMessage::HeartbeatMessage() {
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
-		const XBeeAddress64& sinkAddress, const float rssi, const uint8_t seqNum, const float dataRate,
+		const XBeeAddress64& sinkAddress, const double relativeDistance, const uint8_t seqNum, const float dataRate,
 		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
 
 	this->senderAddress = senderAddress;
 	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
-	this->relativeDistance = rssi;
+	this->relativeDistance = relativeDistance;
 	this->seqNum = seqNum;
 	this->dataRate = dataRate;
 	this->qualityOfPath = qualityOfPath;
@@ -64,8 +64,8 @@ void HeartbeatMessage::printMessage() {
 	//streamSourceAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", seqNum: ");
 	SerialUSB.print(seqNum);
-	SerialUSB.print(", RSSI: ");
-	SerialUSB.print(relativeDistance);
+	SerialUSB.print(", Relative Distance: ");
+	SerialUSB.print(relativeDistance, 12);
 	SerialUSB.print(", DataRate: ");
 	SerialUSB.print(dataRate);
 	SerialUSB.print(", NeighborhoodCapacity: ");
@@ -122,10 +122,10 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	senderAddress = response.getRemoteAddress64();
 
-	relativeDistance = response.getRssi() * -1;
+	double rssi = response.getRssi() * -1;
 
-	double milliWatts = pow(10.0, (relativeDistance / 10.0));
-	double measuredDistance = DISTANCE * pow((MILLIWATTS / DISTANCE), (-1.0 / N_P));
+	double milliWatts = pow(10.0, (rssi / 10.0));
+	relativeDistance = DISTANCE * pow((MILLIWATTS / DISTANCE), (-1.0 / N_P));
 
 	sinkAddress.setMsb(
 			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
