@@ -72,6 +72,8 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.print(neighborhoodCapacity);
 	SerialUSB.print(", QualityOfPath: ");
 	SerialUSB.print(qualityOfPath);
+	SerialUSB.print(", RSSI: ");
+	SerialUSB.print(rssi);
 	SerialUSB.print(", RouteFlag: ");
 	SerialUSB.print(routeFlag);
 	SerialUSB.println('>');
@@ -122,7 +124,7 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	senderAddress = response.getRemoteAddress64();
 
-	const double rssi = response.getRssi() * -1;
+	rssi = response.getRssi() * -1;
 	const double milliWatts = pow(10.0, (rssi / 10.0));
 	relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
 
@@ -220,4 +222,12 @@ double HeartbeatMessage::getRelativeDistance() const {
 
 void HeartbeatMessage::setRelativeDistance(double relativeDistance) {
 	this->relativeDistance = relativeDistance;
+}
+
+double HeartbeatMessage::getRssi() const {
+	return rssi;
+}
+
+void HeartbeatMessage::setRssi(double rssi) {
+	this->rssi = rssi;
 }

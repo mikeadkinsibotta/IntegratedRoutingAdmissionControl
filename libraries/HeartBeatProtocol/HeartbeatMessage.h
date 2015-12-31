@@ -22,6 +22,7 @@ class HeartbeatMessage {
 		XBeeAddress64 streamSourceAddress;
 		uint8_t seqNum;
 		float dataRate;
+		double rssi;
 		double relativeDistance;
 		uint8_t qualityOfPath;
 		float neighborhoodCapacity;
@@ -69,7 +70,8 @@ class HeartbeatMessage {
 
 		double getRelativeDistance() const;
 		void setRelativeDistance(double relativeDistance);
-
+		double getRssi() const;
+		void setRssi(double rssi);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATMESSAGE_H_ */

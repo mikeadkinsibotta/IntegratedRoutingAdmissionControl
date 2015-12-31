@@ -13,6 +13,7 @@
 const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;
 const double N_P = -1.095;
+const uint8_t PAYLOAD_SIZE = 32;
 
 HeartbeatProtocol::HeartbeatProtocol() {
 	this->seqNum = 0;
@@ -50,7 +51,7 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
 			neighborhoodCapacity, routeFlag);
 
-	uint8_t payload[32];
+	uint8_t payload[PAYLOAD_SIZE];
 
 	message.generateBeatMessage(payload);
 
