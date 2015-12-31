@@ -15,7 +15,7 @@ class Neighbor {
 		XBeeAddress64 address;
 		XBeeAddress64 sinkAddress;
 		double relativeDistance;
-		float neighborDataRate;
+		float dataRate;
 		float neighborhoodCapacity;
 		float packetLoss;
 		uint8_t seqNum;
@@ -29,34 +29,25 @@ class Neighbor {
 
 		const XBeeAddress64& getAddress() const;
 		void setAddress(const XBeeAddress64& address);
-
+		float getDataRate() const;
+		void setDataRate(float dataRate);
+		float getNeighborhoodCapacity() const;
+		void setNeighborhoodCapacity(float neighborhoodCapacity);
+		float getPacketLoss() const;
+		void setPacketLoss(float packetLoss);
+		uint8_t getQualityOfPath() const;
+		void setQualityOfPath(uint8_t qualityOfPath);
+		double getRelativeDistance() const;
+		void setRelativeDistance(double relativeDistance);
+		bool isRouteFlag() const;
+		void setRouteFlag(bool routeFlag);
+		uint8_t getSeqNum() const;
+		void setSeqNum(uint8_t seqNum);
 		const XBeeAddress64& getSinkAddress() const;
 		void setSinkAddress(const XBeeAddress64& sinkAddress);
 
-		float getNeighborDataRate() const;
-		void setNeighborDataRate(float neighborDataRate);
-
-		float getNeighborhoodCapacity() const;
-		void setNeighborhoodCapacity(float neighborhoodCapacity);
-
-		float getPacketLoss() const;
-		void setPacketLoss(float packetLoss);
-
-		uint8_t getSeqNum() const;
-		void setSeqNum(uint8_t seqNum);
-
-		uint8_t getQualityOfPath() const;
-		void setQualityOfPath(uint8_t qualityOfPath);
-
-		bool isRouteFlag() const;
-		void setRouteFlag(bool routeFlag);
-
-		double getRelativeDistance() const;
-		void setRelativeDistance(double relativeDistance);
-
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
-
 };
 
 #endif

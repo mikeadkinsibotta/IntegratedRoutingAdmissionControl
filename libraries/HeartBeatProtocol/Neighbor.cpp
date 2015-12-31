@@ -3,7 +3,7 @@
 Neighbor::Neighbor() {
 
 	address = XBeeAddress64();
-	neighborDataRate = 0;
+	dataRate = 0;
 	seqNum = 0;
 	qualityOfPath = 0;
 	neighborhoodCapacity = 0;
@@ -18,7 +18,7 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 		float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance) {
 
 	this->address = address;
-	this->neighborDataRate = neighborDataRate;
+	this->dataRate = dataRate;
 	this->seqNum = seqNum;
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
@@ -36,20 +36,12 @@ void Neighbor::setAddress(const XBeeAddress64& address) {
 	this->address = address;
 }
 
-float Neighbor::getNeighborDataRate() const {
-	return neighborDataRate;
+float Neighbor::getDataRate() const {
+	return dataRate;
 }
 
-void Neighbor::setNeighborDataRate(float neighborDataRate) {
-	this->neighborDataRate = neighborDataRate;
-}
-
-const XBeeAddress64& Neighbor::getSinkAddress() const {
-	return sinkAddress;
-}
-
-void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
-	this->sinkAddress = sinkAddress;
+void Neighbor::setDataRate(float dataRate) {
+	this->dataRate = dataRate;
 }
 
 float Neighbor::getNeighborhoodCapacity() const {
@@ -68,20 +60,20 @@ void Neighbor::setPacketLoss(float packetLoss) {
 	this->packetLoss = packetLoss;
 }
 
-uint8_t Neighbor::getSeqNum() const {
-	return seqNum;
-}
-
-void Neighbor::setSeqNum(uint8_t seqNum) {
-	this->seqNum = seqNum;
-}
-
 uint8_t Neighbor::getQualityOfPath() const {
 	return qualityOfPath;
 }
 
 void Neighbor::setQualityOfPath(uint8_t qualityOfPath) {
 	this->qualityOfPath = qualityOfPath;
+}
+
+double Neighbor::getRelativeDistance() const {
+	return relativeDistance;
+}
+
+void Neighbor::setRelativeDistance(double relativeDistance) {
+	this->relativeDistance = relativeDistance;
 }
 
 bool Neighbor::isRouteFlag() const {
@@ -92,12 +84,20 @@ void Neighbor::setRouteFlag(bool routeFlag) {
 	this->routeFlag = routeFlag;
 }
 
-double Neighbor::getRelativeDistance() const {
-	return relativeDistance;
+uint8_t Neighbor::getSeqNum() const {
+	return seqNum;
 }
 
-void Neighbor::setRelativeDistance(double relativeDistance) {
-	this->relativeDistance = relativeDistance;
+void Neighbor::setSeqNum(uint8_t seqNum) {
+	this->seqNum = seqNum;
+}
+
+const XBeeAddress64& Neighbor::getSinkAddress() const {
+	return sinkAddress;
+}
+
+void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
+	this->sinkAddress = sinkAddress;
 }
 
 bool Neighbor::compare(const Neighbor &b) {
@@ -109,7 +109,7 @@ void Neighbor::printNeighbor() const {
 	Serial.print('<');
 	address.printAddress(&Serial);
 	Serial.print(',');
-	Serial.print(neighborDataRate);
+	Serial.print(dataRate);
 	Serial.print(',');
 	Serial.print(neighborhoodCapacity);
 	Serial.print('>');

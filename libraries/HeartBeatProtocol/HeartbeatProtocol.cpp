@@ -66,7 +66,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	float neighborhoodRate = 0;
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		neighborhoodRate += neighborhoodTable.at(i).getNeighborDataRate();
+		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
 	}
 
 	//Don't forget to include myself
@@ -112,7 +112,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
-			neighborhoodTable.at(i).setNeighborDataRate(heartbeatMessage.getDataRate());
+			neighborhoodTable.at(i).setDataRate(heartbeatMessage.getDataRate());
 			neighborhoodTable.at(i).setSeqNum(heartbeatMessage.getSeqNum());
 			neighborhoodTable.at(i).setQualityOfPath(heartbeatMessage.getQualityOfPath());
 			neighborhoodTable.at(i).setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
@@ -164,7 +164,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print("NeighborAddress: ");
 		neighborhoodTable.at(i).getAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", DataRate: ");
-		SerialUSB.print(neighborhoodTable.at(i).getNeighborDataRate());
+		SerialUSB.print(neighborhoodTable.at(i).getDataRate());
 		SerialUSB.print(", SeqNum: ");
 		SerialUSB.print(neighborhoodTable.at(i).getSeqNum());
 		SerialUSB.print(", QualityOfPath: ");
@@ -197,10 +197,6 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 			if (path < qop) {
 				qop = path;
 				neighbor = neighborhoodTable.at(i);
-				SerialUSB.print("NewNeighborLowerPath");
-				SerialUSB.print(" Address: ");
-				neighbor.getAddress().printAddressASCII(&SerialUSB);
-				SerialUSB.println();
 
 			} else if (qop == path) {
 				double relativeDistanceCurrent = neighbor.getRelativeDistance();
