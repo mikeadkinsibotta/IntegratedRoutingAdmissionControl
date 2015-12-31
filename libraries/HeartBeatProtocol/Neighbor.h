@@ -21,11 +21,13 @@ class Neighbor {
 		uint8_t seqNum;
 		uint8_t qualityOfPath;
 		bool routeFlag;
+		double rssi;
 
 	public:
 		Neighbor();
 		Neighbor(const XBeeAddress64 &address, float neighborDataRate, uint8_t seqNum, float qosCost,
-				float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance);
+				float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance,
+				double rssi);
 
 		const XBeeAddress64& getAddress() const;
 		void setAddress(const XBeeAddress64& address);
@@ -48,6 +50,8 @@ class Neighbor {
 
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
+		double getRssi() const;
+		void setRssi(double rssi);
 };
 
 #endif

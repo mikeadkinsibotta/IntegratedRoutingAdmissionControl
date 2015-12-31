@@ -246,6 +246,9 @@ uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetS
 
 void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
+	Serial.print("DataLoss: ");
+	Serial.println(dataLoss);
+
 	VoiceSetting * v = compressionTable.getCompressionTable();
 	VoiceSetting newSetting = *(v + dataLoss);
 

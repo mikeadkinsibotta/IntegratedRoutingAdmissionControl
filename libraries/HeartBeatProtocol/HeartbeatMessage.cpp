@@ -20,6 +20,7 @@ HeartbeatMessage::HeartbeatMessage() {
 	qualityOfPath = 0;
 	neighborhoodCapacity = 0.0;
 	routeFlag = false;
+	rssi = 0;
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
@@ -35,7 +36,7 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBe
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
-
+	rssi = 0;
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
@@ -51,6 +52,7 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& streamSourceAddress, con
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
+	rssi = 0;
 
 }
 

@@ -120,6 +120,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 			neighborhoodTable.at(i).setRouteFlag(heartbeatMessage.isRouteFlag());
 			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
 			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
+			neighborhoodTable.at(i).setRssi(heartbeatMessage.getRssi());
 
 			found = true;
 			break;
@@ -130,7 +131,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
-				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance());
+				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi());
 		neighborhoodTable.push_back(neighbor);
 	}
 
@@ -176,6 +177,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", RSSI: ");
+		SerialUSB.print(neighborhoodTable.at(i).getRssi());
 		SerialUSB.print(", RelativeDistance: ");
 		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance(), 12);
 
