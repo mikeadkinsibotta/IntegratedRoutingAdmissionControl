@@ -216,6 +216,13 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 	} else {
 		Serial.println("Received Path Packet");
 		uint8_t dataLoss = dataPtr[13];
+		uint8_t totalPacketSent = dataPtr[14];
+		uint8_t totalPacketReceived = dataPtr[15];
+
+		SerialUSB.print("TotalPacketSent: ");
+		SerialUSB.print(totalPacketSent);
+		SerialUSB.print(" TotalPacketReceived: ");
+		SerialUSB.print(totalPacketReceived);
 
 		//Returned to the orignal sender, update packet loss
 		updateDataRate(dataLoss);
@@ -246,8 +253,8 @@ uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetS
 
 void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
-	Serial.print("DataLoss: ");
-	Serial.println(dataLoss);
+	SerialUSB.print(" DataLoss: ");
+	SerialUSB.println(dataLoss);
 
 	VoiceSetting * v = compressionTable.getCompressionTable();
 	VoiceSetting newSetting = *(v + dataLoss);

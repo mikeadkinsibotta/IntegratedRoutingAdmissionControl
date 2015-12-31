@@ -114,9 +114,6 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
 
-		if (rounded > 24.5)
-			rounded = 24;
-
 		packetLoss = rounded;
 
 		double x = 0;
@@ -187,4 +184,20 @@ const XBeeAddress64& VoiceStreamStats::getUpStreamNeighborAddress() const {
 
 void VoiceStreamStats::setUpStreamNeighborAddress(const XBeeAddress64& upStreamNeighborAddress) {
 	this->upStreamNeighborAddress = upStreamNeighborAddress;
+}
+
+uint8_t VoiceStreamStats::getTotalPacketsRecieved() const {
+	return totalPacketsRecieved;
+}
+
+void VoiceStreamStats::setTotalPacketsRecieved(uint8_t totalPacketsRecieved) {
+	this->totalPacketsRecieved = totalPacketsRecieved;
+}
+
+uint8_t VoiceStreamStats::getTotalPacketsSent() const {
+	return totalPacketsSent;
+}
+
+void VoiceStreamStats::setTotalPacketsSent(uint8_t totalPacketsSent) {
+	this->totalPacketsSent = totalPacketsSent;
 }
