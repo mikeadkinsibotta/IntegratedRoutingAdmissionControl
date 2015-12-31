@@ -10,6 +10,7 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
+#define IGNORE_HEARTBEAT false
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B31805
 
@@ -153,7 +154,7 @@ void listenForResponses() {
 
 			if (!strcmp(control, "BEAT")) {
 				//routing data
-				heartbeatProtocol->receiveHeartBeat(response);
+				heartbeatProtocol->receiveHeartBeat(response, IGNORE_HEARTBEAT);
 			} else if (!strcmp(control, "DATA")) {
 				//voice data
 				voicePacketSender->handleDataPacket(response);

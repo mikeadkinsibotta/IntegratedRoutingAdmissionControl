@@ -38,7 +38,7 @@ class HeartbeatProtocol {
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee);
 		void broadcastHeartBeat(const XBeeAddress64& heartbeatAddress);
-		void receiveHeartBeat(const Rx64Response& response);
+		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
 
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		void calculatePathQualityNextHop();

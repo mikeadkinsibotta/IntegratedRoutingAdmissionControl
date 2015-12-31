@@ -82,7 +82,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	}
 }
 
-void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
+void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag) {
 	HeartbeatMessage message;
 
 	message.transcribeHeartbeatPacket(response);
@@ -91,7 +91,10 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 		routeFlag = message.isRouteFlag();
 
 	}
-	updateNeighborHoodTable(message);
+
+	if (!ignoreHeartBeatFlag) {
+		updateNeighborHoodTable(message);
+	}
 
 	if (DEBUG) {
 		message.printMessage();
