@@ -1,27 +1,39 @@
 #include "Neighbor.h"
 
-Neighbor::Neighbor(const XBeeAddress64& neighborAddress, const float neighborDataRate, const uint8_t seqNum,
-		const float qualityOfPath, const float neighborhoodCapacity, const bool routeFlag,
-		const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress, const double relativeDistance) {
+Neighbor::Neighbor() {
 
-	this->neighborAddress = neighborAddress;
+	address = XBeeAddress64();
+	neighborDataRate = 0;
+	seqNum = 0;
+	qualityOfPath = 0;
+	neighborhoodCapacity = 0;
+	routeFlag = false;
+	sinkAddress = XBeeAddress64();
+	relativeDistance = 0;
+	packetLoss = 0;
+
+}
+
+Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t seqNum, float qualityOfPath,
+		float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance) {
+
+	this->address = address;
 	this->neighborDataRate = neighborDataRate;
 	this->seqNum = seqNum;
 	this->qualityOfPath = qualityOfPath;
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
-	this->streamSourceAddress = streamSourceAddress;
 	this->sinkAddress = sinkAddress;
 	this->relativeDistance = relativeDistance;
 	this->packetLoss = 0;
 }
 
-const XBeeAddress64& Neighbor::getNeighborAddress() const {
-	return neighborAddress;
+const XBeeAddress64& Neighbor::getAddress() const {
+	return address;
 }
 
-void Neighbor::setNeighborAddress(const XBeeAddress64& neighborAddress) {
-	this->neighborAddress = neighborAddress;
+void Neighbor::setAddress(const XBeeAddress64& address) {
+	this->address = address;
 }
 
 float Neighbor::getNeighborDataRate() const {
@@ -30,14 +42,6 @@ float Neighbor::getNeighborDataRate() const {
 
 void Neighbor::setNeighborDataRate(float neighborDataRate) {
 	this->neighborDataRate = neighborDataRate;
-}
-
-const XBeeAddress64& Neighbor::getStreamSourceAddress() const {
-	return streamSourceAddress;
-}
-
-void Neighbor::setStreamSourceAddress(const XBeeAddress64& streamSourceAddress) {
-	this->streamSourceAddress = streamSourceAddress;
 }
 
 const XBeeAddress64& Neighbor::getSinkAddress() const {
@@ -97,13 +101,13 @@ void Neighbor::setRelativeDistance(double relativeDistance) {
 }
 
 bool Neighbor::compare(const Neighbor &b) {
-	return neighborAddress.equals(b.neighborAddress);
+	return address.equals(b.address);
 
 }
 
 void Neighbor::printNeighbor() const {
 	Serial.print('<');
-	neighborAddress.printAddress(&Serial);
+	address.printAddress(&Serial);
 	Serial.print(',');
 	Serial.print(neighborDataRate);
 	Serial.print(',');

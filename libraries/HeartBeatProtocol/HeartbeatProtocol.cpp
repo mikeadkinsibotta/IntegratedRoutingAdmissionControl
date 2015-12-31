@@ -93,10 +93,11 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 
 	if (!myAddress.equals(sinkAddress)) {
 		routeFlag = message.isRouteFlag();
-
 	}
 
 	if (!ignoreHeartBeatFlag) {
+		updateNeighborHoodTable(message);
+	} else if (!message.getSenderAddress().equals(sinkAddress)) {
 		updateNeighborHoodTable(message);
 	}
 
@@ -110,13 +111,12 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 	bool found = false;
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		if (neighborhoodTable.at(i).getNeighborAddress().equals(heartbeatMessage.getSenderAddress())) {
+		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
 			neighborhoodTable.at(i).setNeighborDataRate(heartbeatMessage.getDataRate());
 			neighborhoodTable.at(i).setSeqNum(heartbeatMessage.getSeqNum());
 			neighborhoodTable.at(i).setQualityOfPath(heartbeatMessage.getQualityOfPath());
 			neighborhoodTable.at(i).setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
 			neighborhoodTable.at(i).setRouteFlag(heartbeatMessage.isRouteFlag());
-			neighborhoodTable.at(i).setStreamSourceAddress(heartbeatMessage.getStreamSourceAddress());
 			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
 			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
 
@@ -129,8 +129,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
-				heartbeatMessage.getStreamSourceAddress(), heartbeatMessage.getSinkAddress(),
-				heartbeatMessage.getRelativeDistance());
+				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance());
 		neighborhoodTable.push_back(neighbor);
 	}
 
@@ -138,14 +137,33 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 void HeartbeatProtocol::printNeighborHoodTable() {
 
+	SerialUSB.println("My Info");
+	SerialUSB.print("MyAddress: ");
+	myAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", DataRate: ");
+	SerialUSB.print(dataRate);
+	SerialUSB.print(", SeqNum: ");
+	SerialUSB.print(seqNum);
+	SerialUSB.print(", QualityOfPath: ");
+	SerialUSB.print(qualityOfPath);
+	SerialUSB.print(", NeighborhoodCapacity: ");
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.print(", RouteFlag: ");
+	SerialUSB.print(routeFlag);
+	SerialUSB.print(", SinkAddress: ");
+	sinkAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", NextHopAddress: ");
+	nextHopAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
 	if (neighborhoodTable.size() > 0) {
 		SerialUSB.println("Print Neighbor Table");
 	}
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 
 		SerialUSB.print("NeighborAddress: ");
-		neighborhoodTable.at(i).getNeighborAddress().printAddressASCII(&SerialUSB);
-		SerialUSB.print(", NeighborDataRate: ");
+		neighborhoodTable.at(i).getAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", DataRate: ");
 		SerialUSB.print(neighborhoodTable.at(i).getNeighborDataRate());
 		SerialUSB.print(", SeqNum: ");
 		SerialUSB.print(neighborhoodTable.at(i).getSeqNum());
@@ -165,10 +183,11 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 }
 
 void HeartbeatProtocol::calculatePathQualityNextHop() {
+
 	//Add 1 to include myself
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 	uint8_t qop = UINT8_MAX;
-	XBeeAddress64 neighbor;
+	Neighbor neighbor;
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 
@@ -177,7 +196,18 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 
 			if (path < qop) {
 				qop = path;
-				neighbor = neighborhoodTable.at(i).getNeighborAddress();
+				neighbor = neighborhoodTable.at(i);
+				SerialUSB.print("NewNeighborLowerPath");
+				SerialUSB.print(" Address: ");
+				neighbor.getAddress().printAddressASCII(&SerialUSB);
+				SerialUSB.println();
+
+			} else if (qop == path) {
+				double relativeDistanceCurrent = neighbor.getRelativeDistance();
+				double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
+				if (relativeDistanceCurrent > relativeDistanceNew) {
+					neighbor = neighborhoodTable.at(i);
+				}
 			}
 		}
 	}
@@ -186,7 +216,7 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	if (qop != UINT8_MAX) {
 
 		qualityOfPath = qop;
-		nextHopAddress = neighbor;
+		nextHopAddress = neighbor.getAddress();
 		routeFlag = true;
 
 	} else {
