@@ -25,10 +25,12 @@ class VoiceStreamStats {
 		uint8_t totalPacketsSent;
 		double voiceQuality;
 		uint8_t duplicateFrame;
+		uint8_t payloadSize;
 
 	public:
-		VoiceStreamStats(const XBeeAddress64& senderAddress);
-		VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress);
+		VoiceStreamStats(const XBeeAddress64& senderAddress, const uint8_t payloadSize);
+		VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress,
+				const uint8_t payloadSize);
 		const XBeeAddress64& getSenderAddress() const;
 		double getThroughput() const;
 		void calculateThroughput();

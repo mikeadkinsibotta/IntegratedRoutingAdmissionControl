@@ -17,7 +17,7 @@ VoicePacketSender::VoicePacketSender() {
 	myNextHop = XBeeAddress64();
 	heartbeatProtocol = 0;
 	xbee = XBee();
-	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+	voiceStreamStatManager = VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	pathLoss = 0;
 	injectionRate = 0;
 	compressionTable.buildCompressionLookUpTable();
@@ -43,7 +43,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->heartbeatProtocol = heartbeatProtocol;
 
 	this->xbee = xbee;
-	voiceStreamStatManager = VoiceStreamStatManager(xbee);
+	voiceStreamStatManager = VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	this->pathLoss = pathLoss;
 	compressionTable.buildCompressionLookUpTable();
 

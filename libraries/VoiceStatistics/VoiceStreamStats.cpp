@@ -7,9 +7,11 @@
  *      Author: mike
  */
 
-VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress) {
+VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress,
+		const uint8_t payloadSize) {
 	this->upStreamNeighborAddress = upStreamNeighborAddress;
 	this->senderAddress = senderAddress;
+	this->payloadSize = payloadSize;
 	throughput = 0;
 	totalPacketsRecieved = 0;
 	expectedFrameId = 1;
@@ -23,9 +25,10 @@ VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBe
 
 }
 
-VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress) {
+VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const uint8_t payloadSize) {
 	this->upStreamNeighborAddress = XBeeAddress64();
 	this->senderAddress = senderAddress;
+	this->payloadSize = payloadSize;
 	throughput = 0;
 	totalPacketsRecieved = 0;
 	expectedFrameId = 1;
@@ -53,7 +56,7 @@ void VoiceStreamStats::calculateThroughput() {
 	double timeDiff = timepoint - timeStamp;
 	timeStamp = timepoint;
 
-	unsigned long totaldata = totalPacketsRecieved * 100 * 8;
+	unsigned long totaldata = totalPacketsRecieved * payloadSize * 8;
 	double inKb = totaldata / 1000.0;
 	throughput = inKb / timeDiff;
 

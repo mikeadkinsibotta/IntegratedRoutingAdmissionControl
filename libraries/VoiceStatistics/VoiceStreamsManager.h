@@ -19,10 +19,13 @@ class VoiceStreamStatManager {
 	private:
 		vector<VoiceStreamStats> streams;
 		XBee xbee;
+		uint8_t payloadSize;
 
 	public:
 		VoiceStreamStatManager();
-		VoiceStreamStatManager(XBee& xbee);
+		VoiceStreamStatManager(uint8_t payloadSize);
+		VoiceStreamStatManager(XBee& xbee, uint8_t payloadSize);
+
 		void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
 				const uint8_t * dataPtr);

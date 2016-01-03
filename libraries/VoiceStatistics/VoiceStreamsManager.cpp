@@ -9,10 +9,19 @@
 
 VoiceStreamStatManager::VoiceStreamStatManager() {
 	xbee = XBee();
+	payloadSize = 0;
+
 }
 
-VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee) {
+VoiceStreamStatManager::VoiceStreamStatManager(const uint8_t payloadSize) {
+	xbee = XBee();
+	this->payloadSize = payloadSize;
+
+}
+
+VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize) {
 	this->xbee = xbee;
+	this->payloadSize = payloadSize;
 }
 
 void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSource) {
@@ -29,7 +38,7 @@ void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSourc
 
 	if (!found) {
 		//SerialUSB.println("New Stream");
-		VoiceStreamStats stream = VoiceStreamStats(packetSource);
+		VoiceStreamStats stream = VoiceStreamStats(packetSource, 76);
 		stream.startStream();
 		stream.calculateThroughput();
 		streams.push_back(stream);
@@ -68,7 +77,7 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 
 	if (!found) {
 		//SerialUSB.println("New Stream");
-		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop);
+		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		stream.startStream();
 		stream.updateVoiceLoss(dataPtr);
 		streams.push_back(stream);
@@ -92,7 +101,7 @@ void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& 
 
 	if (!found) {
 		//SerialUSB.println("New Stream");
-		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop);
+		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		streams.push_back(stream);
 	}
 
