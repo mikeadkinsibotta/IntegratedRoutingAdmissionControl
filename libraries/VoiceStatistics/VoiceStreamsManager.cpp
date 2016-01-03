@@ -106,7 +106,7 @@ void VoiceStreamStatManager::sendPathPacket() {
 		const XBeeAddress64 &dataSenderAddress = streams.at(i).getSenderAddress();
 		const uint8_t dataLoss = streams.at(i).getPacketLoss();
 		const uint8_t totalPacketsSent = streams.at(i).getTotalPacketsSent();
-		const uint8_t totalPacketsRecieved = streams.at(i).getTotalPacketsRecieved() - 1;
+		const uint8_t totalPacketsRecieved = streams.at(i).getTotalPacketsRecieved();
 
 		uint8_t payload[] = { 'P', 'A', 'T', 'H', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
 				(dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
