@@ -130,6 +130,20 @@ void VoiceStreamStatManager::getStreamPreviousHop(const XBeeAddress64& packetSou
 	}
 }
 
+void VoiceStreamStatManager::handleStreamRestart(const Rx64Response& response) {
+
+	uint8_t * dataPtr = response.getData();
+
+	XBeeAddress64 packetSource;
+	packetSource.setMsb(
+			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+
+	packetSource.setLsb(
+			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+
+	removeStream(packetSource);
+}
+
 const vector<VoiceStreamStats> & VoiceStreamStatManager::getStreams() const {
 	return streams;
 }

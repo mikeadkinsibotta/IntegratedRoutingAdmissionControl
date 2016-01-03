@@ -56,6 +56,8 @@ class VoicePacketSender {
 		void setDupSetting(float dupSetting);
 		void sendPathPacket();
 		void handlePathPacket(const Rx64Response &response);
+		void sendStreamRestart(const XBeeAddress64& packetSource);
+		void handleStreamRestart(const Rx64Response &response);
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */

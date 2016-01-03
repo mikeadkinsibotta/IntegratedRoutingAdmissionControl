@@ -5,7 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 3000
-#define SENDER true
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -161,7 +161,10 @@ void listenForResponses() {
 			} else if (!strcmp(control, "PATH")) {
 				//path loss packet
 				voicePacketSender->handlePathPacket(response);
-			} /*else if(!strcmp(control, "ASM_")) {
+			} else if (!strcmp(control, "RSTR")) {
+				voicePacketSender->handleStreamRestart(response);
+			}
+			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.
 			 admissionController.updateNeighborRatesCalculateMyNeighborhoodRate(response);
 			 } else if(!strcmp(control, "INIT")) {

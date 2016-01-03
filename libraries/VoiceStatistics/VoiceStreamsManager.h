@@ -33,6 +33,7 @@ class VoiceStreamStatManager {
 		const vector<VoiceStreamStats> & getStreams() const;
 		void setStreams(const vector<VoiceStreamStats>& streams);
 		void sendPathPacket();
+		void handleStreamRestart(const Rx64Response& response);
 
 };
 
