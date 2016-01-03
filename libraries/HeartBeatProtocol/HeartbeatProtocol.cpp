@@ -8,7 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define DEBUG true
+#define DEBUG false
 
 const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;

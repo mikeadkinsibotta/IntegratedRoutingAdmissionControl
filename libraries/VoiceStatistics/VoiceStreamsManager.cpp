@@ -125,9 +125,9 @@ void VoiceStreamStatManager::sendPathPacket() {
 		Tx64Request tx = Tx64Request(streams.at(i).getUpStreamNeighborAddress(), payload, sizeof(payload));
 		xbee.send(tx);
 
-		i++;
-
 		streams.at(i).calculateThroughput();
+
+		i++;
 
 	}
 }
