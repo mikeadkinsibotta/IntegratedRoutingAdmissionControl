@@ -26,11 +26,13 @@ Thread pathLoss = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 
+XBeeAddress64 myAddress;
+
 void setup() {
 	arduinoSetup();
 
 	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
-	XBeeAddress64 myAddress = getMyAddress();
+	xbee.getMyAddress(myAddress, DEBUG);
 	heartbeatProtocol = new HeartbeatProtocol(myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, myAddress, sinkAddress, 2, 0);
 	setupThreads();
@@ -89,52 +91,6 @@ void sendPathPacket() {
 void clearBuffer() {
 	while (Serial.available())
 		Serial.read();
-}
-
-const XBeeAddress64& getMyAddress() {
-	XBeeAddress64 address = XBeeAddress64();
-
-	uint8_t shCmd[] = { 'S', 'H' };
-
-	// serial low
-	uint8_t slCmd[] = { 'S', 'L' };
-
-	AtCommandRequest atCommandRequest = AtCommandRequest(shCmd);
-
-	xbee.send(atCommandRequest);
-	atCommandRequest.setCommand(slCmd);
-	xbee.send(atCommandRequest);
-	uint8_t notfound = 0;
-
-	while (notfound < 2) {
-		if (xbee.readPacket(1000, DEBUG)) {
-
-			// should be an AT command response
-			if (xbee.getResponse().getApiId() == AT_COMMAND_RESPONSE) {
-				AtCommandResponse atResponse = AtCommandResponse();
-				xbee.getResponse().getAtCommandResponse(atResponse);
-
-				if (atResponse.isOk()) {
-					if (!notfound) {
-						address.setMsb(
-								(atResponse.getValue()[0] << 24) + (atResponse.getValue()[1] << 16)
-										+ (atResponse.getValue()[2] << 8) + atResponse.getValue()[3]);
-						++notfound;
-					} else {
-						address.setLsb(
-								(atResponse.getValue()[0] << 24) + (atResponse.getValue()[1] << 16)
-										+ (atResponse.getValue()[2] << 8) + atResponse.getValue()[3]);
-						++notfound;
-					}
-				}
-			}
-		}
-	}
-
-	Serial.print("ThisAddress");
-	address.printAddress(&Serial);
-
-	return address;
 }
 
 void listenForResponses() {

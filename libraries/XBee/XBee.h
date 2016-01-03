@@ -547,6 +547,9 @@ class XBee {
 		 * Specify the serial port.  Only relevant for Arduinos that support multiple serial ports (e.g. Mega)
 		 */
 		void setSerial(Stream &serial);
+
+		void getMyAddress(XBeeAddress64& address, bool debug);
+
 	private:
 		bool available() const;
 		uint8_t read() const;

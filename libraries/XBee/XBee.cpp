@@ -113,8 +113,8 @@ void XBeeResponse::setCommon(XBeeResponse &target) const {
 	target.setSerial(*(getSerial()));
 }
 
-RxResponse::RxResponse()
-		: RxDataResponse() {
+RxResponse::RxResponse() :
+		RxDataResponse() {
 
 }
 
@@ -127,11 +127,11 @@ XBeeAddress64 Rx64Response::getRemoteAddress64() const {
 }
 
 void Rx64Response::setRemoteAddress64(const XBeeAddress64& remoteAddress) {
- _remoteAddress = remoteAddress;
+	_remoteAddress = remoteAddress;
 }
 
-Rx64Response::Rx64Response()
-		: RxResponse() {
+Rx64Response::Rx64Response() :
+		RxResponse() {
 	_remoteAddress = XBeeAddress64();
 }
 
@@ -139,8 +139,8 @@ Rx64Response::~Rx64Response() {
 
 }
 
-TxStatusResponse::TxStatusResponse()
-		: FrameIdResponse() {
+TxStatusResponse::TxStatusResponse() :
+		FrameIdResponse() {
 
 }
 
@@ -199,18 +199,19 @@ void XBeeResponse::getRx64Response(XBeeResponse &rx64Response) const {
 
 	XBeeAddress64 remoteAddress;
 
-	remoteAddress.setMsb((uint32_t(getFrameData()[0]) << 24) + (uint32_t(getFrameData()[1]) << 16)
-						+ (uint16_t(getFrameData()[2]) << 8) + getFrameData()[3]);
+	remoteAddress.setMsb(
+			(uint32_t(getFrameData()[0]) << 24) + (uint32_t(getFrameData()[1]) << 16)
+					+ (uint16_t(getFrameData()[2]) << 8) + getFrameData()[3]);
 	remoteAddress.setLsb(
-				(uint32_t(getFrameData()[4]) << 24) + (uint32_t(getFrameData()[5]) << 16)
-						+ (uint16_t(getFrameData()[6]) << 8) + getFrameData()[7]);
+			(uint32_t(getFrameData()[4]) << 24) + (uint32_t(getFrameData()[5]) << 16)
+					+ (uint16_t(getFrameData()[6]) << 8) + getFrameData()[7]);
 
 	rx64->setRemoteAddress64(remoteAddress);
 
 }
 
-RemoteAtCommandResponse::RemoteAtCommandResponse()
-		: AtCommandResponse() {
+RemoteAtCommandResponse::RemoteAtCommandResponse() :
+		AtCommandResponse() {
 
 }
 
@@ -232,7 +233,7 @@ uint8_t RemoteAtCommandResponse::getValueLength() const {
 }
 
 uint8_t* RemoteAtCommandResponse::getValue() const {
-	if(getValueLength() > 0) {
+	if (getValueLength() > 0) {
 		// value is only included for query commands.  set commands does not return a value
 		return getFrameData() + 14;
 	}
@@ -265,8 +266,8 @@ void XBeeResponse::getRemoteAtCommandResponse(XBeeResponse &response) const {
 
 }
 
-RxDataResponse::RxDataResponse()
-		: XBeeResponse() {
+RxDataResponse::RxDataResponse() :
+		XBeeResponse() {
 
 }
 
@@ -306,7 +307,7 @@ uint8_t AtCommandResponse::getValueLength() const {
 }
 
 uint8_t* AtCommandResponse::getValue() const {
-	if(getValueLength() > 0) {
+	if (getValueLength() > 0) {
 		// value is only included for query commands.  set commands does not return a value
 		return getFrameData() + 4;
 	}
@@ -363,8 +364,8 @@ void XBee::resetResponse() {
 	_response.reset();
 }
 
-XBee::XBee()
-		: _response(XBeeResponse()) {
+XBee::XBee() :
+		_response(XBeeResponse()) {
 	_pos = 0;
 	_escape = false;
 	_checksumTotal = 0;
@@ -384,7 +385,7 @@ uint8_t XBee::getNextFrameId() {
 
 	_nextFrameId++;
 
-	if(_nextFrameId == 0) {
+	if (_nextFrameId == 0) {
 		// can't send 0 because that disables status response
 		_nextFrameId = 1;
 	}
@@ -436,7 +437,7 @@ void XBee::getResponse(XBeeResponse &response) const {
 }
 
 void XBee::readPacketUntilAvailable() {
-	while(!(getResponse().isAvailable() || getResponse().isError())) {
+	while (!(getResponse().isAvailable() || getResponse().isError())) {
 		// read some more
 		readPacket(false);
 	}
@@ -444,19 +445,19 @@ void XBee::readPacketUntilAvailable() {
 
 bool XBee::readPacket(int timeout, bool debug) {
 
-	if(timeout < 0) {
+	if (timeout < 0) {
 		return false;
 	}
 
 	unsigned long start = millis();
 
-	while(int((millis() - start)) < timeout) {
+	while (int((millis() - start)) < timeout) {
 
 		readPacket(debug);
 
-		if(getResponse().isAvailable()) {
+		if (getResponse().isAvailable()) {
 			return true;
-		} else if(getResponse().isError()) {
+		} else if (getResponse().isError()) {
 			return false;
 		}
 	}
@@ -468,9 +469,9 @@ bool XBee::readPacket(int timeout, bool debug) {
 bool XBee::readPacketNoTimeout(bool debug) {
 	readPacket(debug);
 
-	if(getResponse().isAvailable()) {
+	if (getResponse().isAvailable()) {
 		return true;
-	} else if(getResponse().isError()) {
+	} else if (getResponse().isError()) {
 		Serial.print("Error ");
 		Serial.println(getResponse().getErrorCode());
 		return false;
@@ -480,28 +481,28 @@ bool XBee::readPacketNoTimeout(bool debug) {
 
 void XBee::readPacket(bool debug) {
 	// reset previous response
-	if(_response.isAvailable() || _response.isError()) {
+	if (_response.isAvailable() || _response.isError()) {
 		// discard previous packet and start over
 		resetResponse();
 	}
 
 	//_serial->print(available());
-	while(available()) {
+	while (available()) {
 
 		b = read();
-		if(debug)
+		if (debug)
 			_serial->print((char) b);
 
-		if(_pos > 0 && b == START_BYTE && ATAP == 2) {
+		if (_pos > 0 && b == START_BYTE && ATAP == 2) {
 			// new packet start before previous packeted completed -- discard previous packet and start over
 			_response.setErrorCode(UNEXPECTED_START_BYTE);
 			return;
 		}
 
-		if(_pos > 0 && b == ESCAPE) {
-			if(available()) {
+		if (_pos > 0 && b == ESCAPE) {
+			if (available()) {
 				b = read();
-				if(debug)
+				if (debug)
 					_serial->print((char) b);
 
 				b = 0x20 ^ b;
@@ -512,19 +513,19 @@ void XBee::readPacket(bool debug) {
 			}
 		}
 
-		if(_escape == true) {
+		if (_escape == true) {
 			b = 0x20 ^ b;
 			_escape = false;
 		}
 
 		// checksum includes all bytes starting with api id
-		if(_pos >= API_ID_INDEX) {
+		if (_pos >= API_ID_INDEX) {
 			_checksumTotal += b;
 		}
 
-		switch(_pos) {
+		switch (_pos) {
 			case 0:
-				if(b == START_BYTE) {
+				if (b == START_BYTE) {
 					_pos++;
 				}
 
@@ -549,7 +550,7 @@ void XBee::readPacket(bool debug) {
 			default:
 				// starts at fifth byte
 				//Serial.println(_pos);
-				if(_pos > MAX_FRAME_DATA_SIZE) {
+				if (_pos > MAX_FRAME_DATA_SIZE) {
 					// exceed max size.  should never occur
 					_response.setErrorCode(PACKET_EXCEEDS_BYTE_ARRAY_LENGTH);
 					return;
@@ -557,12 +558,12 @@ void XBee::readPacket(bool debug) {
 
 				// check if we're at the end of the packet
 				// packet length does not include start, length, or checksum bytes, so add 3
-				if(_pos == (_response.getPacketLength() + 3)) {
+				if (_pos == (_response.getPacketLength() + 3)) {
 					// verify checksum
 
 					//std::cout << "read checksum " << static_cast<unsigned int>(b) << " at pos " << static_cast<unsigned int>(_pos) << std::endl;
 
-					if((_checksumTotal & 0xff) == 0xff) {
+					if ((_checksumTotal & 0xff) == 0xff) {
 						_response.setChecksum(b);
 						_response.setAvailable(true);
 
@@ -629,8 +630,8 @@ void XBeeRequest::setApiId(const uint8_t apiId) {
 //}
 
 PayloadRequest::PayloadRequest(const uint8_t apiId, const uint8_t frameId, uint8_t *payload,
-		const uint8_t payloadLength)
-		: XBeeRequest(apiId, frameId) {
+		const uint8_t payloadLength) :
+		XBeeRequest(apiId, frameId) {
 	_payloadPtr = payload;
 	_payloadLength = payloadLength;
 }
@@ -658,13 +659,13 @@ XBeeAddress::XBeeAddress() {
 
 }
 
-XBeeAddress64::XBeeAddress64()
-		: XBeeAddress() {
+XBeeAddress64::XBeeAddress64() :
+		XBeeAddress() {
 
 }
 
-XBeeAddress64::XBeeAddress64(const uint32_t msb, const uint32_t lsb)
-		: XBeeAddress() {
+XBeeAddress64::XBeeAddress64(const uint32_t msb, const uint32_t lsb) :
+		XBeeAddress() {
 	_msb = msb;
 	_lsb = lsb;
 }
@@ -686,7 +687,7 @@ void XBeeAddress64::setLsb(const uint32_t lsb) {
 }
 
 bool XBeeAddress64::equals(const XBeeAddress64& x) const {
-	if(_lsb == x._lsb && _msb == x._msb)
+	if (_lsb == x._lsb && _msb == x._msb)
 		return true;
 	return false;
 
@@ -720,8 +721,8 @@ void XBeeAddress64::printAddressASCII(Stream* _serial) const {
 	_serial->print((_lsb & 0xff), HEX);
 }
 
-Tx64Request::Tx64Request()
-		: PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, NULL, 0) {
+Tx64Request::Tx64Request() :
+		PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, NULL, 0) {
 
 }
 
@@ -730,37 +731,37 @@ Tx64Request::~Tx64Request() {
 }
 
 Tx64Request::Tx64Request(const XBeeAddress64 &addr64, const uint8_t option, uint8_t *data, const uint8_t dataLength,
-		const uint8_t frameId)
-		: PayloadRequest(TX_64_REQUEST, frameId, data, dataLength) {
+		const uint8_t frameId) :
+		PayloadRequest(TX_64_REQUEST, frameId, data, dataLength) {
 	_addr64 = addr64;
 	_option = option;
 }
 
-Tx64Request::Tx64Request(const XBeeAddress64 &addr64, uint8_t *data, const uint8_t dataLength)
-		: PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, data, dataLength) {
+Tx64Request::Tx64Request(const XBeeAddress64 &addr64, uint8_t *data, const uint8_t dataLength) :
+		PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, data, dataLength) {
 	_addr64 = addr64;
 	_option = ACK_OPTION;
 }
 
 uint8_t Tx64Request::getFrameData(const uint8_t pos) const {
 
-	if(pos == 0) {
+	if (pos == 0) {
 		return (_addr64.getMsb() >> 24) & 0xff;
-	} else if(pos == 1) {
+	} else if (pos == 1) {
 		return (_addr64.getMsb() >> 16) & 0xff;
-	} else if(pos == 2) {
+	} else if (pos == 2) {
 		return (_addr64.getMsb() >> 8) & 0xff;
-	} else if(pos == 3) {
+	} else if (pos == 3) {
 		return _addr64.getMsb() & 0xff;
-	} else if(pos == 4) {
+	} else if (pos == 4) {
 		return (_addr64.getLsb() >> 24) & 0xff;
-	} else if(pos == 5) {
+	} else if (pos == 5) {
 		return (_addr64.getLsb() >> 16) & 0xff;
-	} else if(pos == 6) {
+	} else if (pos == 6) {
 		return (_addr64.getLsb() >> 8) & 0xff;
-	} else if(pos == 7) {
+	} else if (pos == 7) {
 		return _addr64.getLsb() & 0xff;
-	} else if(pos == 8) {
+	} else if (pos == 8) {
 		return _option;
 	} else {
 		return getPayload()[pos - TX_64_API_LENGTH];
@@ -787,21 +788,21 @@ void Tx64Request::setOption(const uint8_t option) {
 	_option = option;
 }
 
-AtCommandRequest::AtCommandRequest()
-		: XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
+AtCommandRequest::AtCommandRequest() :
+		XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
 	_command = NULL;
 	clearCommandValue();
 }
 
-AtCommandRequest::AtCommandRequest(uint8_t *command, uint8_t *commandValue, uint8_t commandValueLength)
-		: XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
+AtCommandRequest::AtCommandRequest(uint8_t *command, uint8_t *commandValue, uint8_t commandValueLength) :
+		XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
 	_command = command;
 	_commandValue = commandValue;
 	_commandValueLength = commandValueLength;
 }
 
-AtCommandRequest::AtCommandRequest(uint8_t *command)
-		: XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
+AtCommandRequest::AtCommandRequest(uint8_t *command) :
+		XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
 	_command = command;
 	clearCommandValue();
 }
@@ -836,9 +837,9 @@ void AtCommandRequest::setCommandValueLength(const uint8_t length) {
 
 uint8_t AtCommandRequest::getFrameData(const uint8_t pos) const {
 
-	if(pos == 0) {
+	if (pos == 0) {
 		return _command[0];
-	} else if(pos == 1) {
+	} else if (pos == 1) {
 		return _command[1];
 	} else {
 		return _commandValue[pos - AT_COMMAND_API_LENGTH];
@@ -861,24 +862,24 @@ uint8_t AtCommandRequest::getFrameDataLength() const {
 
 XBeeAddress64 RemoteAtCommandRequest::broadcastAddress64 = XBeeAddress64(0x0, BROADCAST_ADDRESS);
 
-RemoteAtCommandRequest::RemoteAtCommandRequest()
-		: AtCommandRequest(NULL, NULL, 0) {
+RemoteAtCommandRequest::RemoteAtCommandRequest() :
+		AtCommandRequest(NULL, NULL, 0) {
 	_remoteAddress16 = 0;
 	_applyChanges = false;
 	setApiId (REMOTE_AT_REQUEST);
 }
 
 RemoteAtCommandRequest::RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t *command, uint8_t *commandValue,
-		uint8_t commandValueLength)
-		: AtCommandRequest(command, commandValue, commandValueLength) {
+		uint8_t commandValueLength) :
+		AtCommandRequest(command, commandValue, commandValueLength) {
 	_remoteAddress64 = broadcastAddress64;
 	_remoteAddress16 = remoteAddress16;
 	_applyChanges = true;
 	setApiId (REMOTE_AT_REQUEST);
 }
 
-RemoteAtCommandRequest::RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t *command)
-		: AtCommandRequest(command, NULL, 0) {
+RemoteAtCommandRequest::RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t *command) :
+		AtCommandRequest(command, NULL, 0) {
 	_remoteAddress64 = broadcastAddress64;
 	_remoteAddress16 = remoteAddress16;
 	_applyChanges = false;
@@ -886,8 +887,8 @@ RemoteAtCommandRequest::RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t
 }
 
 RemoteAtCommandRequest::RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, uint8_t *command, uint8_t *commandValue,
-		uint8_t commandValueLength)
-		: AtCommandRequest(command, commandValue, commandValueLength) {
+		uint8_t commandValueLength) :
+		AtCommandRequest(command, commandValue, commandValueLength) {
 	_remoteAddress64 = remoteAddress64;
 	// don't worry.. works for series 1 too!
 	_remoteAddress16 = ZB_BROADCAST_ADDRESS;
@@ -895,8 +896,8 @@ RemoteAtCommandRequest::RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, u
 	setApiId (REMOTE_AT_REQUEST);
 }
 
-RemoteAtCommandRequest::RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, uint8_t *command)
-		: AtCommandRequest(command, NULL, 0) {
+RemoteAtCommandRequest::RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, uint8_t *command) :
+		AtCommandRequest(command, NULL, 0) {
 	_remoteAddress64 = remoteAddress64;
 	_remoteAddress16 = ZB_BROADCAST_ADDRESS;
 	_applyChanges = false;
@@ -928,31 +929,31 @@ void RemoteAtCommandRequest::setApplyChanges(const bool applyChanges) {
 }
 
 uint8_t RemoteAtCommandRequest::getFrameData(const uint8_t pos) const {
-	if(pos == 0) {
+	if (pos == 0) {
 		return (_remoteAddress64.getMsb() >> 24) & 0xff;
-	} else if(pos == 1) {
+	} else if (pos == 1) {
 		return (_remoteAddress64.getMsb() >> 16) & 0xff;
-	} else if(pos == 2) {
+	} else if (pos == 2) {
 		return (_remoteAddress64.getMsb() >> 8) & 0xff;
-	} else if(pos == 3) {
+	} else if (pos == 3) {
 		return _remoteAddress64.getMsb() & 0xff;
-	} else if(pos == 4) {
+	} else if (pos == 4) {
 		return (_remoteAddress64.getLsb() >> 24) & 0xff;
-	} else if(pos == 5) {
+	} else if (pos == 5) {
 		return (_remoteAddress64.getLsb() >> 16) & 0xff;
-	} else if(pos == 6) {
+	} else if (pos == 6) {
 		return (_remoteAddress64.getLsb() >> 8) & 0xff;
-	} else if(pos == 7) {
+	} else if (pos == 7) {
 		return _remoteAddress64.getLsb() & 0xff;
-	} else if(pos == 8) {
+	} else if (pos == 8) {
 		return (_remoteAddress16 >> 8) & 0xff;
-	} else if(pos == 9) {
+	} else if (pos == 9) {
 		return _remoteAddress16 & 0xff;
-	} else if(pos == 10) {
+	} else if (pos == 10) {
 		return _applyChanges ? 2 : 0;
-	} else if(pos == 11) {
+	} else if (pos == 11) {
 		return getCommand()[0];
-	} else if(pos == 12) {
+	} else if (pos == 12) {
 		return getCommand()[1];
 	} else {
 		return getCommandValue()[pos - REMOTE_AT_COMMAND_API_LENGTH];
@@ -984,7 +985,7 @@ void XBee::packageSend(const XBeeRequest &request) {
 	checksum += request.getApiId();
 	checksum += request.getFrameId();
 
-	for(int i = 0; i < request.getFrameDataLength(); i++) {
+	for (int i = 0; i < request.getFrameDataLength(); i++) {
 		packageByte(buffer, request.getFrameData(i), true, index);
 		checksum += request.getFrameData(i);
 	}
@@ -1025,7 +1026,7 @@ void XBee::send(const XBeeRequest &request) {
 
 	//std::cout << "frame length is " << static_cast<unsigned int>(request.getFrameDataLength()) << std::endl;
 
-	for(int i = 0; i < request.getFrameDataLength(); i++) {
+	for (int i = 0; i < request.getFrameDataLength(); i++) {
 //		std::cout << "sending byte [" << static_cast<unsigned int>(i) << "] " << std::endl;
 		sendByte(request.getFrameData(i), true);
 		checksum += request.getFrameData(i);
@@ -1045,7 +1046,7 @@ void XBee::send(const XBeeRequest &request) {
 
 void XBee::sendByte(const uint8_t b, const bool escape) {
 
-	if(escape && (b == START_BYTE || b == ESCAPE || b == XON || b == XOFF)) {
+	if (escape && (b == START_BYTE || b == ESCAPE || b == XON || b == XOFF)) {
 //		std::cout << "escaping byte [" << toHexString(b) << "] " << std::endl;
 		write (ESCAPE);
 		write(b ^ 0x20);
@@ -1056,7 +1057,7 @@ void XBee::sendByte(const uint8_t b, const bool escape) {
 
 void XBee::packageByte(uint8_t buffer[], const uint8_t b, const bool escape, uint8_t &index) {
 
-	if(escape && (b == START_BYTE || b == ESCAPE || b == XON || b == XOFF)) {
+	if (escape && (b == START_BYTE || b == ESCAPE || b == XON || b == XOFF)) {
 //		std::cout << "escaping byte [" << toHexString(b) << "] " << std::endl;
 		buffer[index] = ESCAPE;
 		index++;
@@ -1067,3 +1068,45 @@ void XBee::packageByte(uint8_t buffer[], const uint8_t b, const bool escape, uin
 	index++;
 }
 
+void XBee::getMyAddress(XBeeAddress64& address, bool debug) {
+
+	uint8_t shCmd[] = { 'S', 'H' };
+
+	// serial low
+	uint8_t slCmd[] = { 'S', 'L' };
+
+	AtCommandRequest atCommandRequest = AtCommandRequest(shCmd);
+
+	send(atCommandRequest);
+	atCommandRequest.setCommand(slCmd);
+	send(atCommandRequest);
+	uint8_t notfound = 0;
+
+	while (notfound < 2) {
+		if (readPacket(1000, debug)) {
+
+			// should be an AT command response
+			if (getResponse().getApiId() == AT_COMMAND_RESPONSE) {
+				AtCommandResponse atResponse = AtCommandResponse();
+				getResponse().getAtCommandResponse(atResponse);
+
+				if (atResponse.isOk()) {
+					if (!notfound) {
+						address.setMsb(
+								(atResponse.getValue()[0] << 24) + (atResponse.getValue()[1] << 16)
+										+ (atResponse.getValue()[2] << 8) + atResponse.getValue()[3]);
+						++notfound;
+					} else {
+						address.setLsb(
+								(atResponse.getValue()[0] << 24) + (atResponse.getValue()[1] << 16)
+										+ (atResponse.getValue()[2] << 8) + atResponse.getValue()[3]);
+						++notfound;
+					}
+				}
+			}
+		}
+	}
+
+	Serial.print("ThisAddress");
+	address.printAddress(&Serial);
+}

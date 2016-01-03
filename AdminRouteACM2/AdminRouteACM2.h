@@ -20,7 +20,6 @@ void sendVoicePacket();
 void sendPathPacket();
 void arduinoSetup();
 void clearBuffer();
-const XBeeAddress64& getMyAddress();
 void setupThreads();
 
 //Do not add code below this line
