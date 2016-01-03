@@ -126,6 +126,9 @@ void VoiceStreamStatManager::sendPathPacket() {
 		xbee.send(tx);
 
 		i++;
+
+		streams.at(i).calculateThroughput();
+
 	}
 }
 

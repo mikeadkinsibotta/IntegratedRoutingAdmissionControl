@@ -60,7 +60,7 @@ void VoiceStreamStats::calculateThroughput() {
 	double inKb = totaldata / 1000.0;
 	throughput = inKb / timeDiff;
 
-	SerialUSB.print("Sender: ");
+	SerialUSB.print("Source Address: ");
 	senderAddress.printAddressASCII(&SerialUSB);
 
 	SerialUSB.print(" Time Point ");
@@ -112,7 +112,9 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 		double packetLRatio = ((double) lostPackets / totalPacketsSent) * 100.0;
 
-		SerialUSB.print("Packet Loss: ");
+		SerialUSB.print("Source Address: ");
+		senderAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print(" Packet Loss: ");
 		SerialUSB.println(packetLRatio);
 
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
