@@ -17,3 +17,10 @@ Timer& PotentialStream::getGrantTimer() {
 	return grantTimer;
 }
 
+const XBeeAddress64& PotentialStream::getSourceAddress() const {
+	return sourceAddress;
+}
+
+const XBeeAddress64& PotentialStream::getUpStreamNeighbor() const {
+	return upStreamNeighbor;
+}

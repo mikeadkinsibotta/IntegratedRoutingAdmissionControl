@@ -22,10 +22,8 @@ class PotentialStream {
 		PotentialStream(XBeeAddress64 sourceAddress, XBeeAddress64 upStreamNeighbor, unsigned long grantTimeoutLength);
 
 		Timer& getGrantTimer();
-
 		const XBeeAddress64& getSourceAddress() const;
 		const XBeeAddress64& getUpStreamNeighbor() const;
-
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_POTENTIALSTREAM_H_ */

@@ -54,18 +54,9 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 
 void VoicePacketSender::generateVoicePacket() {
 
-	//bool hasNextHop = heartbeatProtocol->isRouteFlag();
-
-	//if (hasNextHop) {
-
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 	heartbeatProtocol->setDataRate(injectionRate);
-
-	if (myNextHop.equals(XBeeAddress64())) {
-		SerialUSB.println("Has Route to Sink");
-		myNextHop = heartbeatProtocol->getNextHopAddress();
-		//sendStreamRestart (senderAddress);
-	}
+	myNextHop = heartbeatProtocol->getNextHopAddress();
 
 	uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
 	uint8_t code = 0;
@@ -270,57 +261,6 @@ void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 	codecSetting = newSetting.getCompressionSetting();
 
 }
-
-/*void VoicePacketSender::requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
- const float injectionRate) {
-
- XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
-
- uint8_t * injectionRateP = (uint8_t *) &injectionRate;
-
- uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
- (senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
- (senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
- & 0xff, senderAddress.getLsb() & 0xff, myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16,
- myNextHop.getMsb() >> 8, myNextHop.getMsb(), myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16,
- myNextHop.getLsb() >> 8, myNextHop.getLsb(), injectionRateP[0], injectionRateP[1], injectionRateP[2],
- injectionRateP[3] };
- Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
- // send the command
- xbee.send(tx);
-
- }
-
- void VoicePacketSender::handleInitPacket(const Rx64Response &response) {
- Serial.print("ReceivedInitPacket");
-
- XBeeAddress64 senderAddress;
- XBeeAddress64 nextHop;
- uint8_t* dataPtr = response.getData();
- senderAddress.setMsb(
- (uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
-
- senderAddress.setLsb(
- (uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
-
- nextHop.setMsb(
- (uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
-
- nextHop.setLsb(
- (uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
-
- float * dataRateP = (float*) (dataPtr + 21);
- float dataRate = *dataRateP;
-
- if (nextHop.equals(senderAddress)) {
- Serial.print("RebroadcastInit");
- requestToStream(senderAddress, nextHop, dataRate);
- }
- }*/
-
-/*void VoicePacketSender::sendPathPacket() {
- voiceStreamStatManager.sendPathPacket();
- }*/
 
 const XBeeAddress64& VoicePacketSender::getMyNextHop() const {
 	return myNextHop;

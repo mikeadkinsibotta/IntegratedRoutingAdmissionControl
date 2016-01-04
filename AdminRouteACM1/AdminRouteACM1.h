@@ -18,6 +18,7 @@
 //add your function definitions for the project AdminRoute1 here
 void broadcastHeartbeat();
 void sendVoicePacket();
+void sendInitPacket();
 void sendPathPacket();
 void arduinoSetup();
 void clearBuffer();

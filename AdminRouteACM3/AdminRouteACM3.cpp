@@ -4,7 +4,8 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 8000
+#define VOICE_DATA_INTERVAL 3000
+#define REQUEST_STREAM 8000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -27,9 +28,10 @@ VoiceStreamStatManager * voiceStreamStatManager;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
-Thread sendData = Thread();
+Thread sendInital = Thread();
 Thread responseThread = Thread();
 Thread pathLoss = Thread();
+Thread generateVoice = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
@@ -75,8 +77,12 @@ void arduinoSetup() {
 
 }
 
-void sendVoicePacket() {
+void sendInitPacket() {
 	admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
+}
+
+void sendVoicePacket() {
+	voicePacketSender->generateVoicePacket();
 }
 
 void broadcastHeartbeat() {
@@ -151,17 +157,23 @@ void setupThreads() {
 	pathLoss.setInterval(3000 + random(100));
 	pathLoss.onRun(sendPathPacket);
 
-	sendData.ThreadName = "Send Voice Data";
+	generateVoice.ThreadName = "Send Voice Data";
+	generateVoice.enabled = false;
+	generateVoice.setInterval(VOICE_DATA_INTERVAL);
+	generateVoice.onRun(sendPathPacket);
+
+	sendInital.ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendData.enabled = false;
+		sendInital.enabled = true;
 	} else {
-		sendData.enabled = false;
+		sendInital.enabled = false;
 	}
-	sendData.setInterval(VOICE_DATA_INTERVAL);
-	sendData.onRun(sendVoicePacket);
+	sendInital.setInterval(REQUEST_STREAM);
+	sendInital.onRun(sendVoicePacket);
 
 	controller.add(&heartbeat);
 	controller.add(&responseThread);
-	controller.add(&sendData);
+	controller.add(&sendInital);
 	controller.add(&pathLoss);
+	controller.add(&generateVoice);
 }
