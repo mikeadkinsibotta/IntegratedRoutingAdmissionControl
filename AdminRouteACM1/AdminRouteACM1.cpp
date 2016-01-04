@@ -118,6 +118,8 @@ void listenForResponses() {
 				voicePacketSender->handlePathPacket(response);
 			} else if (!strcmp(control, "RSTR")) {
 				voicePacketSender->handleStreamRestart(response);
+			} else if (!strcmp(control, "INIT")) {
+				voicePacketSender->handleInitPacket(response);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.

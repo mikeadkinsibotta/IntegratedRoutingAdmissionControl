@@ -25,7 +25,7 @@ class VoicePacketSender {
 		ADPCM admcpm;
 		XBee xbee;
 		HeartbeatProtocol * heartbeatProtocol;
-		XBeeAddress64 myAddress;
+		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
 		VoiceStreamStatManager voiceStreamStatManager;
@@ -58,7 +58,8 @@ class VoicePacketSender {
 		void handlePathPacket(const Rx64Response &response);
 		void sendStreamRestart(const XBeeAddress64& packetSource);
 		void handleStreamRestart(const Rx64Response &response);
-		void requestToStream();
+		void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
+				const float injectionRate);
 		void handleInitPacket(const Rx64Response &response);
 };
 
