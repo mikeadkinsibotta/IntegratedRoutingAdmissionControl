@@ -17,6 +17,7 @@
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
+AdmissionControl * admissionControl;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -34,6 +35,7 @@ void setup() {
 	xbee.getMyAddress(myAddress, DEBUG);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, myAddress, sinkAddress, 2, 0);
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -77,6 +79,16 @@ void sendPathPacket() {
 	voicePacketSender->sendPathPacket();
 }
 
+void fireInitalizationTimer() {
+	admissionControl->intializationSenderTimeout();
+
+	if (SENDER) {
+		sendData.enabled = true;
+	} else {
+		sendData.enabled = false;
+	}
+}
+
 void clearBuffer() {
 	while (Serial.available())
 		Serial.read();
@@ -109,7 +121,7 @@ void listenForResponses() {
 			} else if (!strcmp(control, "RSTR")) {
 				voicePacketSender->handleStreamRestart(response);
 			} else if (!strcmp(control, "INIT")) {
-				voicePacketSender->handleInitPacket(response);
+				//voicePacketSender->handleInitPacket(response);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.

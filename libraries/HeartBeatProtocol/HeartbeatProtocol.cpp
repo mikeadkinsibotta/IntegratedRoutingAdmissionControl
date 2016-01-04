@@ -17,11 +17,7 @@ const uint8_t PAYLOAD_SIZE = 32;
 
 HeartbeatProtocol::HeartbeatProtocol() {
 	seqNum = 0;
-	myAddress = XBeeAddress64();
 	routeFlag = false;
-	sinkAddress = XBeeAddress64();
-	nextHopAddress = XBeeAddress64();
-	broadcastAddress = XBeeAddress64();
 	qualityOfPath = 0;
 	dataRate = 0;
 	neighborhoodCapacity = 0;
@@ -34,7 +30,6 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAdress;
 	this->routeFlag = false;
-	this->nextHopAddress = XBeeAddress64();
 	this->broadcastAddress = broadcastAddress;
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
