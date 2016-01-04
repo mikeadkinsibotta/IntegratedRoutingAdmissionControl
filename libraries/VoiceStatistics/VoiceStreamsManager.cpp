@@ -38,7 +38,7 @@ void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSourc
 
 	if (!found) {
 		//SerialUSB.println("New Stream");
-		VoiceStreamStats stream = VoiceStreamStats(packetSource, 76);
+		VoiceStreamStats stream = VoiceStreamStats(packetSource, payloadSize);
 		stream.startStream();
 		stream.calculateThroughput();
 		streams.push_back(stream);

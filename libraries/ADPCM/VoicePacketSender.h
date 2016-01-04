@@ -33,9 +33,9 @@ class VoicePacketSender {
 		Compression compressionTable;
 		Thread * pathLoss;
 		float injectionRate;
-
+		uint8_t payloadSize;
 		uint8_t frameId;
-		uint8_t payloadSize = 0;
+
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 		void updateDataRate(const uint8_t dataLoss);

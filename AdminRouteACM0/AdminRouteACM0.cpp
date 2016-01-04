@@ -15,6 +15,9 @@
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B31805
 
+const float INITAL_DUPLICATION_SETTING = 0.0;
+const uint8_t CODEC_SETTTING = 2;
+
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
@@ -38,10 +41,10 @@ void setup() {
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
-			sinkAddress, 2, 0, PAYLOAD_SIZE);
+			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol);
 	setupThreads();
-
+	
 	digitalWrite(13, LOW);
 }
 
@@ -72,7 +75,7 @@ void arduinoSetup() {
 }
 
 void sendVoicePacket() {
-	voicePacketSender->generateVoicePacket();
+	admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
 }
 
 void broadcastHeartbeat() {
@@ -115,19 +118,17 @@ void listenForResponses() {
 			} else if (!strcmp(control, "RSTR")) {
 				//voicePacketSender->handleStreamRestart(response);
 			} else if (!strcmp(control, "INIT")) {
-				voicePacketSender->handleStreamRestart(response);
-				//voicePacketSender->handleInitPacket(response);
+				admissionControl->handleInitPacket(response);
+			} else if (!strcmp(control, "REDJ")) {
+				admissionControl->handleREDJPacket(response);
+			} else if (!strcmp(control, "GRNT")) {
+				admissionControl->handleGRANTPacket(response);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.
 			 admissionController.updateNeighborRatesCalculateMyNeighborhoodRate(response);
 			 } else if(!strcmp(control, "INIT")) {
-			 handleInitPacket(response);
-			 } else if(!strcmp(control, "REDJ")) {
-			 handleREDJPacket(response);
-			 } else if(!strcmp(control, "GRNT")) {
-			 handleGRANTPacket(response);
-			 }*/
+			 handleInitPacket(response);*/
 		}
 	}
 }
@@ -151,7 +152,7 @@ void setupThreads() {
 
 	sendData.ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendData.enabled = true;
+		sendData.enabled = false;
 	} else {
 		sendData.enabled = false;
 	}

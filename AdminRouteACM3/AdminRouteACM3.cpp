@@ -11,13 +11,18 @@
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define IGNORE_HEARTBEAT false
+#define PAYLOAD_SIZE 76
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B31805
+
+const float INITAL_DUPLICATION_SETTING = 0.0;
+const uint8_t CODEC_SETTTING = 2;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
 AdmissionControl * admissionControl;
+VoiceStreamStatManager * voiceStreamStatManager;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -33,11 +38,13 @@ void setup() {
 	arduinoSetup();
 
 	xbee.getMyAddress(myAddress, DEBUG);
+	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
-	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, myAddress, sinkAddress, 2, 0);
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
+			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol);
 	setupThreads();
-
+	
 	digitalWrite(13, LOW);
 }
 
@@ -68,7 +75,7 @@ void arduinoSetup() {
 }
 
 void sendVoicePacket() {
-	voicePacketSender->generateVoicePacket();
+	admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
 }
 
 void broadcastHeartbeat() {
@@ -76,17 +83,7 @@ void broadcastHeartbeat() {
 }
 
 void sendPathPacket() {
-	voicePacketSender->sendPathPacket();
-}
-
-void fireInitalizationTimer() {
-	admissionControl->intializationSenderTimeout();
-
-	if (SENDER) {
-		sendData.enabled = true;
-	} else {
-		sendData.enabled = false;
-	}
+	voiceStreamStatManager->sendPathPacket();
 }
 
 void clearBuffer() {
@@ -95,7 +92,7 @@ void clearBuffer() {
 }
 
 void listenForResponses() {
-	//checkTimers();
+	admissionControl->checkTimers();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
@@ -119,20 +116,19 @@ void listenForResponses() {
 				//path loss packet
 				voicePacketSender->handlePathPacket(response);
 			} else if (!strcmp(control, "RSTR")) {
-				voicePacketSender->handleStreamRestart(response);
+				//voicePacketSender->handleStreamRestart(response);
 			} else if (!strcmp(control, "INIT")) {
-				//voicePacketSender->handleInitPacket(response);
+				admissionControl->handleInitPacket(response);
+			} else if (!strcmp(control, "REDJ")) {
+				admissionControl->handleREDJPacket(response);
+			} else if (!strcmp(control, "GRNT")) {
+				admissionControl->handleGRANTPacket(response);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.
 			 admissionController.updateNeighborRatesCalculateMyNeighborhoodRate(response);
 			 } else if(!strcmp(control, "INIT")) {
-			 handleInitPacket(response);
-			 } else if(!strcmp(control, "REDJ")) {
-			 handleREDJPacket(response);
-			 } else if(!strcmp(control, "GRNT")) {
-			 handleGRANTPacket(response);
-			 }*/
+			 handleInitPacket(response);*/
 		}
 	}
 }
@@ -156,7 +152,7 @@ void setupThreads() {
 
 	sendData.ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendData.enabled = true;
+		sendData.enabled = false;
 	} else {
 		sendData.enabled = false;
 	}

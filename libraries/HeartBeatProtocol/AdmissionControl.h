@@ -29,9 +29,7 @@ class AdmissionControl {
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
 				HeartbeatProtocol * heartbeatProtocol);
 
-		void sendInitPacket(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
-				const float injectionRate);
-
+		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		void intializationSenderTimeout();
 		void sendGRANTPacket(const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop);
 		void sendREDJPacket(const XBeeAddress64 &senderAddress);

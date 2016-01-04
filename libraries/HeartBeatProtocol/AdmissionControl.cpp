@@ -36,24 +36,26 @@ void AdmissionControl::checkTimers() {
 
 }
 
-void AdmissionControl::sendInitPacket(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
-		const float injectionRate) {
+void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 
-	XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
+	bool hasNextHop = heartbeatProtocol->isRouteFlag();
+	if (hasNextHop) {
 
-	uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
+		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
+		uint8_t injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
+		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
 
-	uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
-					& 0xff, senderAddress.getLsb() & 0xff, myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16,
-			myNextHop.getMsb() >> 8, myNextHop.getMsb(), myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16,
-			myNextHop.getLsb() >> 8, myNextHop.getLsb(), injectionRateP[0], injectionRateP[1], injectionRateP[2],
-			injectionRateP[3] };
-	Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
-// send the command
-	xbee.send(tx);
-
+		uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+				myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16, myNextHop.getMsb() >> 8, myNextHop.getMsb(),
+				myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16, myNextHop.getLsb() >> 8, myNextHop.getLsb(),
+				injectionRateP[0], injectionRateP[1], injectionRateP[2], injectionRateP[3] };
+		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+		// send the command
+		xbee.send(tx);
+	}
 }
 
 void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
@@ -176,9 +178,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response) {
 
 	} else {
 		//TODO Send Data
-
 	}
-
 }
 
 void AdmissionControl::intializationSenderTimeout() {
