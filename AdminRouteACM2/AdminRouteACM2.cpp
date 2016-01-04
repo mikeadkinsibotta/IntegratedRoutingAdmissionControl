@@ -25,15 +25,14 @@ Thread responseThread = Thread();
 Thread pathLoss = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
-
+XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
 void setup() {
 	arduinoSetup();
 
-	XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 	xbee.getMyAddress(myAddress, DEBUG);
-	heartbeatProtocol = new HeartbeatProtocol(myAddress, sinkAddress, xbee);
+	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, myAddress, sinkAddress, 2, 0);
 	setupThreads();
 
@@ -71,7 +70,7 @@ void sendVoicePacket() {
 }
 
 void broadcastHeartbeat() {
-	heartbeatProtocol->broadcastHeartBeat(heartBeatAddress);
+	heartbeatProtocol->broadcastHeartBeat();
 
 	/*if (heartbeatProtocol.isRouteFlag()) {
 	 voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());

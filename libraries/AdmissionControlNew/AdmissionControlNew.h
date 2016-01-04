@@ -30,7 +30,7 @@ class AdmissionController {
 
 		vector<Neighbor> neighborhood;
 		std::map<XBeeAddress64, Neighbor> flowList;
-		Saturation satT[4];
+
 		float contentionDomainRate = 0;
 		float injectionRate = 0;
 		float totalInjectionRate = 0;

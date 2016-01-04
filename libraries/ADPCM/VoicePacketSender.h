@@ -58,6 +58,8 @@ class VoicePacketSender {
 		void handlePathPacket(const Rx64Response &response);
 		void sendStreamRestart(const XBeeAddress64& packetSource);
 		void handleStreamRestart(const Rx64Response &response);
+		void requestToStream();
+		void handleInitPacket(const Rx64Response &response);
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */

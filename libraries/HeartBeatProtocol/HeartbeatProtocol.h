@@ -26,6 +26,7 @@ class HeartbeatProtocol {
 		float seqNum;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
+		XBeeAddress64 broadcastAddress;
 		bool routeFlag;
 		XBeeAddress64 nextHopAddress;
 		uint8_t qualityOfPath;
@@ -36,17 +37,22 @@ class HeartbeatProtocol {
 		void reCalculateNeighborhoodCapacity();
 	public:
 		HeartbeatProtocol();
-		HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee);
-		void broadcastHeartBeat(const XBeeAddress64& heartbeatAddress);
+		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
+				const XBeeAddress64& sinkAdress, XBee& xbee);
+		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
 
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();
+		float requestToStream(XBee &xbee, const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop,
+				const float injectionRate);
 		bool isRouteFlag() const;
 		const XBeeAddress64& getNextHopAddress() const;
 		float getDataRate() const;
 		void setDataRate(float dataRate);
+		const XBeeAddress64& getBroadcastAddress() const;
+		void setBroadcastAddress(const XBeeAddress64& broadcastAddress);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

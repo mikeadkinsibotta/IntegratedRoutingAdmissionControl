@@ -16,23 +16,26 @@ const double N_P = -1.095;
 const uint8_t PAYLOAD_SIZE = 32;
 
 HeartbeatProtocol::HeartbeatProtocol() {
-	this->seqNum = 0;
-	this->myAddress = XBeeAddress64();
-	this->routeFlag = false;
-	this->sinkAddress = XBeeAddress64();
-	this->nextHopAddress = XBeeAddress64();
-	this->qualityOfPath = 0;
-	this->dataRate = 0;
-	this->neighborhoodCapacity = 0;
+	seqNum = 0;
+	myAddress = XBeeAddress64();
+	routeFlag = false;
+	sinkAddress = XBeeAddress64();
+	nextHopAddress = XBeeAddress64();
+	broadcastAddress = XBeeAddress64();
+	qualityOfPath = 0;
+	dataRate = 0;
+	neighborhoodCapacity = 0;
 }
 
-HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee) {
+HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
+		const XBeeAddress64& sinkAdress, XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAdress;
 	this->routeFlag = false;
 	this->nextHopAddress = XBeeAddress64();
+	this->broadcastAddress = broadcastAddress;
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = 0;
@@ -42,7 +45,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& myAddress, const XBeeA
 	}
 }
 
-void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress) {
+void HeartbeatProtocol::broadcastHeartBeat() {
 
 	if (DEBUG) {
 		printNeighborHoodTable();
@@ -55,7 +58,7 @@ void HeartbeatProtocol::broadcastHeartBeat(const XBeeAddress64& heartbeatAddress
 
 	message.generateBeatMessage(payload);
 
-	Tx64Request tx = Tx64Request(heartbeatAddress, payload, sizeof(payload));
+	Tx64Request tx = Tx64Request(broadcastAddress, payload, sizeof(payload));
 
 	xbee.send(tx);
 
@@ -259,4 +262,12 @@ float HeartbeatProtocol::getDataRate() const {
 
 void HeartbeatProtocol::setDataRate(float dataRate) {
 	this->dataRate = dataRate;
+}
+
+const XBeeAddress64& HeartbeatProtocol::getBroadcastAddress() const {
+	return broadcastAddress;
+}
+
+void HeartbeatProtocol::setBroadcastAddress(const XBeeAddress64& broadcastAddress) {
+	this->broadcastAddress = broadcastAddress;
 }

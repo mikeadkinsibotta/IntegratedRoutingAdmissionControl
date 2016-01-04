@@ -20,7 +20,6 @@ AdmissionController::AdmissionController(const XBeeAddress64 &_sinkAddress, cons
 	this->myAddress = myAddress;
 	contentionDomainRate = 0;
 	contentionDomainSize = 0;
-	buildSaturationTable();
 }
 
 /**
@@ -188,15 +187,6 @@ void AdmissionController::AskForBandwidthInContentionDomain(XBee &xbee) {
 			sizeof(payloadBroadCast), 0);
 // send the command
 	xbee.send(tx);
-
-}
-
-void AdmissionController::buildSaturationTable() {
-	satT[0] = Saturation(2, 120.90);
-	satT[1] = Saturation(3, 153.39);
-	satT[2] = Saturation(4, 151.2);
-	satT[3] = Saturation(5, 154.45);
-	satT[4] = Saturation(6, 111.42);
 
 }
 
