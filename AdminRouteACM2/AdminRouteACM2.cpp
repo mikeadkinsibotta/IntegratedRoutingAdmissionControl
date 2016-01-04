@@ -160,7 +160,7 @@ void setupThreads() {
 	generateVoice.ThreadName = "Send Voice Data";
 	generateVoice.enabled = false;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
-	generateVoice.onRun(sendPathPacket);
+	generateVoice.onRun(sendVoicePacket);
 
 	sendInital.ThreadName = "Send Voice Data";
 	if (SENDER) {
@@ -169,7 +169,7 @@ void setupThreads() {
 		sendInital.enabled = false;
 	}
 	sendInital.setInterval(REQUEST_STREAM);
-	sendInital.onRun(sendVoicePacket);
+	sendInital.onRun(sendInitPacket);
 
 	controller.add(&heartbeat);
 	controller.add(&responseThread);

@@ -6,7 +6,7 @@
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 3000
 #define REQUEST_STREAM 8000
-#define SENDER false
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -160,7 +160,7 @@ void setupThreads() {
 	generateVoice.ThreadName = "Send Voice Data";
 	generateVoice.enabled = false;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
-	generateVoice.onRun(sendPathPacket);
+	generateVoice.onRun(sendVoicePacket);
 
 	sendInital.ThreadName = "Send Voice Data";
 	if (SENDER) {
@@ -169,7 +169,7 @@ void setupThreads() {
 		sendInital.enabled = false;
 	}
 	sendInital.setInterval(REQUEST_STREAM);
-	sendInital.onRun(sendVoicePacket);
+	sendInital.onRun(sendInitPacket);
 
 	controller.add(&heartbeat);
 	controller.add(&responseThread);
