@@ -71,16 +71,6 @@ void sendVoicePacket() {
 
 void broadcastHeartbeat() {
 	heartbeatProtocol->broadcastHeartBeat();
-
-	/*if (heartbeatProtocol.isRouteFlag()) {
-	 voicePacketSender.setMyNextHop(heartbeatProtocol.getNextHopAddress());
-	 if (SENDER)
-	 sendData.enabled = true;
-	 } else {
-	 //No Next Hop
-	 voicePacketSender.setMyNextHop(XBeeAddress64());
-	 }*/
-
 }
 
 void sendPathPacket() {
