@@ -7,21 +7,21 @@
 #include <Timer.h>
 
 Timer::Timer() {
-	timer = 0;
+	timeStamp = millis();
 	timeoutLength = 0;
 }
 Timer::Timer(const unsigned long timeoutLength) {
-	timer = 0;
+	timeStamp = millis();
 	this->timeoutLength = timeoutLength;
 }
 
 void Timer::startTimer() {
 
-	timer = millis();
+	timeStamp = millis();
 }
 
 bool Timer::timeoutTimer() {
-	if (millis() - timer > timeoutLength) {
+	if (millis() - timeStamp > timeoutLength) {
 		return true;
 	}
 	return false;

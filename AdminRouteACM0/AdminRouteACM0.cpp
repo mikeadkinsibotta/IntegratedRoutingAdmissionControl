@@ -4,7 +4,7 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 3000
+#define VOICE_DATA_INTERVAL 8000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -17,6 +17,7 @@
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
+const unsigned long TIMEOUT_LENGTH = 5000;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -42,9 +43,9 @@ void setup() {
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol);
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, TIMEOUT_LENGTH);
 	setupThreads();
-	
+
 	digitalWrite(13, LOW);
 }
 
@@ -152,7 +153,7 @@ void setupThreads() {
 
 	sendData.ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendData.enabled = false;
+		sendData.enabled = true;
 	} else {
 		sendData.enabled = false;
 	}

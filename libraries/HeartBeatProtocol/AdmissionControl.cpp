@@ -8,15 +8,17 @@
 
 AdmissionControl::AdmissionControl() {
 	heartbeatProtocol = 0;
+	timeoutLength = 0;
 
 }
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-		HeartbeatProtocol * heartbeatProtocol) {
+		HeartbeatProtocol * heartbeatProtocol, const unsigned long timeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
 	this->xbee = xbee;
+	this->timeoutLength = timeoutLength;
 
 }
 
@@ -119,7 +121,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
-		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64());
+		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
 		potentialStream.getGrantTimer().startTimer();
 		potentialStreams.push_back(potentialStream);
 
@@ -127,7 +129,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	} else if (nextHop.equals(sinkAddress)) {
 		//Start Grant Timer
-		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64());
+		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
 		potentialStreams.push_back(potentialStream);
 	}
 

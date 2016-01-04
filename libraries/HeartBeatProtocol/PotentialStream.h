@@ -19,13 +19,12 @@ class PotentialStream {
 		Timer grantTimer;
 
 	public:
-		PotentialStream(XBeeAddress64 sourceAddress, XBeeAddress64 upStreamNeighbor);
+		PotentialStream(XBeeAddress64 sourceAddress, XBeeAddress64 upStreamNeighbor, unsigned long grantTimeoutLength);
+
 		Timer& getGrantTimer();
 
 		const XBeeAddress64& getSourceAddress() const;
-		void setSourceAddress(const XBeeAddress64& sourceAddress);
 		const XBeeAddress64& getUpStreamNeighbor() const;
-		void setUpStreamNeighbor(const XBeeAddress64& upStreamNeighbor);
 
 };
 

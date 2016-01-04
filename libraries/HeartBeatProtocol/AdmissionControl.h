@@ -23,11 +23,12 @@ class AdmissionControl {
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		HeartbeatProtocol * heartbeatProtocol;
+		unsigned long timeoutLength;
 
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-				HeartbeatProtocol * heartbeatProtocol);
+				HeartbeatProtocol * heartbeatProtocol, const unsigned long timeoutLength);
 
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		void intializationSenderTimeout();

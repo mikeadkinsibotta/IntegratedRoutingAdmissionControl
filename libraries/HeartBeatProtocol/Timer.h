@@ -13,7 +13,7 @@
 class Timer {
 
 	private:
-		unsigned long timer;
+		unsigned long timeStamp;
 		unsigned long timeoutLength;
 
 	public:
