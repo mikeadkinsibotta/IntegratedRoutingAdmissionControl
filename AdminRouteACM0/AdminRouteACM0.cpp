@@ -11,6 +11,7 @@
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define IGNORE_HEARTBEAT false
+#define PAYLOAD_SIZE 76
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B31805
 
@@ -18,6 +19,7 @@ XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
 AdmissionControl * admissionControl;
+VoiceStreamStatManager * voiceStreamStatManager;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -33,8 +35,10 @@ void setup() {
 	arduinoSetup();
 
 	xbee.getMyAddress(myAddress, DEBUG);
+	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
-	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, myAddress, sinkAddress, 2, 0);
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
+			sinkAddress, 2, 0, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol);
 	setupThreads();
 
@@ -76,7 +80,7 @@ void broadcastHeartbeat() {
 }
 
 void sendPathPacket() {
-	voicePacketSender->sendPathPacket();
+	voiceStreamStatManager->sendPathPacket();
 }
 
 void clearBuffer() {
@@ -109,8 +113,9 @@ void listenForResponses() {
 				//path loss packet
 				voicePacketSender->handlePathPacket(response);
 			} else if (!strcmp(control, "RSTR")) {
-				voicePacketSender->handleStreamRestart(response);
+				//voicePacketSender->handleStreamRestart(response);
 			} else if (!strcmp(control, "INIT")) {
+				voicePacketSender->handleStreamRestart(response);
 				//voicePacketSender->handleInitPacket(response);
 			}
 			/*else if(!strcmp(control, "ASM_")) {

@@ -23,8 +23,8 @@ class VoiceStreamStatManager {
 
 	public:
 		VoiceStreamStatManager();
-		VoiceStreamStatManager(uint8_t payloadSize);
-		VoiceStreamStatManager(XBee& xbee, uint8_t payloadSize);
+		VoiceStreamStatManager(const uint8_t payloadSize);
+		VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize);
 
 		void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
@@ -37,7 +37,7 @@ class VoiceStreamStatManager {
 		void setStreams(const vector<VoiceStreamStats>& streams);
 		void sendPathPacket();
 		void handleStreamRestart(const Rx64Response& response);
-
+		uint8_t getPayloadSize() const;
 };
 
 #endif /* LIBRARIES_VOICESTATISTICS_VOICESTREAMSMANAGER_H_ */

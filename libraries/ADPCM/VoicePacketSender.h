@@ -25,15 +25,17 @@ class VoicePacketSender {
 		ADPCM admcpm;
 		XBee xbee;
 		HeartbeatProtocol * heartbeatProtocol;
+		VoiceStreamStatManager * voiceStreamStatManager;
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
-		VoiceStreamStatManager voiceStreamStatManager;
+
 		Compression compressionTable;
 		Thread * pathLoss;
 		float injectionRate;
 
 		uint8_t frameId;
+		uint8_t payloadSize = 0;
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 		void updateDataRate(const uint8_t dataLoss);
@@ -41,8 +43,9 @@ class VoicePacketSender {
 	public:
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
-				const float dupSetting);
+				VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
+				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+				const uint8_t payloadSize);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
@@ -54,13 +57,13 @@ class VoicePacketSender {
 		void setCodecSetting(uint8_t codecSetting);
 		float getDupSetting() const;
 		void setDupSetting(float dupSetting);
-		void sendPathPacket();
+		//void sendPathPacket();
 		void handlePathPacket(const Rx64Response &response);
 		void sendStreamRestart(const XBeeAddress64& packetSource);
 		void handleStreamRestart(const Rx64Response &response);
-		void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
-				const float injectionRate);
-		void handleInitPacket(const Rx64Response &response);
+		//void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
+		//		const float injectionRate);
+		//void handleInitPacket(const Rx64Response &response);
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */

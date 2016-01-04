@@ -5,7 +5,6 @@
  *      Author: mike
  */
 #include <VoicePacketSender.h>
-#define PAYLOAD_SIZE 76
 
 VoicePacketSender::VoicePacketSender() {
 	codecSetting = 2;
@@ -17,22 +16,25 @@ VoicePacketSender::VoicePacketSender() {
 	myNextHop = XBeeAddress64();
 	heartbeatProtocol = 0;
 	xbee = XBee();
-	voiceStreamStatManager = VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
+	voiceStreamStatManager = 0;
 	pathLoss = 0;
 	injectionRate = 0;
 	compressionTable.buildCompressionLookUpTable();
+	payloadSize = 0;
 
 }
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-		const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
-		const float dupSetting) {
+		VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+		const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
 	admcpm = ADPCM();
 	this->senderAddress = myAddress;
 	this->sinkAddress = sinkAddress;
+	this->voiceStreamStatManager = voiceStreamStatManager;
 	frameId = 0;
 	injectionRate = 0;
 	myNextHop = XBeeAddress64();
@@ -43,8 +45,8 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->heartbeatProtocol = heartbeatProtocol;
 
 	this->xbee = xbee;
-	voiceStreamStatManager = VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	this->pathLoss = pathLoss;
+	this->payloadSize = payloadSize;
 	compressionTable.buildCompressionLookUpTable();
 
 }
@@ -61,15 +63,15 @@ void VoicePacketSender::generateVoicePacket() {
 		if (myNextHop.equals(XBeeAddress64())) {
 			SerialUSB.println("Has Route to Sink");
 			myNextHop = heartbeatProtocol->getNextHopAddress();
-			sendStreamRestart (senderAddress);
+			//sendStreamRestart (senderAddress);
 		}
 
-		uint8_t payload[PAYLOAD_SIZE] = { 0 };
+		uint8_t payload[payloadSize] = { 0 };
 		uint8_t code = 0;
 		int actualPayloadSize = 0;
 		int i = 0;
 
-		while (i <= PAYLOAD_SIZE) {
+		while (i <= payloadSize) {
 
 			switch (codecSetting) {
 				case 2:
@@ -79,7 +81,7 @@ void VoicePacketSender::generateVoicePacket() {
 					actualPayloadSize = i;
 					break;
 				case 3:
-					if (i + 3 <= PAYLOAD_SIZE) {
+					if (i + 3 <= payloadSize) {
 						uint8_t buffer[3] = { 0 };
 						admcpm.threeBitEncode(buffer);
 						for (int j = 0; j < 3; ++j) {
@@ -99,7 +101,7 @@ void VoicePacketSender::generateVoicePacket() {
 					actualPayloadSize = i;
 					break;
 				case 5:
-					if (i + 5 <= PAYLOAD_SIZE) {
+					if (i + 5 <= payloadSize) {
 						uint8_t buffer[5] = { 0 };
 						admcpm.fiveBitEncode(buffer);
 
@@ -173,7 +175,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		//need to forward to next hop
 		Serial.print("ForwardData");
 
-		voiceStreamStatManager.updateStreamsIntermediateNode(packetSource, previousHop);
+		voiceStreamStatManager->updateStreamsIntermediateNode(packetSource, previousHop);
 
 		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
 
@@ -183,7 +185,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		//admissionController.updateFlowList(packetSource);
 
 	} else {
-		voiceStreamStatManager.updateVoiceLoss(packetSource, previousHop, dataPtr);
+		voiceStreamStatManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
 	}
 
@@ -205,7 +207,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 		//if (aodv.hasRoute(packetSource, nextHop)) {
 		XBeeAddress64 nextHop;
-		voiceStreamStatManager.getStreamPreviousHop(packetSource, nextHop);
+		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
 
 		Serial.print("ForwardPathPacket");
 
@@ -276,60 +278,56 @@ void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
 }
 
-void VoicePacketSender::requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
-		const float injectionRate) {
+/*void VoicePacketSender::requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
+ const float injectionRate) {
 
-	XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
+ XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 
-	uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+ uint8_t * injectionRateP = (uint8_t *) &injectionRate;
 
-	uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
-					& 0xff, senderAddress.getLsb() & 0xff, myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16,
-			myNextHop.getMsb() >> 8, myNextHop.getMsb(), myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16,
-			myNextHop.getLsb() >> 8, myNextHop.getLsb(), injectionRateP[0], injectionRateP[1], injectionRateP[2],
-			injectionRateP[3] };
-	Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
-	// send the command
-	xbee.send(tx);
+ uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
+ (senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
+ (senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
+ & 0xff, senderAddress.getLsb() & 0xff, myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16,
+ myNextHop.getMsb() >> 8, myNextHop.getMsb(), myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16,
+ myNextHop.getLsb() >> 8, myNextHop.getLsb(), injectionRateP[0], injectionRateP[1], injectionRateP[2],
+ injectionRateP[3] };
+ Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+ // send the command
+ xbee.send(tx);
 
-}
+ }
 
-void VoicePacketSender::handleInitPacket(const Rx64Response &response) {
-	Serial.print("ReceivedInitPacket");
+ void VoicePacketSender::handleInitPacket(const Rx64Response &response) {
+ Serial.print("ReceivedInitPacket");
 
-	XBeeAddress64 senderAddress;
-	XBeeAddress64 nextHop;
-	uint8_t* dataPtr = response.getData();
-	senderAddress.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+ XBeeAddress64 senderAddress;
+ XBeeAddress64 nextHop;
+ uint8_t* dataPtr = response.getData();
+ senderAddress.setMsb(
+ (uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
 
-	senderAddress.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+ senderAddress.setLsb(
+ (uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
-	nextHop.setMsb(
-			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+ nextHop.setMsb(
+ (uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
 
-	nextHop.setLsb(
-			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+ nextHop.setLsb(
+ (uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
 
-	float * dataRateP = (float*) (dataPtr + 21);
-	float dataRate = *dataRateP;
+ float * dataRateP = (float*) (dataPtr + 21);
+ float dataRate = *dataRateP;
 
-	if (nextHop.equals(senderAddress)) {
-		Serial.print("RebroadcastInit");
-		requestToStream(senderAddress, nextHop, dataRate);
-	}
-}
+ if (nextHop.equals(senderAddress)) {
+ Serial.print("RebroadcastInit");
+ requestToStream(senderAddress, nextHop, dataRate);
+ }
+ }*/
 
-void VoicePacketSender::sendPathPacket() {
-	voiceStreamStatManager.sendPathPacket();
-}
-
-void VoicePacketSender::handleStreamRestart(const Rx64Response &response) {
-	voiceStreamStatManager.handleStreamRestart(response);
-}
+/*void VoicePacketSender::sendPathPacket() {
+ voiceStreamStatManager.sendPathPacket();
+ }*/
 
 const XBeeAddress64& VoicePacketSender::getMyNextHop() const {
 	return myNextHop;

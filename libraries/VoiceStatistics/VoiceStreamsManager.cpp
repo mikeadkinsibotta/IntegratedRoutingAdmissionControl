@@ -164,3 +164,6 @@ void VoiceStreamStatManager::setStreams(const vector<VoiceStreamStats>& streams)
 	this->streams = streams;
 }
 
+uint8_t VoiceStreamStatManager::getPayloadSize() const {
+	return payloadSize;
+}
