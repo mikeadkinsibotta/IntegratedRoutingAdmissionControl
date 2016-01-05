@@ -27,11 +27,11 @@ void AdmissionControl::checkTimers() {
 	for (int i = 0; i < potentialStreams.size(); i++) {
 
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer()) {
-			Serial.println("CheckTimer PotentialStream");
+			SerialUSB.println("Grant Timer Expired");
 			XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 
-			sendGRANTPacket(sourceAddress, nextHop);
+			//sendGRANTPacket(sourceAddress, nextHop);
 			removePotentialStream(sourceAddress);
 		}
 	}
@@ -42,7 +42,7 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 
 	bool hasNextHop = heartbeatProtocol->isRouteFlag();
 	if (hasNextHop) {
-
+		SerialUSB.println("SendingInitalMessage1");
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
 		uint8_t injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
@@ -85,7 +85,7 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 }
 
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
-	Serial.print("ReceivedInitPacket");
+	SerialUSB.println("ReceivedInitPacket");
 
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;
@@ -105,7 +105,15 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
 
-	if (nextHop.equals(myAddress)) {
+	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
+		SerialUSB.println("Init reached sink");
+		//Start Grant Timer
+		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
+		potentialStream.getGrantTimer().startTimer();
+		SerialUSB.println("Start Grant Timer");
+		potentialStreams.push_back(potentialStream);
+	} else if (nextHop.equals(myAddress)) {
+
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
 
@@ -122,15 +130,9 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
 		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
-		potentialStream.getGrantTimer().startTimer();
 		potentialStreams.push_back(potentialStream);
 
 		xbee.send(tx);
-
-	} else if (nextHop.equals(sinkAddress)) {
-		//Start Grant Timer
-		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
-		potentialStreams.push_back(potentialStream);
 	}
 
 //TODO Check Local Capacity;
@@ -156,7 +158,7 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 
 }
 
-void AdmissionControl::handleGRANTPacket(const Rx64Response &response) {
+void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& sendEnabled) {
 	XBeeAddress64 sourceAddress;
 	uint8_t * dataPtr = response.getData();
 
@@ -179,7 +181,8 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response) {
 		}
 
 	} else {
-		//TODO Send Data
+		SerialUSB.println("SendEnable False");
+		sendEnabled = false;
 	}
 }
 

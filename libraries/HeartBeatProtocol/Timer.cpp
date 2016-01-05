@@ -4,7 +4,7 @@
  *  Created on: Jan 4, 2016
  *      Author: mike
  */
-#include <Timer.h>
+#include "Timer.h"
 
 Timer::Timer() {
 	timeStamp = millis();
@@ -13,6 +13,7 @@ Timer::Timer() {
 Timer::Timer(const unsigned long timeoutLength) {
 	timeStamp = millis();
 	this->timeoutLength = timeoutLength;
+
 }
 
 void Timer::startTimer() {

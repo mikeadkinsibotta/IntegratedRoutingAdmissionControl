@@ -129,7 +129,7 @@ void listenForResponses() {
 			} else if (!strcmp(control, "REDJ")) {
 				admissionControl->handleREDJPacket(response);
 			} else if (!strcmp(control, "GRNT")) {
-				admissionControl->handleGRANTPacket(response);
+				admissionControl->handleGRANTPacket(response, sendInital.enabled);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.
