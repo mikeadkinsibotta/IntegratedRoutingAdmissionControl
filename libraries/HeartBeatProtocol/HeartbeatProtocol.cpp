@@ -21,10 +21,11 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	qualityOfPath = 0;
 	dataRate = 0;
 	neighborhoodCapacity = 0;
+	timeoutLength = 0;
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAdress, XBee& xbee) {
+		const XBeeAddress64& sinkAdress, XBee& xbee, unsigned long timeoutLength) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -34,6 +35,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = 0;
+	this->timeoutLength = timeoutLength;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -119,18 +121,31 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
 			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
 			neighborhoodTable.at(i).setRssi(heartbeatMessage.getRssi());
-
+			neighborhoodTable.at(i).updateTimeStamp();
 			found = true;
 			break;
 		}
 	}
 
 	if (!found) {
+		//Sets timestamp when constructor is called.
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
-				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi());
+				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
+				timeoutLength);
 		neighborhoodTable.push_back(neighbor);
+	}
+
+}
+
+void HeartbeatProtocol::purgeNeighborhoodTable() {
+	int i = 0;
+	for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); ++it) {
+		if (neighborhoodTable.at(i).checkTimer()) {
+			neighborhoodTable.erase(it);
+		}
+		++i;
 	}
 
 }

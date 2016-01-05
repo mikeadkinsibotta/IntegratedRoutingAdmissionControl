@@ -33,15 +33,17 @@ class HeartbeatProtocol {
 		float dataRate;
 		float neighborhoodCapacity;
 		Saturation satT[4];
+		unsigned long timeoutLength;
+
 		void buildSaturationTable();
 		void reCalculateNeighborhoodCapacity();
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAdress, XBee& xbee);
+				const XBeeAddress64& sinkAdress, XBee& xbee, unsigned long timeoutLength);
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
-
+		void purgeNeighborhoodTable();
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();

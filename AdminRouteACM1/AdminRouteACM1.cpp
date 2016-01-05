@@ -46,7 +46,8 @@ void setup() {
 	SerialUSB.println();
 
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
-	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
+	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee,
+			(heartbeat.getInterval() * 3));
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
@@ -105,6 +106,7 @@ void clearBuffer() {
 
 void listenForResponses() {
 	admissionControl->checkTimers();
+	heartbeatProtocol->purgeNeighborhoodTable();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {

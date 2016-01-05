@@ -85,6 +85,8 @@ class Thread {
 
 			// Runs Thread
 			virtual void run();
+
+			unsigned long getInterval() const;
 		};
 
 #endif

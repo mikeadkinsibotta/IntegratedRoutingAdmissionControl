@@ -12,12 +12,13 @@ Neighbor::Neighbor() {
 	relativeDistance = 0;
 	packetLoss = 0;
 	rssi = 0;
-
+	timeStamp = 0;
+	timeoutLength = 0;
 }
 
 Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t seqNum, float qualityOfPath,
 		float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance,
-		double rssi) {
+		double rssi, unsigned long timeoutLength) {
 
 	this->address = address;
 	this->dataRate = dataRate;
@@ -29,6 +30,8 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 	this->relativeDistance = relativeDistance;
 	this->packetLoss = 0;
 	this->rssi = rssi;
+	timeStamp = millis();
+	this->timeoutLength = timeoutLength;
 }
 
 const XBeeAddress64& Neighbor::getAddress() const {
@@ -101,6 +104,18 @@ const XBeeAddress64& Neighbor::getSinkAddress() const {
 
 void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 	this->sinkAddress = sinkAddress;
+}
+
+void Neighbor::updateTimeStamp() {
+	timeStamp = millis();
+
+}
+
+bool Neighbor::checkTimer() {
+	if (millis() - timeStamp > timeoutLength) {
+		return true;
+	}
+	return false;
 }
 
 bool Neighbor::compare(const Neighbor &b) {
