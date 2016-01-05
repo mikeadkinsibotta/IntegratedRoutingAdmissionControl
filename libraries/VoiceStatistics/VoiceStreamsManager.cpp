@@ -65,8 +65,6 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 	bool found = false;
 
 	for (int i = 0; i < streams.size(); i++) {
-		//SerialUSB.println("Old Stream");
-
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
 			streams.at(i).updateVoiceLoss(dataPtr);
 
@@ -76,7 +74,7 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 	}
 
 	if (!found) {
-		//SerialUSB.println("New Stream");
+		SerialUSB.println("New Stream");
 		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		stream.startStream();
 		stream.updateVoiceLoss(dataPtr);

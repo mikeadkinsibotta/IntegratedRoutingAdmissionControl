@@ -32,6 +32,7 @@ void AdmissionControl::checkTimers() {
 		//Only sink should send grant message when timer expires
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			SerialUSB.println("Grant Timer Expired");
+			SerialUSB.println();
 			XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 
@@ -90,10 +91,10 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
-	SerialUSB.println("ReceivedInitPacket");
+	SerialUSB.println("Received INIT Packet");
 
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
-	SerialUSB.print("Requesting new stream from: ");
+	SerialUSB.print("Receiving request for new stream via: ");
 	receivedAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
@@ -121,11 +122,11 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 
-		SerialUSB.println("Init reached sink");
 		//Start Grant Timer
 		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, timeoutLength);
 		potentialStream.getGrantTimer().startTimer();
 		SerialUSB.println("Start Grant Timer");
+		SerialUSB.println();
 		potentialStreams.push_back(potentialStream);
 
 	} else if (nextHop.equals(myAddress)) {
@@ -157,6 +158,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	}
 
 	printPotentialStreams();
+	SerialUSB.println("End handleInitPacket");
+	SerialUSB.println();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
