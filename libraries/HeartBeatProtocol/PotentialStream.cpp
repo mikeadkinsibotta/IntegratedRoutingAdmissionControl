@@ -24,3 +24,12 @@ const XBeeAddress64& PotentialStream::getSourceAddress() const {
 const XBeeAddress64& PotentialStream::getUpStreamNeighbor() const {
 	return upStreamNeighbor;
 }
+
+void PotentialStream::printPotentialStream() const {
+	SerialUSB.print("Source Address: ");
+	sourceAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" Upstream Neighbor: ");
+	upStreamNeighbor.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
+}

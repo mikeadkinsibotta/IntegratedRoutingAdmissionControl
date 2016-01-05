@@ -39,6 +39,7 @@ class AdmissionControl {
 		void handleGRANTPacket(const Rx64Response &response, bool& sendEnabled);
 		void checkTimers();
 		bool removePotentialStream(const XBeeAddress64& packetSource);
+		void printPotentialStreams() const;
 
 };
 

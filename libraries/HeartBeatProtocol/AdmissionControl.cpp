@@ -31,7 +31,7 @@ void AdmissionControl::checkTimers() {
 			XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 
-			//sendGRANTPacket(sourceAddress, nextHop);
+			sendGRANTPacket(sourceAddress, nextHop);
 			removePotentialStream(sourceAddress);
 		}
 	}
@@ -39,7 +39,7 @@ void AdmissionControl::checkTimers() {
 }
 
 void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
-
+	SerialUSB.println("Sending Init");
 	bool hasNextHop = heartbeatProtocol->isRouteFlag();
 	if (hasNextHop) {
 		SerialUSB.println("SendingInitalMessage1");
@@ -87,6 +87,11 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	SerialUSB.println("ReceivedInitPacket");
 
+	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
+	SerialUSB.print("Init Received From: ");
+	receivedAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;
 	uint8_t* dataPtr = response.getData();
@@ -106,12 +111,14 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	float dataRate = *dataRateP;
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
+
 		SerialUSB.println("Init reached sink");
 		//Start Grant Timer
-		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, timeoutLength);
 		potentialStream.getGrantTimer().startTimer();
 		SerialUSB.println("Start Grant Timer");
 		potentialStreams.push_back(potentialStream);
+
 	} else if (nextHop.equals(myAddress)) {
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
@@ -129,14 +136,18 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
-		PotentialStream potentialStream = PotentialStream(senderAddress, response.getRemoteAddress64(), timeoutLength);
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, timeoutLength);
 		potentialStreams.push_back(potentialStream);
 
 		xbee.send(tx);
+
+	} else {
+
+		//TODO Check Local Capacity;
+
 	}
 
-//TODO Check Local Capacity;
-
+	printPotentialStreams();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
@@ -202,5 +213,12 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 		++i;
 	}
 	return false;
+}
+
+void AdmissionControl::printPotentialStreams() const {
+	for (int i = 0; i < potentialStreams.size(); i++) {
+		potentialStreams.at(i).printPotentialStream();
+
+	}
 }
 

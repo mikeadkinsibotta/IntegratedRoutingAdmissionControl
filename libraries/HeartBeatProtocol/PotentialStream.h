@@ -24,6 +24,7 @@ class PotentialStream {
 		Timer& getGrantTimer();
 		const XBeeAddress64& getSourceAddress() const;
 		const XBeeAddress64& getUpStreamNeighbor() const;
+		void printPotentialStream() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_POTENTIALSTREAM_H_ */

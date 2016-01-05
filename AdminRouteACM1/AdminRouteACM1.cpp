@@ -5,8 +5,8 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 3000
-#define REQUEST_STREAM 8000
-#define SENDER true
+#define REQUEST_STREAM 12000
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -41,6 +41,8 @@ void setup() {
 	arduinoSetup();
 
 	xbee.getMyAddress(myAddress, DEBUG);
+	myAddress.printAddressASCII(&SerialUSB);
+
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
