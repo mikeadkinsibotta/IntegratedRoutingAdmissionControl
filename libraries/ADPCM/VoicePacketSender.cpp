@@ -238,16 +238,16 @@ uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetS
 
 }
 
-void VoicePacketSender::sendStreamRestart(const XBeeAddress64& dataSenderAddress) {
+/*void VoicePacketSender::sendStreamRestart(const XBeeAddress64& dataSenderAddress) {
 
-	uint8_t payload[] = { 'R', 'S', 'T', 'R', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
-			(dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
-			dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff, (dataSenderAddress.getLsb()
-					>> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff, dataSenderAddress.getLsb() & 0xff };
-	Tx64Request tx = Tx64Request(myNextHop, payload, sizeof(payload));
-	xbee.send(tx);
+ uint8_t payload[] = { 'R', 'S', 'T', 'R', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
+ (dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
+ dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff, (dataSenderAddress.getLsb()
+ >> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff, dataSenderAddress.getLsb() & 0xff };
+ Tx64Request tx = Tx64Request(myNextHop, payload, sizeof(payload));
+ xbee.send(tx);
 
-}
+ }*/
 
 void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 

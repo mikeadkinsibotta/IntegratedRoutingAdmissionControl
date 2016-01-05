@@ -11,6 +11,7 @@
 #include <HeartbeatProtocol.h>
 #include <AdmissionControl.h>
 #include <PotentialStream.h>
+#include <VoiceStreamsManager.h>
 #include <Thread.h>
 #include <vector>
 
@@ -23,12 +24,15 @@ class AdmissionControl {
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		HeartbeatProtocol * heartbeatProtocol;
+		VoiceStreamStatManager * voiceStreamStatManager;
+
 		unsigned long timeoutLength;
 
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-				HeartbeatProtocol * heartbeatProtocol, const unsigned long timeoutLength);
+				HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
+				const unsigned long timeoutLength);
 
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		void intializationSenderTimeout();
@@ -36,7 +40,7 @@ class AdmissionControl {
 		void sendREDJPacket(const XBeeAddress64 &senderAddress);
 		void handleInitPacket(const Rx64Response &response);
 		void handleREDJPacket(Rx64Response &response);
-		void handleGRANTPacket(const Rx64Response &response, bool& sendEnabled);
+		void handleGRANTPacket(const Rx64Response &response, bool& initThreadActive, bool& voiceThreadActive);
 		void checkTimers();
 		bool removePotentialStream(const XBeeAddress64& packetSource);
 		void printPotentialStreams() const;

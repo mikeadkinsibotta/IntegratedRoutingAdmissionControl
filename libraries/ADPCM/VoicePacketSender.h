@@ -57,10 +57,8 @@ class VoicePacketSender {
 		void setCodecSetting(uint8_t codecSetting);
 		float getDupSetting() const;
 		void setDupSetting(float dupSetting);
-		//void sendPathPacket();
 		void handlePathPacket(const Rx64Response &response);
-		void sendStreamRestart(const XBeeAddress64& packetSource);
-		void handleStreamRestart(const Rx64Response &response);
+		//void sendStreamRestart(const XBeeAddress64& packetSource);
 		//void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
 		//		const float injectionRate);
 		//void handleInitPacket(const Rx64Response &response);

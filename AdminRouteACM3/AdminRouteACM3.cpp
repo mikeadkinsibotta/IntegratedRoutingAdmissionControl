@@ -5,7 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 3000
-#define REQUEST_STREAM 8000
+#define REQUEST_STREAM 12000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -41,11 +41,16 @@ void setup() {
 	arduinoSetup();
 
 	xbee.getMyAddress(myAddress, DEBUG);
+	SerialUSB.print("My Address: ");
+	myAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, TIMEOUT_LENGTH);
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
+			TIMEOUT_LENGTH);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -129,7 +134,7 @@ void listenForResponses() {
 			} else if (!strcmp(control, "REDJ")) {
 				admissionControl->handleREDJPacket(response);
 			} else if (!strcmp(control, "GRNT")) {
-				admissionControl->handleGRANTPacket(response, sendInital.enabled);
+				admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
 			}
 			/*else if(!strcmp(control, "ASM_")) {
 			 /*When I receive the neighborhood rate of a neighbor I update my neighborhood rate.

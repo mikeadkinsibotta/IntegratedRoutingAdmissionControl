@@ -8,15 +8,18 @@
 
 AdmissionControl::AdmissionControl() {
 	heartbeatProtocol = 0;
+	voiceStreamStatManager = 0;
 	timeoutLength = 0;
 
 }
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-		HeartbeatProtocol * heartbeatProtocol, const unsigned long timeoutLength) {
+		HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
+		const unsigned long timeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
+	this->voiceStreamStatManager = voiceStreamStatManager;
 	this->xbee = xbee;
 	this->timeoutLength = timeoutLength;
 
@@ -26,7 +29,8 @@ void AdmissionControl::checkTimers() {
 
 	for (int i = 0; i < potentialStreams.size(); i++) {
 
-		if (potentialStreams.at(i).getGrantTimer().timeoutTimer()) {
+		//Only sink should send grant message when timer expires
+		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			SerialUSB.println("Grant Timer Expired");
 			XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
@@ -85,10 +89,11 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 }
 
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
+
 	SerialUSB.println("ReceivedInitPacket");
 
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
-	SerialUSB.print("Init Received From: ");
+	SerialUSB.print("Requesting new stream from: ");
 	receivedAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
@@ -109,6 +114,10 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
+
+	//remove any old streams
+	SerialUSB.println("Check for old stream...");
+	voiceStreamStatManager->removeStream(senderAddress);
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 
@@ -151,7 +160,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
-	Serial.print("ReceiveREDJ");
+	SerialUSB.println("ReceiveREDJ");
 	XBeeAddress64 senderAddress;
 	uint8_t * dataPtr = response.getData();
 
@@ -169,9 +178,11 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 
 }
 
-void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& sendEnabled) {
+void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& initThreadActive,
+		bool& voiceThreadActive) {
 	XBeeAddress64 sourceAddress;
 	uint8_t * dataPtr = response.getData();
+	XBeeAddress64 previousHop = response.getRemoteAddress64();
 
 	sourceAddress.setMsb(
 			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
@@ -180,11 +191,18 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& sen
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	if (!myAddress.equals(sourceAddress)) {
-		Serial.print("ForwardGRANT");
+		SerialUSB.print("Forward GRANT recevied from: ");
+		previousHop.printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 
 		for (int i = 0; i < potentialStreams.size(); i++) {
 			//SerialUSB.println("Old Stream");
 			if (potentialStreams.at(i).getSourceAddress().equals(sourceAddress)) {
+
+				SerialUSB.print("Forward GRANT to: ");
+				potentialStreams.at(i).getUpStreamNeighbor().printAddressASCII(&SerialUSB);
+				SerialUSB.println();
+
 				sendGRANTPacket(sourceAddress, potentialStreams.at(i).getUpStreamNeighbor());
 				removePotentialStream(sourceAddress);
 				break;
@@ -192,8 +210,9 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& sen
 		}
 
 	} else {
-		SerialUSB.println("SendEnable False");
-		sendEnabled = false;
+		SerialUSB.println("Active Voice");
+		initThreadActive = false;
+		voiceThreadActive = true;
 	}
 }
 
