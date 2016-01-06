@@ -47,6 +47,7 @@ void AdmissionControl::checkTimers() {
 			SerialUSB.println();
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
+				SerialUSB.println("Sending Reject Packet...");
 				sendREDJPacket(potentialStreams.at(i).getSourceAddress());
 			}
 			removePotentialStream(sourceAddress);
@@ -62,8 +63,11 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 		SerialUSB.println("SendingInitalMessage1");
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
-		uint8_t injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
+		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+
+		SerialUSB.print("Injection Rate: ");
+		SerialUSB.print(injectionRate);
 
 		uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
 				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
@@ -131,6 +135,13 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
+
+	SerialUSB.print("Sender Address: ");
+	senderAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" Nexthop Address: ");
+	nextHop.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" Potential Data Rate: ");
+	SerialUSB.println(dataRate);
 
 	//remove any old streams
 	SerialUSB.println("Check for old stream...");
@@ -300,7 +311,9 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	SerialUSB.println();
 
 	if (potentialDataRate > neighborhoodCapacity) {
+		SerialUSB.println("Stream Rejected");
 		return true;
 	}
+	SerialUSB.println("Stream Accepted");
 	return false;
 }

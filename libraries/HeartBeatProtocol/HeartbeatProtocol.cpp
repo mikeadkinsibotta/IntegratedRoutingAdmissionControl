@@ -14,6 +14,7 @@ const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;
 const double N_P = -1.095;
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 32;
+const float MAX_FLT = 9999.0;
 
 HeartbeatProtocol::HeartbeatProtocol() {
 	seqNum = 0;
@@ -65,26 +66,28 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	float neighborhoodRate = 0;
-
+	uint8_t neighborhoodSize = 0;
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
+		if (neighborhoodTable.at(i).getDataRate() > 0) {
+			neighborhoodSize++;
+		}
 	}
 
 	//Don't forget to include myself
 	neighborhoodRate += dataRate;
-
-	uint8_t neighborhoodSize = neighborhoodTable.size();
 
 	if (dataRate > 0) {
 		neighborhoodSize++;
 	}
 
 	if (neighborhoodSize == 1 || neighborhoodSize == 0) {
-		neighborhoodCapacity = UINT32_MAX;
+		neighborhoodCapacity = MAX_FLT;
 	} else if (neighborhoodSize > 1) {
 		float saturationRate = satT[neighborhoodSize - 2].getRate();
 		neighborhoodCapacity = saturationRate - neighborhoodRate;
 	}
+
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag) {
@@ -98,8 +101,11 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 
 	if (!ignoreHeartBeatFlag) {
 		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
 	} else if (!message.getSenderAddress().equals(sinkAddress)) {
 		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
+
 	}
 
 	if (!myAddress.equals(sinkAddress)) {
@@ -129,12 +135,15 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	if (!found) {
 		//Sets timestamp when constructor is called.
-		SerialUSB.println("New Neighbor Added");
+		SerialUSB.print("New Neighbor Added ");
+
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
+		neighbor.getAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 		neighborhoodTable.push_back(neighbor);
 	}
 

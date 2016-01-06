@@ -55,6 +55,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 void VoicePacketSender::generateVoicePacket() {
 
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
+
 	heartbeatProtocol->setDataRate(injectionRate);
 	myNextHop = heartbeatProtocol->getNextHopAddress();
 
@@ -205,11 +206,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		uint8_t dataLoss = dataPtr[13];
 		uint8_t totalPacketSent = dataPtr[14];
 		uint8_t totalPacketReceived = dataPtr[15];
-
-		SerialUSB.print("TotalPacketSent: ");
-		SerialUSB.print(totalPacketSent);
-		SerialUSB.print(" TotalPacketReceived: ");
-		SerialUSB.print(totalPacketReceived);
 
 		//Returned to the original sender, update packet loss
 		updateDataRate(dataLoss);

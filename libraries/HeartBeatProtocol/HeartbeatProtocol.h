@@ -15,6 +15,7 @@
 #include <Saturation.h>
 #include <vector>
 #include <set>
+#include <cfloat>
 
 using namespace std;
 
@@ -23,7 +24,7 @@ class HeartbeatProtocol {
 	private:
 		vector<Neighbor> neighborhoodTable;
 		XBee xbee;
-		float seqNum;
+		uint8_t seqNum;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 broadcastAddress;
