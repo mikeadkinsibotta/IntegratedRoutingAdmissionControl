@@ -9,19 +9,21 @@
 AdmissionControl::AdmissionControl() {
 	heartbeatProtocol = 0;
 	voiceStreamStatManager = 0;
-	timeoutLength = 0;
+	grantTimeoutLength = 0;
+	rejcTimeoutLength = 0;
 
 }
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
 		HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
-		const unsigned long timeoutLength) {
+		const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
 	this->voiceStreamStatManager = voiceStreamStatManager;
 	this->xbee = xbee;
-	this->timeoutLength = timeoutLength;
+	this->grantTimeoutLength = grantTimeoutLength;
+	this->rejcTimeoutLength = rejcTimeoutLength;
 
 }
 
@@ -38,6 +40,13 @@ void AdmissionControl::checkTimers() {
 
 			sendGRANTPacket(sourceAddress, nextHop);
 			removePotentialStream(sourceAddress);
+		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
+			SerialUSB.println("ReJC Timer Expired. Check Local Capacity...");
+			bool rejected = checkLocalCapacity(potentialStreams.at(i));
+			if (rejected) {
+				sendREDJPacket(potentialStreams.at(i).getSourceAddress());
+			}
+
 		}
 	}
 
@@ -68,13 +77,17 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 
 	XBeeAddress64 nextHop = heartbeatProtocol->getNextHopAddress();
+	if (!nextHop.equals(XBeeAddress64())) {
 
-	uint8_t payload[] = { 'R', 'E', 'D', 'J', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
-					& 0xff, senderAddress.getLsb() & 0xff };
-	Tx64Request tx = Tx64Request(nextHop, payload, sizeof(payload));
-	xbee.send(tx);
+		uint8_t payload[] = { 'R', 'E', 'D', 'J', '\0', (senderAddress.getMsb() >> 24) & 0xff, (senderAddress.getMsb()
+				>> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
+				(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb()
+						>> 8) & 0xff, senderAddress.getLsb() & 0xff };
+		Tx64Request tx = Tx64Request(nextHop, payload, sizeof(payload));
+		xbee.send(tx);
+	} else {
+		Serial.print("No nextHop for reject message");
+	}
 
 }
 
@@ -121,15 +134,18 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	voiceStreamStatManager->removeStream(senderAddress);
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
+		//sink node
 
 		//Start Grant Timer
-		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, timeoutLength);
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
 		potentialStream.getGrantTimer().startTimer();
 		SerialUSB.println("Start Grant Timer");
 		SerialUSB.println();
-		potentialStreams.push_back(potentialStream);
+		addPotentialStream(potentialStream, dataRate);
 
 	} else if (nextHop.equals(myAddress)) {
+		//on path node
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
@@ -146,14 +162,18 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
-		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, timeoutLength);
-		potentialStreams.push_back(potentialStream);
-
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
+		addPotentialStream(potentialStream, dataRate);
+		potentialStream.getRejcTimer().startTimer();
 		xbee.send(tx);
 
 	} else {
-
-		//TODO Check Local Capacity;
+		//node affected but node on path
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
+		addPotentialStream(potentialStream, dataRate);
+		potentialStream.getRejcTimer().startTimer();
 
 	}
 
@@ -237,6 +257,23 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 	return false;
 }
 
+void AdmissionControl::addPotentialStream(const PotentialStream& potentialStream, float const addDataRate) {
+
+	bool found = false;
+
+	for (int i = 0; i < potentialStreams.size(); i++) {
+		if (potentialStreams.at(i).getSourceAddress().equals(potentialStream.getSourceAddress())) {
+			potentialStreams.at(i).increaseDataRate(addDataRate);
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		potentialStreams.push_back(potentialStream);
+	}
+}
+
 void AdmissionControl::printPotentialStreams() const {
 	for (int i = 0; i < potentialStreams.size(); i++) {
 		potentialStreams.at(i).printPotentialStream();
@@ -244,3 +281,12 @@ void AdmissionControl::printPotentialStreams() const {
 	}
 }
 
+bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
+	float neighborhoodCapacity = heartbeatProtocol->getNeighborhoodCapacity();
+	float potentialDataRate = potentialStream.getIncreasedDataRate();
+
+	if (potentialDataRate > neighborhoodCapacity) {
+		return true;
+	}
+	return false;
+}

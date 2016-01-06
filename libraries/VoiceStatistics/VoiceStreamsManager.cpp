@@ -67,7 +67,6 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 	for (int i = 0; i < streams.size(); i++) {
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
 			streams.at(i).updateVoiceLoss(dataPtr);
-
 			found = true;
 			break;
 		}

@@ -20,7 +20,8 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long TIMEOUT_LENGTH = 5000;
+const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
+const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -52,7 +53,7 @@ void setup() {
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
-			TIMEOUT_LENGTH);
+			GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
 
 	digitalWrite(13, LOW);

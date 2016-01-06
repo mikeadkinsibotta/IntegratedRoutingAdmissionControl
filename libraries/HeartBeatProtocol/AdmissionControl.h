@@ -25,14 +25,15 @@ class AdmissionControl {
 		XBeeAddress64 sinkAddress;
 		HeartbeatProtocol * heartbeatProtocol;
 		VoiceStreamStatManager * voiceStreamStatManager;
-
-		unsigned long timeoutLength;
-
+		unsigned long grantTimeoutLength;
+		unsigned long rejcTimeoutLength;
+		void addPotentialStream(const PotentialStream& potentialStream, const float addDataRate);
+		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
 				HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
-				const unsigned long timeoutLength);
+				const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength);
 
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		void intializationSenderTimeout();

@@ -17,14 +17,21 @@ class PotentialStream {
 		XBeeAddress64 sourceAddress;
 		XBeeAddress64 upStreamNeighbor;
 		Timer grantTimer;
+		Timer rejcTimer;
+		float increasedDataRate;
 
 	public:
-		PotentialStream(XBeeAddress64 sourceAddress, XBeeAddress64 upStreamNeighbor, unsigned long grantTimeoutLength);
+		PotentialStream(const XBeeAddress64& sourceAddress, const XBeeAddress64& upStreamNeighbor,
+				const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength,
+				const float increasedDataRate);
 
 		Timer& getGrantTimer();
 		const XBeeAddress64& getSourceAddress() const;
 		const XBeeAddress64& getUpStreamNeighbor() const;
 		void printPotentialStream() const;
+		void increaseDataRate(const float increasedDataRate);
+		Timer& getRejcTimer();
+		float getIncreasedDataRate() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_POTENTIALSTREAM_H_ */

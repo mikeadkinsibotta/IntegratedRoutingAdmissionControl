@@ -59,6 +59,7 @@ class HeartbeatProtocol {
 		void setTimeoutLength(unsigned long timeoutLength);
 		const XBee& getXbee() const;
 		void setXbee(const XBee& xbee);
+		float getNeighborhoodCapacity() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

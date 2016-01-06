@@ -6,11 +6,13 @@
  */
 #include <PotentialStream.h>
 
-PotentialStream::PotentialStream(XBeeAddress64 sourceAddress, XBeeAddress64 upStreamNeighbor,
-		unsigned long grantTimeoutLength) {
+PotentialStream::PotentialStream(const XBeeAddress64& sourceAddress, const XBeeAddress64& upStreamNeighbor,
+		const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength, const float increasedDataRate) {
 	this->sourceAddress = sourceAddress;
 	this->upStreamNeighbor = upStreamNeighbor;
+	this->increasedDataRate = increasedDataRate;
 	grantTimer = Timer(grantTimeoutLength);
+	rejcTimer = Timer(rejcTimeoutLength);
 }
 
 Timer& PotentialStream::getGrantTimer() {
@@ -32,4 +34,16 @@ void PotentialStream::printPotentialStream() const {
 	upStreamNeighbor.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
+}
+
+void PotentialStream::increaseDataRate(const float increasedDataRate) {
+	this->increasedDataRate += increasedDataRate;
+}
+
+Timer& PotentialStream::getRejcTimer() {
+	return rejcTimer;
+}
+
+float PotentialStream::getIncreasedDataRate() const {
+	return increasedDataRate;
 }

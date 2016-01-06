@@ -83,7 +83,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 		neighborhoodCapacity = UINT32_MAX;
 	} else if (neighborhoodSize > 1) {
 		float saturationRate = satT[neighborhoodSize - 2].getRate();
-		neighborhoodCapacity = saturationRate;
+		neighborhoodCapacity = saturationRate - neighborhoodRate;
 	}
 }
 
@@ -303,3 +303,8 @@ const XBee& HeartbeatProtocol::getXbee() const {
 void HeartbeatProtocol::setXbee(const XBee& xbee) {
 	this->xbee = xbee;
 }
+
+float HeartbeatProtocol::getNeighborhoodCapacity() const {
+	return neighborhoodCapacity;
+}
+
