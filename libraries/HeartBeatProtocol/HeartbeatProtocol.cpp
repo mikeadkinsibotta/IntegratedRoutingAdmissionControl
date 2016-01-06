@@ -140,14 +140,20 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 }
 
 void HeartbeatProtocol::purgeNeighborhoodTable() {
-	int i = 0;
-	for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); ++it) {
-		if (neighborhoodTable.at(i).checkTimer()) {
-			neighborhoodTable.erase(it);
-		}
-		++i;
-	}
 
+	if (!neighborhoodTable.empty()) {
+
+		int i = 0;
+		for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); ++it) {
+			if (neighborhoodTable.at(i).checkTimer()) {
+				SerialUSB.print("Neighbor: ");
+				neighborhoodTable.at(i).getAddress().printAddressASCII(&SerialUSB);
+				SerialUSB.println(" timer has expired and is purged.");
+				neighborhoodTable.erase(it);
+			}
+			++i;
+		}
+	}
 }
 
 void HeartbeatProtocol::printNeighborHoodTable() {
