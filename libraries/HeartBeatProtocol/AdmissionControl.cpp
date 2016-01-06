@@ -30,12 +30,13 @@ AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAdd
 void AdmissionControl::checkTimers() {
 
 	for (int i = 0; i < potentialStreams.size(); i++) {
+		XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 
-		//Only sink should send grant message when timer expires
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
-			SerialUSB.println("Grant Timer Expired");
+			//Only sink should send grant message when timer expires
+			SerialUSB.println("Grant Timer Expired. Sink sends GRNT");
 			SerialUSB.println();
-			XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
+
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 
 			sendGRANTPacket(sourceAddress, nextHop);
@@ -43,11 +44,12 @@ void AdmissionControl::checkTimers() {
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
 			//Wait for all init messages then send rejc if violate local capacity
 			SerialUSB.println("ReJC Timer Expired. Check Local Capacity...");
+			SerialUSB.println();
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
 				sendREDJPacket(potentialStreams.at(i).getSourceAddress());
 			}
-
+			removePotentialStream(sourceAddress);
 		}
 	}
 
@@ -170,6 +172,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		xbee.send(tx);
 
 	} else {
+		SerialUSB.println("Affected Node Received INIT");
 		//node affected but node on path
 		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
 				rejcTimeoutLength, dataRate);
@@ -285,6 +288,16 @@ void AdmissionControl::printPotentialStreams() const {
 bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
 	float neighborhoodCapacity = heartbeatProtocol->getNeighborhoodCapacity();
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
+	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
+
+	SerialUSB.print("Potential Stream: ");
+	sourceAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" Potential Data Rate: ");
+	SerialUSB.print(potentialDataRate);
+
+	SerialUSB.print(" Neighborhood Capacity: ");
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.println();
 
 	if (potentialDataRate > neighborhoodCapacity) {
 		return true;
