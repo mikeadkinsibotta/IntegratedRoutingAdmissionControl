@@ -40,7 +40,7 @@ class HeartbeatProtocol {
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAdress, XBee& xbee, unsigned long timeoutLength);
+				const XBeeAddress64& sinkAdress, XBee& xbee);
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
 		void purgeNeighborhoodTable();
@@ -55,6 +55,10 @@ class HeartbeatProtocol {
 		void setDataRate(float dataRate);
 		const XBeeAddress64& getBroadcastAddress() const;
 		void setBroadcastAddress(const XBeeAddress64& broadcastAddress);
+		unsigned long getTimeoutLength() const;
+		void setTimeoutLength(unsigned long timeoutLength);
+		const XBee& getXbee() const;
+		void setXbee(const XBee& xbee);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

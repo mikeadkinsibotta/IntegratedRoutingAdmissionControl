@@ -108,10 +108,9 @@ void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 
 void Neighbor::updateTimeStamp() {
 	timeStamp = millis();
-
 }
 
-bool Neighbor::checkTimer() {
+bool Neighbor::timerExpired() {
 	if (millis() - timeStamp > timeoutLength) {
 		return true;
 	}

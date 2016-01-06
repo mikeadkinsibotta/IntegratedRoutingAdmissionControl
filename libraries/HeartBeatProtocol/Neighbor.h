@@ -50,7 +50,7 @@ class Neighbor {
 		const XBeeAddress64& getSinkAddress() const;
 		void setSinkAddress(const XBeeAddress64& sinkAddress);
 		void updateTimeStamp();
-		bool checkTimer();
+		bool timerExpired();
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
 		double getRssi() const;

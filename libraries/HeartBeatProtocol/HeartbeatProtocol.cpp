@@ -25,7 +25,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAdress, XBee& xbee, unsigned long timeoutLength) {
+		const XBeeAddress64& sinkAdress, XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -35,7 +35,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = 0;
-	this->timeoutLength = timeoutLength;
+	timeoutLength = 0;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -129,6 +129,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	if (!found) {
 		//Sets timestamp when constructor is called.
+		SerialUSB.println("New Neighbor Added");
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
@@ -142,16 +143,15 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 void HeartbeatProtocol::purgeNeighborhoodTable() {
 
 	if (!neighborhoodTable.empty()) {
-
-		int i = 0;
-		for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); ++it) {
-			if (neighborhoodTable.at(i).checkTimer()) {
+		for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();) {
+			if (it->timerExpired()) {
 				SerialUSB.print("Neighbor: ");
-				neighborhoodTable.at(i).getAddress().printAddressASCII(&SerialUSB);
+				it->getAddress().printAddressASCII(&SerialUSB);
 				SerialUSB.println(" timer has expired and is purged.");
-				neighborhoodTable.erase(it);
+				it = neighborhoodTable.erase(it);
+			} else {
+				++it;
 			}
-			++i;
 		}
 	}
 }
@@ -286,4 +286,20 @@ const XBeeAddress64& HeartbeatProtocol::getBroadcastAddress() const {
 
 void HeartbeatProtocol::setBroadcastAddress(const XBeeAddress64& broadcastAddress) {
 	this->broadcastAddress = broadcastAddress;
+}
+
+unsigned long HeartbeatProtocol::getTimeoutLength() const {
+	return timeoutLength;
+}
+
+void HeartbeatProtocol::setTimeoutLength(unsigned long timeoutLength) {
+	this->timeoutLength = timeoutLength;
+}
+
+const XBee& HeartbeatProtocol::getXbee() const {
+	return xbee;
+}
+
+void HeartbeatProtocol::setXbee(const XBee& xbee) {
+	this->xbee = xbee;
 }

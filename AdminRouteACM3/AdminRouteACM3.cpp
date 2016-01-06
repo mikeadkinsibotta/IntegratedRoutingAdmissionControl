@@ -16,6 +16,8 @@
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B31805
 
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
+
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const unsigned long TIMEOUT_LENGTH = 5000;
@@ -46,8 +48,7 @@ void setup() {
 	SerialUSB.println();
 
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
-	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee,
-			(heartbeat.getInterval() * 3));
+	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
@@ -153,6 +154,8 @@ void setupThreads() {
 	heartbeat.enabled = true;
 	heartbeat.setInterval(3000 + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
+
+	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	pathLoss.ThreadName = "Send Path Loss";
 	pathLoss.enabled = false;
