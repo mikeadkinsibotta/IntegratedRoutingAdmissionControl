@@ -280,6 +280,12 @@ float HeartbeatProtocol::getLocalCapacity() const {
 
 	}
 
+	if (neighborhoodCapacity < localCapacity) {
+		localCapacity = neighborhoodCapacity;
+	}
+
+	SerialUSB.print("Local Capacity: ");
+	SerialUSB.println(localCapacity);
 	return localCapacity;
 }
 

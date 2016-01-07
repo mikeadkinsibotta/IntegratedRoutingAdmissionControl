@@ -31,7 +31,6 @@ void AdmissionControl::checkTimers() {
 
 	for (int i = 0; i < potentialStreams.size(); i++) {
 		XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
-
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
 			SerialUSB.println("Grant Timer Expired. Sink sends GRNT");
@@ -61,14 +60,14 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 	SerialUSB.println("Sending Init");
 	bool hasNextHop = heartbeatProtocol->isRouteFlag();
 	if (hasNextHop) {
-		SerialUSB.println("SendingInitalMessage1");
+
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHopAddress();
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
 
 		SerialUSB.print("Injection Rate: ");
-		SerialUSB.print(injectionRate);
+		SerialUSB.println(injectionRate);
 
 		uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
 				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
@@ -147,16 +146,15 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	//remove any old streams
 	voiceStreamStatManager->removeStream(senderAddress);
 
+	PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+			rejcTimeoutLength, dataRate);
+
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 		//sink node
 
 		//Start Grant Timer
-		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
-				rejcTimeoutLength, dataRate);
 		potentialStream.getGrantTimer().startTimer();
 		SerialUSB.println("Start Grant Timer");
-		SerialUSB.println();
-		addPotentialStream(potentialStream, dataRate);
 
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
@@ -176,23 +174,24 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
-		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
-				rejcTimeoutLength, dataRate);
-		addPotentialStream(potentialStream, dataRate);
+		SerialUSB.println("Start REJC Timer");
 		potentialStream.getRejcTimer().startTimer();
+
 		xbee.send(tx);
 
 	} else {
 		SerialUSB.println("Affected Node Received INIT");
+
 		//node affected but node on path
-		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
-				rejcTimeoutLength, dataRate);
-		addPotentialStream(potentialStream, dataRate);
+		SerialUSB.println("Start REJC Timer");
 		potentialStream.getRejcTimer().startTimer();
 
 	}
 
+	addPotentialStream(potentialStream, dataRate);
+
 	printPotentialStreams();
+	SerialUSB.println();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
