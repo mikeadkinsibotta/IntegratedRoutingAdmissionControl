@@ -21,7 +21,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	routeFlag = false;
 	qualityOfPath = 0;
 	dataRate = 0;
-	neighborhoodCapacity = 0;
+	neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
 }
 
@@ -35,7 +35,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->broadcastAddress = broadcastAddress;
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
-	this->neighborhoodCapacity = 0;
+	this->neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
 
 	if (myAddress.equals(sinkAddress)) {
@@ -135,15 +135,11 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	if (!found) {
 		//Sets timestamp when constructor is called.
-		SerialUSB.print("New Neighbor Added ");
-
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
 				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
-		neighbor.getAddress().printAddressASCII(&SerialUSB);
-		SerialUSB.println();
 		neighborhoodTable.push_back(neighbor);
 	}
 
@@ -273,6 +269,20 @@ void HeartbeatProtocol::buildSaturationTable() {
 
 }
 
+float HeartbeatProtocol::getLocalCapacity() const {
+
+	float localCapacity = MAX_FLT;
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		float neighborCapacity = neighborhoodTable.at(i).getNeighborhoodCapacity();
+		if (neighborCapacity < localCapacity) {
+			localCapacity = neighborCapacity;
+		}
+
+	}
+
+	return localCapacity;
+}
+
 bool HeartbeatProtocol::isRouteFlag() const {
 	return routeFlag;
 }
@@ -311,9 +321,5 @@ const XBee& HeartbeatProtocol::getXbee() const {
 
 void HeartbeatProtocol::setXbee(const XBee& xbee) {
 	this->xbee = xbee;
-}
-
-float HeartbeatProtocol::getNeighborhoodCapacity() const {
-	return neighborhoodCapacity;
 }
 

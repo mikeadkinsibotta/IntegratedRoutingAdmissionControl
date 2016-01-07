@@ -79,7 +79,6 @@ void VoiceStreamStats::calculateThroughput() {
 	voiceQuality = (voiceQuality / totalPacketsRecieved);
 	SerialUSB.print(" Average R-Quality ");
 	SerialUSB.println(voiceQuality);
-	SerialUSB.println();
 
 	voiceQuality = 0;
 
@@ -117,7 +116,6 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 		senderAddress.printAddressASCII(&SerialUSB);
 		SerialUSB.print(" Packet Loss: ");
 		SerialUSB.println(packetLRatio);
-		SerialUSB.println();
 
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
 

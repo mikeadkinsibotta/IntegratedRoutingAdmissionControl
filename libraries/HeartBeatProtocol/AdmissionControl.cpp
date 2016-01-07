@@ -43,7 +43,7 @@ void AdmissionControl::checkTimers() {
 			removePotentialStream(sourceAddress);
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
 			//Wait for all init messages then send rejc if violate local capacity
-			SerialUSB.println("ReJC Timer Expired. Check Local Capacity...");
+			SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
 			SerialUSB.println();
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
@@ -145,7 +145,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	SerialUSB.println(dataRate);
 
 	//remove any old streams
-	SerialUSB.println("Check for old stream...");
 	voiceStreamStatManager->removeStream(senderAddress);
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
@@ -194,8 +193,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	}
 
 	printPotentialStreams();
-	SerialUSB.println("End handleInitPacket");
-	SerialUSB.println();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
@@ -298,7 +295,7 @@ void AdmissionControl::printPotentialStreams() const {
 }
 
 bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
-	float neighborhoodCapacity = heartbeatProtocol->getNeighborhoodCapacity();
+	float neighborhoodCapacity = heartbeatProtocol->getLocalCapacity();
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
 
@@ -307,7 +304,7 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	SerialUSB.print(" Potential Data Rate: ");
 	SerialUSB.print(potentialDataRate);
 
-	SerialUSB.print(" Neighborhood Capacity: ");
+	SerialUSB.print(" Local Capacity: ");
 	SerialUSB.print(neighborhoodCapacity);
 	SerialUSB.println();
 
