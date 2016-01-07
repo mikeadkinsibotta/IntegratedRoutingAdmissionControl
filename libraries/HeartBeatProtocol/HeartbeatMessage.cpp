@@ -22,21 +22,6 @@ HeartbeatMessage::HeartbeatMessage() {
 	rssi = 0;
 }
 
-/*HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
- const double relativeDistance, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
- const float neighborhoodCapacity, const bool routeFlag) {
-
- this->senderAddress = senderAddress;
- this->sinkAddress = sinkAddress;
- this->relativeDistance = relativeDistance;
- this->seqNum = seqNum;
- this->dataRate = dataRate;
- this->qualityOfPath = qualityOfPath;
- this->neighborhoodCapacity = neighborhoodCapacity;
- this->routeFlag = routeFlag;
- rssi = 0;
- }*/
-
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& sinkAddress, const uint8_t seqNum, const float dataRate,
 		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
 
@@ -134,9 +119,6 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	dataRateP = (float*) (dataPtr + 15);
 	neighborhoodCapacity = *dataRateP;
-
-	SerialUSB.println("SeqNum");
-	SerialUSB.println(seqNum);
 
 }
 
