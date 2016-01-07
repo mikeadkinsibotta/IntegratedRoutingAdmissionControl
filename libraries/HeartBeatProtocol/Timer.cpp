@@ -9,20 +9,23 @@
 Timer::Timer() {
 	timeStamp = millis();
 	timeoutLength = 0;
+	active = false;
 }
 Timer::Timer(const unsigned long timeoutLength) {
-	timeStamp = millis();
+	timeStamp = 0;
 	this->timeoutLength = timeoutLength;
+	active = false;
 
 }
 
 void Timer::startTimer() {
-
 	timeStamp = millis();
+	active = true;
 }
 
 bool Timer::timeoutTimer() {
-	if (millis() - timeStamp > timeoutLength) {
+	if ((millis() - timeStamp) > timeoutLength && active) {
+		active = false;
 		return true;
 	}
 	return false;

@@ -15,6 +15,7 @@ class Timer {
 	private:
 		unsigned long timeStamp;
 		unsigned long timeoutLength;
+		bool active;
 
 	public:
 		Timer();

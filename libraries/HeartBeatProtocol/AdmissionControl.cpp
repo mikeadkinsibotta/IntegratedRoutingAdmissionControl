@@ -50,6 +50,7 @@ void AdmissionControl::checkTimers() {
 				SerialUSB.println("Sending Reject Packet...");
 				sendREDJPacket(potentialStreams.at(i).getSourceAddress());
 			}
+
 			removePotentialStream(sourceAddress);
 		}
 	}
