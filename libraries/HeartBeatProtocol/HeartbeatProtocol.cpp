@@ -13,7 +13,7 @@
 const double MILLIWATTS = 0.0000000199526231;
 const double DISTANCE = 5.5;
 const double N_P = -1.095;
-const uint8_t HEARTBEAT_PAYLOAD_SIZE = 32;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
 
 HeartbeatProtocol::HeartbeatProtocol() {
@@ -49,8 +49,8 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 		printNeighborHoodTable();
 	}
 
-	HeartbeatMessage message = HeartbeatMessage(XBeeAddress64(), sinkAddress, seqNum, dataRate, qualityOfPath,
-			neighborhoodCapacity, routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(sinkAddress, seqNum, dataRate, qualityOfPath, neighborhoodCapacity,
+			routeFlag);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 
@@ -99,14 +99,8 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 		routeFlag = message.isRouteFlag();
 	}
 
-	if (!ignoreHeartBeatFlag) {
-		updateNeighborHoodTable(message);
-		reCalculateNeighborhoodCapacity();
-	} else if (!message.getSenderAddress().equals(sinkAddress)) {
-		updateNeighborHoodTable(message);
-		reCalculateNeighborhoodCapacity();
-
-	}
+	updateNeighborHoodTable(message);
+	reCalculateNeighborhoodCapacity();
 
 	if (!myAddress.equals(sinkAddress)) {
 		calculatePathQualityNextHop();
@@ -163,7 +157,6 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 
 void HeartbeatProtocol::printNeighborHoodTable() {
 
-	SerialUSB.println("My Info");
 	SerialUSB.print("MyAddress: ");
 	myAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", DataRate: ");
@@ -182,9 +175,6 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	nextHopAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
-	if (neighborhoodTable.size() > 0) {
-		SerialUSB.println("Print Neighbor Table");
-	}
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 
 		SerialUSB.print("NeighborAddress: ");

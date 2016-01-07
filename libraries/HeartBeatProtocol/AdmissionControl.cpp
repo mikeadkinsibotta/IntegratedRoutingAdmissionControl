@@ -111,8 +111,6 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
-	SerialUSB.println("Received INIT Packet");
-
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
 	SerialUSB.print("Receiving request for new stream via: ");
 	receivedAddress.printAddressASCII(&SerialUSB);
@@ -174,16 +172,11 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
-		SerialUSB.println("Start REJC Timer");
 		potentialStream.getRejcTimer().startTimer();
-
 		xbee.send(tx);
 
 	} else {
-		SerialUSB.println("Affected Node Received INIT");
-
 		//node affected but node on path
-		SerialUSB.println("Start REJC Timer");
 		potentialStream.getRejcTimer().startTimer();
 
 	}

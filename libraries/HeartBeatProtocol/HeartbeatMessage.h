@@ -19,7 +19,6 @@ class HeartbeatMessage {
 	private:
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
-		XBeeAddress64 streamSourceAddress;
 		uint8_t seqNum;
 		float dataRate;
 		double rssi;
@@ -31,21 +30,16 @@ class HeartbeatMessage {
 	public:
 		HeartbeatMessage();
 
-		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& streamSourceAddress,
-				const XBeeAddress64& sinkAddress, const double relativeDistance, const uint8_t seqNum,
-				const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
-				const bool routeFlag);
+		/*HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
+		 const double relativeDistance, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
+		 const float neighborhoodCapacity, const bool routeFlag);*/
 
-		HeartbeatMessage(const XBeeAddress64& streamSourceAddress, const XBeeAddress64& sinkAddress,
-				const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
-				const float neighborhoodCapacity, const bool routeFlag);
+		HeartbeatMessage(const XBeeAddress64& sinkAddress, const uint8_t seqNum, const float dataRate,
+				const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag);
 
 		void generateBeatMessage(uint8_t payload[]);
 		void transcribeHeartbeatPacket(const Rx64Response& response);
 		void printMessage();
-
-		const XBeeAddress64& getStreamSourceAddress() const;
-		void setStreamSourceAddress(const XBeeAddress64& streamSourceAddress);
 
 		const XBeeAddress64& getSenderAddress() const;
 		void setSenderAddress(const XBeeAddress64& senderAddress);
