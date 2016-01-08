@@ -15,6 +15,7 @@ const double DISTANCE = 5.5;
 const double N_P = -1.095;
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
+const float EPISLON = 0.001;
 
 HeartbeatProtocol::HeartbeatProtocol() {
 	seqNum = 0;
@@ -71,7 +72,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	uint8_t neighborhoodSize = 0;
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
-		if (abs(neighborhoodTable.at(i).getDataRate() - 0) > 0.001) {
+		if (abs(neighborhoodTable.at(i).getDataRate() - 0) > EPISLON) {
 			neighborhoodSize++;
 		}
 	}
@@ -79,7 +80,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	//Don't forget to include myself
 	neighborhoodRate += dataRate;
 
-	if (abs(dataRate - 0) > 0.001) {
+	if (abs(dataRate - 0) > EPISLON) {
 		neighborhoodSize++;
 	}
 
