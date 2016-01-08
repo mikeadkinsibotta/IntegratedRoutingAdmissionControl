@@ -23,6 +23,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	dataRate = 0;
 	neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
+	buildSaturationTable();
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
@@ -41,6 +42,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
 	}
+	buildSaturationTable();
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
@@ -69,7 +71,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	uint8_t neighborhoodSize = 0;
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
-		if (neighborhoodTable.at(i).getDataRate() > 0) {
+		if (abs(neighborhoodTable.at(i).getDataRate() - 0) > 0.001) {
 			neighborhoodSize++;
 		}
 	}
@@ -77,7 +79,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	//Don't forget to include myself
 	neighborhoodRate += dataRate;
 
-	if (dataRate > 0) {
+	if (abs(dataRate - 0) > 0.001) {
 		neighborhoodSize++;
 	}
 
