@@ -94,7 +94,9 @@ void sendVoicePacket() {
 }
 
 void broadcastHeartbeat() {
-	heartbeatProtocol->broadcastHeartBeat();
+	if (millis() > 10000) {
+		heartbeatProtocol->broadcastHeartBeat();
+	}
 }
 
 void sendPathPacket() {
@@ -177,9 +179,9 @@ void setupThreads() {
 	sendInital.setInterval(REQUEST_STREAM);
 	sendInital.onRun(sendInitPacket);
 
-	controller.add(&heartbeat);
 	controller.add(&responseThread);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
 	controller.add(&generateVoice);
+	controller.add(&heartbeat);
 }
