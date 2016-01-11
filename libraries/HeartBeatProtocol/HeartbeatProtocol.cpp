@@ -10,9 +10,9 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define DEBUG true
 
-const double MILLIWATTS = 0.0000000199526231;
-const double DISTANCE = 5.5;
-const double N_P = -1.095;
+const double MILLIWATTS = 0.000001995262315;
+const double DISTANCE = 1;
+const double N_P = 3.88237;
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
 const float EPISLON = 0.001;
