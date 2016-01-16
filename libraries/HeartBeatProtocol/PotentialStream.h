@@ -19,6 +19,7 @@ class PotentialStream {
 		Timer grantTimer;
 		Timer rejcTimer;
 		float increasedDataRate;
+		bool onPath;
 
 	public:
 		PotentialStream(const XBeeAddress64& sourceAddress, const XBeeAddress64& upStreamNeighbor,
@@ -32,6 +33,8 @@ class PotentialStream {
 		void increaseDataRate(const float increasedDataRate);
 		Timer& getRejcTimer();
 		float getIncreasedDataRate() const;
+		bool isOnPath() const;
+		void setOnPath(bool onPath);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_POTENTIALSTREAM_H_ */

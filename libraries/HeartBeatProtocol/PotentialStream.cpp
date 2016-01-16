@@ -13,6 +13,7 @@ PotentialStream::PotentialStream(const XBeeAddress64& sourceAddress, const XBeeA
 	this->increasedDataRate = increasedDataRate;
 	grantTimer = Timer(grantTimeoutLength);
 	rejcTimer = Timer(rejcTimeoutLength);
+	onPath = false;
 }
 
 Timer& PotentialStream::getGrantTimer() {
@@ -32,6 +33,8 @@ void PotentialStream::printPotentialStream() const {
 	sourceAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(" Upstream Neighbor: ");
 	upStreamNeighbor.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" OnPath ");
+	SerialUSB.print(onPath);
 	SerialUSB.println();
 
 }
@@ -46,4 +49,12 @@ Timer& PotentialStream::getRejcTimer() {
 
 float PotentialStream::getIncreasedDataRate() const {
 	return increasedDataRate;
+}
+
+bool PotentialStream::isOnPath() const {
+	return onPath;
+}
+
+void PotentialStream::setOnPath(bool onPath) {
+	this->onPath = onPath;
 }

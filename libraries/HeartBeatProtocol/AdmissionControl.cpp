@@ -49,7 +49,11 @@ void AdmissionControl::checkTimers() {
 				sendREDJPacket(potentialStreams.at(i).getSourceAddress());
 			}
 
-			removePotentialStream(sourceAddress);
+			//OnPath will be receiving a GRNT packet.  Potential Stream will be removed when forwarding
+			//GRNT packet.
+			if (!potentialStreams.at(i).isOnPath()) {
+				removePotentialStream(sourceAddress);
+			}
 		}
 	}
 
@@ -152,7 +156,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
 		SerialUSB.println("Start Grant Timer");
-
+		potentialStream.setOnPath(true);
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
 
@@ -172,6 +176,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
 		potentialStream.getRejcTimer().startTimer();
+		potentialStream.setOnPath(true);
 		xbee.send(tx);
 
 	} else {
@@ -181,9 +186,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	}
 
 	addPotentialStream(potentialStream, dataRate);
-
 	printPotentialStreams();
-	SerialUSB.println();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
@@ -221,7 +224,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 		SerialUSB.print("Forward GRANT recevied from: ");
 		previousHop.printAddressASCII(&SerialUSB);
 		SerialUSB.println();
-
+		printPotentialStreams();
 		for (int i = 0; i < potentialStreams.size(); i++) {
 			//SerialUSB.println("Old Stream");
 			if (potentialStreams.at(i).getSourceAddress().equals(sourceAddress)) {
@@ -279,10 +282,11 @@ void AdmissionControl::addPotentialStream(const PotentialStream& potentialStream
 }
 
 void AdmissionControl::printPotentialStreams() const {
+	SerialUSB.println("Potential Streams: ");
 	for (int i = 0; i < potentialStreams.size(); i++) {
 		potentialStreams.at(i).printPotentialStream();
-
 	}
+	SerialUSB.println();
 }
 
 bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
