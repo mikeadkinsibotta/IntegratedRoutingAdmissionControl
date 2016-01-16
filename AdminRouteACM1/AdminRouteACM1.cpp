@@ -6,15 +6,15 @@
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 3000
 #define REQUEST_STREAM 12000
-#define SENDER false
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define HEARTBEAT_ADDRESS_1 0x00000000
-#define HEARTBEAT_ADDRESS_2 0x0000FFFF
+//#define HEARTBEAT_ADDRESS_1 0x00000000
+//#define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define IGNORE_HEARTBEAT false
 #define PAYLOAD_SIZE 76
-//#define HEARTBEAT_ADDRESS_1 0x0013A200
-//#define HEARTBEAT_ADDRESS_2 0x40B31805
+#define HEARTBEAT_ADDRESS_1 0x0013A200
+#define HEARTBEAT_ADDRESS_2 0x40B31805
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 
@@ -23,7 +23,7 @@ const uint8_t CODEC_SETTTING = 2;
 const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
 const unsigned long HEARTBEAT_INTERVAL = 5000;
-const unsigned long PATHLOSS_INTERVAL = 3000;
+const unsigned long PATHLOSS_INTERVAL = 8000;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;

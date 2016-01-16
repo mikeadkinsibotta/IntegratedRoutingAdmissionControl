@@ -172,7 +172,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", NextHopAddress: ");
-	nextHopAddress.printAddressASCII(&SerialUSB);
+	nextHop.getAddress().printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
@@ -230,13 +230,13 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	if (qop != UINT8_MAX) {
 
 		qualityOfPath = qop;
-		nextHopAddress = neighbor.getAddress();
+		nextHop = neighbor;
 		routeFlag = true;
 
 	} else {
 		//reset path if path does not exist
 		qualityOfPath = 0;
-		nextHopAddress = XBeeAddress64();
+		nextHop = Neighbor();
 		routeFlag = false;
 
 	}
@@ -283,8 +283,8 @@ bool HeartbeatProtocol::isRouteFlag() const {
 	return routeFlag;
 }
 
-const XBeeAddress64& HeartbeatProtocol::getNextHopAddress() const {
-	return nextHopAddress;
+const Neighbor& HeartbeatProtocol::getNextHop() const {
+	return nextHop;
 }
 
 float HeartbeatProtocol::getDataRate() const {
