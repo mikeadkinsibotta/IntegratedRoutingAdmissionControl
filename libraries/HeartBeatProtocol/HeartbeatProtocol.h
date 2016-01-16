@@ -38,6 +38,9 @@ class HeartbeatProtocol {
 
 		void buildSaturationTable();
 		void reCalculateNeighborhoodCapacity();
+		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& message);
+		void noNeighborcalculatePathQualityNextHop();
+		void withNeighborcalculatePathQualityNextHop();
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
@@ -46,7 +49,6 @@ class HeartbeatProtocol {
 		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
 		void purgeNeighborhoodTable();
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
-		void calculatePathQualityNextHop();
 		void printNeighborHoodTable();
 		float requestToStream(XBee &xbee, const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop,
 				const float injectionRate);

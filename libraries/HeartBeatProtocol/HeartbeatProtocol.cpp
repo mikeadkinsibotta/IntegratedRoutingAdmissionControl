@@ -103,7 +103,11 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 	reCalculateNeighborhoodCapacity();
 
 	if (!myAddress.equals(sinkAddress)) {
-		calculatePathQualityNextHop();
+		if (nextHop.equals(Neighbor())) {
+			noNeighborcalculatePathQualityNextHop();
+		} else if (nextHop.getAddress().equals(message.getSenderAddress())) {
+			withNeighborcalculatePathQualityNextHop();
+		}
 	}
 }
 
@@ -113,15 +117,13 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
-			neighborhoodTable.at(i).setDataRate(heartbeatMessage.getDataRate());
-			neighborhoodTable.at(i).setSeqNum(heartbeatMessage.getSeqNum());
-			neighborhoodTable.at(i).setQualityOfPath(heartbeatMessage.getQualityOfPath());
-			neighborhoodTable.at(i).setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
-			neighborhoodTable.at(i).setRouteFlag(heartbeatMessage.isRouteFlag());
-			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
-			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
-			neighborhoodTable.at(i).setRssi(heartbeatMessage.getRssi());
-			neighborhoodTable.at(i).updateTimeStamp();
+			updateNeighbor(neighborhoodTable.at(i), heartbeatMessage);
+
+			if (neighborhoodTable.at(i).equals(nextHop)) {
+				SerialUSB.println("Updated Next Hop with info");
+				nextHop = neighborhoodTable.at(i);
+			}
+
 			found = true;
 			break;
 		}
@@ -137,6 +139,18 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 		neighborhoodTable.push_back(neighbor);
 	}
 
+}
+
+void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
+	neighbor.setDataRate(heartbeatMessage.getDataRate());
+	neighbor.setSeqNum(heartbeatMessage.getSeqNum());
+	neighbor.setQualityOfPath(heartbeatMessage.getQualityOfPath());
+	neighbor.setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
+	neighbor.setRouteFlag(heartbeatMessage.isRouteFlag());
+	neighbor.setSinkAddress(heartbeatMessage.getSinkAddress());
+	neighbor.setRelativeDistance(heartbeatMessage.getRelativeDistance());
+	neighbor.setRssi(heartbeatMessage.getRssi());
+	neighbor.updateTimeStamp();
 }
 
 void HeartbeatProtocol::purgeNeighborhoodTable() {
@@ -200,56 +214,71 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.println();
 }
 
-void HeartbeatProtocol::calculatePathQualityNextHop() {
+void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 	//Add 1 to include myself
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 	uint8_t qop = UINT8_MAX;
 	Neighbor neighbor;
 
-	if (nextHop.equals(Neighbor())) {
-		SerialUSB.println("I need a nextHop!");
-		/*If no neighbor is currently selected:
-		 * - Pick neighbor with smallest quality of path
-		 * - If quality of path is the same, pick with shorter relative distance
-		 */
-		for (int i = 0; i < neighborhoodTable.size(); i++) {
+	SerialUSB.println("I need a nextHop!");
+	/*If no neighbor is currently selected:
+	 * - Pick neighbor with smallest quality of path
+	 * - If quality of path is the same, pick with shorter relative distance
+	 */
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
 
-			if (neighborhoodTable.at(i).isRouteFlag()) {
-				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+		if (neighborhoodTable.at(i).isRouteFlag()) {
+			uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
 
-				if (path < qop) {
-					qop = path;
+			if (path < qop) {
+				qop = path;
+				neighbor = neighborhoodTable.at(i);
+
+			} else if (qop == path) {
+				double relativeDistanceCurrent = neighbor.getRelativeDistance();
+				double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
+				if (relativeDistanceCurrent > relativeDistanceNew) {
 					neighbor = neighborhoodTable.at(i);
-
-				} else if (qop == path) {
-					double relativeDistanceCurrent = neighbor.getRelativeDistance();
-					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
-					if (relativeDistanceCurrent > relativeDistanceNew) {
-						neighbor = neighborhoodTable.at(i);
-					}
 				}
 			}
 		}
+	}
 
-		//Make sure route exists
-		if (qop != UINT8_MAX) {
-			qualityOfPath = qop;
-			nextHop = neighbor;
-			routeFlag = true;
-
-		} else {
-			//reset path if path does not exist
-			qualityOfPath = 0;
-			nextHop = Neighbor();
-			routeFlag = false;
-		}
+	//Make sure route exists
+	if (qop != UINT8_MAX) {
+		qualityOfPath = qop;
+		nextHop = neighbor;
+		routeFlag = true;
 
 	} else {
-		//Neighbor is already selected.  Should I make some adjustments?
-		SerialUSB.println("Should I adjust my nextHop neighbor?");
-
+		//reset path if path does not exist
+		qualityOfPath = 0;
+		nextHop = Neighbor();
+		routeFlag = false;
 	}
+
+}
+
+void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
+
+	//Add 1 to include myself
+
+	//Neighbor is already selected.  Should I make some adjustments?
+
+	unsigned long timeStamp = nextHop.getTimeStamp();
+	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
+
+	SerialUSB.print("TimeStamp: ");
+	SerialUSB.println(timeStamp);
+	SerialUSB.print("PreviousTimeStamp: ");
+	SerialUSB.println(previousTimeStamp);
+
+	unsigned long diff = timeStamp - previousTimeStamp;
+	SerialUSB.println("Should I adjust my nextHop neighbor?");
+	SerialUSB.print("Difference from last timeStamp: ");
+	SerialUSB.println(diff);
+
 }
 
 void HeartbeatProtocol::buildSaturationTable() {

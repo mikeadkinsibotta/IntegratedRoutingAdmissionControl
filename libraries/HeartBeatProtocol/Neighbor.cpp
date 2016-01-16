@@ -12,6 +12,7 @@ Neighbor::Neighbor() {
 	relativeDistance = 0;
 	packetLoss = 0;
 	rssi = 0;
+	previousTimeStamp = 0;
 	timeStamp = 0;
 	timeoutLength = 0;
 }
@@ -31,6 +32,7 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 	this->packetLoss = 0;
 	this->rssi = rssi;
 	timeStamp = millis();
+	previousTimeStamp = timeStamp;
 	this->timeoutLength = timeoutLength;
 }
 
@@ -107,6 +109,7 @@ void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 }
 
 void Neighbor::updateTimeStamp() {
+	previousTimeStamp = timeStamp;
 	timeStamp = millis();
 }
 
@@ -128,6 +131,14 @@ double Neighbor::getRssi() const {
 
 void Neighbor::setRssi(double rssi) {
 	this->rssi = rssi;
+}
+
+unsigned long Neighbor::getPreviousTimeStamp() const {
+	return previousTimeStamp;
+}
+
+unsigned long Neighbor::getTimeStamp() const {
+	return timeStamp;
 }
 
 bool Neighbor::equals(const Neighbor& neighbor) const {
