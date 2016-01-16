@@ -23,6 +23,7 @@ const uint8_t CODEC_SETTTING = 2;
 const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
 const unsigned long HEARTBEAT_INTERVAL = 5000;
+const unsigned long PATHLOSS_INTERVAL = 3000;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -163,7 +164,7 @@ void setupThreads() {
 
 	pathLoss.ThreadName = "Send Path Loss";
 	pathLoss.enabled = false;
-	pathLoss.setInterval(3000 + random(100));
+	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
