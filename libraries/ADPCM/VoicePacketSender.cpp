@@ -191,21 +191,23 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 	packetSource.setLsb(
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
+	uint8_t dataLoss = dataPtr[13];
+	uint8_t totalPacketSent = dataPtr[14];
+	uint8_t totalPacketReceived = dataPtr[15];
+
 	if (!senderAddress.equals(packetSource)) {
 
 		XBeeAddress64 nextHop;
 		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
 
-		Serial.print("ForwardPathPacket");
+		SerialUSB.println("Forward Path Packet");
 
 		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
-
+		SerialUSB.print("DataLoss: ");
+		SerialUSB.println(dataLoss);
 	} else {
-		Serial.println("Received Path Packet");
-		uint8_t dataLoss = dataPtr[13];
-		uint8_t totalPacketSent = dataPtr[14];
-		uint8_t totalPacketReceived = dataPtr[15];
+		SerialUSB.println("Received Path Packet");
 
 		//Returned to the original sender, update packet loss
 		updateDataRate(dataLoss);

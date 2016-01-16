@@ -256,6 +256,9 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 	int i = 0;
 	for (vector<PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end(); ++it) {
 		if (potentialStreams.at(i).getSourceAddress().equals(packetSource)) {
+			SerialUSB.print("Removed Potential Stream: ");
+			potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
+			SerialUSB.println();
 			potentialStreams.erase(it);
 			return true;
 		}
