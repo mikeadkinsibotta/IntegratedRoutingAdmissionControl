@@ -204,8 +204,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
-		SerialUSB.print("DataLoss: ");
-		SerialUSB.println(dataLoss);
 	} else {
 		SerialUSB.println("Received Path Packet");
 
