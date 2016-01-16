@@ -43,7 +43,7 @@ void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSourc
 		stream.calculateThroughput();
 		streams.push_back(stream);
 	}
-
+	SerialUSB.println();
 }
 
 bool VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {

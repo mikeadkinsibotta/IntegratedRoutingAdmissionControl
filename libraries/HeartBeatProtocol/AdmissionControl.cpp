@@ -43,7 +43,6 @@ void AdmissionControl::checkTimers() {
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
 			//Wait for all init messages then send rejc if violate local capacity
 			SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
-			SerialUSB.println();
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
 				SerialUSB.println("Sending Reject Packet...");
@@ -302,8 +301,10 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 
 	if (potentialDataRate > neighborhoodCapacity) {
 		SerialUSB.println("Stream Rejected");
+		SerialUSB.println();
 		return true;
 	}
 	SerialUSB.println("Stream Accepted");
+	SerialUSB.println();
 	return false;
 }
