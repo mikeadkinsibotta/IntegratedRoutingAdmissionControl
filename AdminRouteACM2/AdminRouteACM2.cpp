@@ -22,6 +22,7 @@ const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
+const unsigned long HEARTBEAT_INTERVAL = 5000;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -155,7 +156,7 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(3000 + random(100));
+	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
 
 	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
