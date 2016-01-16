@@ -55,6 +55,7 @@ class Neighbor {
 		void printNeighbor() const;
 		double getRssi() const;
 		void setRssi(double rssi);
+		bool equals(const Neighbor& neighbor) const;
 
 };
 

@@ -122,6 +122,18 @@ bool Neighbor::compare(const Neighbor &b) {
 
 }
 
+double Neighbor::getRssi() const {
+	return rssi;
+}
+
+void Neighbor::setRssi(double rssi) {
+	this->rssi = rssi;
+}
+
+bool Neighbor::equals(const Neighbor& neighbor) const {
+	return address.equals(neighbor.getAddress());
+}
+
 void Neighbor::printNeighbor() const {
 	Serial.print('<');
 	address.printAddress(&Serial);
@@ -130,13 +142,5 @@ void Neighbor::printNeighbor() const {
 	Serial.print(',');
 	Serial.print(neighborhoodCapacity);
 	Serial.print('>');
-
 }
 
-double Neighbor::getRssi() const {
-	return rssi;
-}
-
-void Neighbor::setRssi(double rssi) {
-	this->rssi = rssi;
-}

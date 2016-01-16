@@ -207,36 +207,48 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 	uint8_t qop = UINT8_MAX;
 	Neighbor neighbor;
 
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
+	if (nextHop.equals(Neighbor())) {
+		SerialUSB.println("I need a nextHop!");
+		/*If no neighbor is currently selected:
+		 * - Pick neighbor with smallest quality of path
+		 * - If quality of path is the same, pick with shorter relative distance
+		 */
+		for (int i = 0; i < neighborhoodTable.size(); i++) {
 
-		if (neighborhoodTable.at(i).isRouteFlag()) {
-			uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+			if (neighborhoodTable.at(i).isRouteFlag()) {
+				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
 
-			if (path < qop) {
-				qop = path;
-				neighbor = neighborhoodTable.at(i);
-
-			} else if (qop == path) {
-				double relativeDistanceCurrent = neighbor.getRelativeDistance();
-				double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
-				if (relativeDistanceCurrent > relativeDistanceNew) {
+				if (path < qop) {
+					qop = path;
 					neighbor = neighborhoodTable.at(i);
+
+				} else if (qop == path) {
+					double relativeDistanceCurrent = neighbor.getRelativeDistance();
+					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
+					if (relativeDistanceCurrent > relativeDistanceNew) {
+						neighbor = neighborhoodTable.at(i);
+					}
 				}
 			}
 		}
-	}
 
-	//Make sure route exists
-	if (qop != UINT8_MAX) {
-		qualityOfPath = qop;
-		nextHop = neighbor;
-		routeFlag = true;
+		//Make sure route exists
+		if (qop != UINT8_MAX) {
+			qualityOfPath = qop;
+			nextHop = neighbor;
+			routeFlag = true;
+
+		} else {
+			//reset path if path does not exist
+			qualityOfPath = 0;
+			nextHop = Neighbor();
+			routeFlag = false;
+		}
 
 	} else {
-		//reset path if path does not exist
-		qualityOfPath = 0;
-		nextHop = Neighbor();
-		routeFlag = false;
+		//Neighbor is already selected.  Should I make some adjustments?
+		SerialUSB.println("Should I adjust my nextHop neighbor?");
+
 	}
 }
 
