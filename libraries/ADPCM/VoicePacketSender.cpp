@@ -200,12 +200,13 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		XBeeAddress64 nextHop;
 		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
 
-		SerialUSB.println("Forward Path Packet");
+		SerialUSB.print("Forward Path Packet - Stream Sender: ");
+		packetSource.printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 
 		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
-		SerialUSB.print("DataLoss: ");
-		SerialUSB.println(dataLoss);
+
 	} else {
 		SerialUSB.println("Received Path Packet");
 

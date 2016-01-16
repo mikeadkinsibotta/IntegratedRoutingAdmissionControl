@@ -228,7 +228,6 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 
 	//Make sure route exists
 	if (qop != UINT8_MAX) {
-
 		qualityOfPath = qop;
 		nextHop = neighbor;
 		routeFlag = true;
@@ -238,16 +237,7 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 		qualityOfPath = 0;
 		nextHop = Neighbor();
 		routeFlag = false;
-
 	}
-
-	/*SerialUSB.print("QualityOfPath ");
-	 SerialUSB.println(qualityOfPath);
-
-	 SerialUSB.print("NextHopAddress ");
-	 nextHopAddress.printAddressASCII(&SerialUSB);
-	 SerialUSB.println();*/
-
 }
 
 void HeartbeatProtocol::buildSaturationTable() {

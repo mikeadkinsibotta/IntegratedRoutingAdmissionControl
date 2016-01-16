@@ -287,9 +287,9 @@ void AdmissionControl::addPotentialStream(const PotentialStream& potentialStream
 void AdmissionControl::printPotentialStreams() const {
 	SerialUSB.println("Potential Streams: ");
 	for (int i = 0; i < potentialStreams.size(); i++) {
+		SerialUSB.print("    ");
 		potentialStreams.at(i).printPotentialStream();
 	}
-	SerialUSB.println();
 }
 
 bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
