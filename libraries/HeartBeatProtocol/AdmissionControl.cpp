@@ -65,7 +65,7 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 	if (hasNextHop) {
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
-		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
+		XBeeAddress64 myNextHop = (*heartbeatProtocol->getNextHop()).getAddress();
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
 
@@ -86,7 +86,7 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 
 void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 
-	XBeeAddress64 nextHop = heartbeatProtocol->getNextHop().getAddress();
+	XBeeAddress64 nextHop = (*heartbeatProtocol->getNextHop()).getAddress();
 	if (!nextHop.equals(XBeeAddress64())) {
 
 		uint8_t payload[] = { 'R', 'E', 'D', 'J', '\0', (senderAddress.getMsb() >> 24) & 0xff, (senderAddress.getMsb()
@@ -161,7 +161,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		//on path node
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
-		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
+		XBeeAddress64 myNextHop = (*heartbeatProtocol->getNextHop()).getAddress();
 
 		uint8_t * injectionRateP = (uint8_t *) &dataRate;
 

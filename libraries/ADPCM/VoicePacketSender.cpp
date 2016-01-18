@@ -57,7 +57,7 @@ void VoicePacketSender::generateVoicePacket() {
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 
 	heartbeatProtocol->setDataRate(injectionRate);
-	myNextHop = heartbeatProtocol->getNextHop().getAddress();
+	myNextHop = (*heartbeatProtocol->getNextHop()).getAddress();
 
 	uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
 	uint8_t code = 0;
@@ -132,7 +132,7 @@ void VoicePacketSender::generateVoicePacket() {
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
-	myNextHop = heartbeatProtocol->getNextHop().getAddress();
+	myNextHop = (*heartbeatProtocol->getNextHop()).getAddress();
 
 	//Extract the packet's final destination
 	XBeeAddress64 packetDestination;
