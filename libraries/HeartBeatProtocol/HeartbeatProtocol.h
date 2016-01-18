@@ -22,14 +22,14 @@ using namespace std;
 class HeartbeatProtocol {
 
 	private:
-		vector<Neighbor*> neighborhoodTable;
+		vector<Neighbor> neighborhoodTable;
 		XBee xbee;
 		uint8_t seqNum;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 broadcastAddress;
 		bool routeFlag;
-		Neighbor * nextHop;
+		Neighbor nextHop;
 		uint8_t qualityOfPath;
 		float dataRate;
 		float neighborhoodCapacity;
@@ -53,7 +53,7 @@ class HeartbeatProtocol {
 		float requestToStream(XBee &xbee, const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop,
 				const float injectionRate);
 		bool isRouteFlag() const;
-		const Neighbor* getNextHop() const;
+		const Neighbor& getNextHop() const;
 		float getDataRate() const;
 		void setDataRate(float dataRate);
 		const XBeeAddress64& getBroadcastAddress() const;
