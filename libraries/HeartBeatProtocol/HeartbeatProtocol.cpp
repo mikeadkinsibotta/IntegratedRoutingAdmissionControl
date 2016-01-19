@@ -104,8 +104,10 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 	updateNeighborHoodTable(message);
 	reCalculateNeighborhoodCapacity();
 
-	if (!myAddress.equals(sinkAddress)) {
+	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
 		noNeighborcalculatePathQualityNextHop();
+	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		withNeighborcalculatePathQualityNextHop();
 	}
 }
 
