@@ -15,6 +15,7 @@ class Neighbor {
 		XBeeAddress64 address;
 		XBeeAddress64 sinkAddress;
 		double relativeDistance;
+		double previousRelativeDistance;
 		float dataRate;
 		float neighborhoodCapacity;
 		float packetLoss;
@@ -59,7 +60,7 @@ class Neighbor {
 		unsigned long getTimeStamp() const;
 		unsigned long getPreviousTimeStamp() const;
 		bool equals(const Neighbor& neighbor) const;
-
+		double getPreviousRelativeDistance() const;
 };
 
 #endif

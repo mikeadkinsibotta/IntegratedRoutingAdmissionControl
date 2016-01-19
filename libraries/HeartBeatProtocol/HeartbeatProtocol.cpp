@@ -252,20 +252,27 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 //Add 1 to include myself
 
 //Neighbor is already selected.  Should I make some adjustments?
-
+	SerialUSB.println("Should I adjust my nextHop neighbor?");
 	unsigned long timeStamp = nextHop.getTimeStamp();
 	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
-
-	SerialUSB.print("TimeStamp: ");
-	SerialUSB.println(timeStamp);
-	SerialUSB.print("PreviousTimeStamp: ");
-	SerialUSB.println(previousTimeStamp);
-
 	unsigned long diff = timeStamp - previousTimeStamp;
-	SerialUSB.println("Should I adjust my nextHop neighbor?");
-	SerialUSB.print("Difference from last timeStamp: ");
-	SerialUSB.println(diff);
+	diff = diff / 1000.0;
+	double distanceDiff = abs(nextHop.getRelativeDistance() - nextHop.getPreviousRelativeDistance());
 
+	SerialUSB.print("Difference from last timeStamp: ");
+
+	SerialUSB.print(diff);
+	SerialUSB.println(" seconds");
+
+	SerialUSB.print("Difference distance: ");
+	SerialUSB.println(distanceDiff);
+
+	if (abs(diff - 0) > EPISLON) {
+		double speed = distanceDiff / diff;
+		SerialUSB.print("Speed: ");
+		SerialUSB.print(speed, 12);
+		SerialUSB.println(" mps");
+	}
 }
 
 void HeartbeatProtocol::buildSaturationTable() {

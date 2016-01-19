@@ -81,6 +81,7 @@ double Neighbor::getRelativeDistance() const {
 }
 
 void Neighbor::setRelativeDistance(double relativeDistance) {
+	previousRelativeDistance = this->relativeDistance;
 	this->relativeDistance = relativeDistance;
 }
 
@@ -122,7 +123,6 @@ bool Neighbor::timerExpired() {
 
 bool Neighbor::compare(const Neighbor &b) {
 	return address.equals(b.address);
-
 }
 
 double Neighbor::getRssi() const {
@@ -143,6 +143,10 @@ unsigned long Neighbor::getTimeStamp() const {
 
 bool Neighbor::equals(const Neighbor& neighbor) const {
 	return address.equals(neighbor.getAddress());
+}
+
+double Neighbor::getPreviousRelativeDistance() const {
+	return previousRelativeDistance;
 }
 
 void Neighbor::printNeighbor() const {
