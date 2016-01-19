@@ -22,6 +22,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
 	buildSaturationTable();
+	nextHop = Neighbor();
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
@@ -36,6 +37,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->dataRate = 0;
 	this->neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
+	nextHop = Neighbor();
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
@@ -102,8 +104,10 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 	updateNeighborHoodTable(message);
 	reCalculateNeighborhoodCapacity();
 
-	if (!myAddress.equals(sinkAddress)) {
-		calculatePathQualityNextHop();
+	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+		noNeighborcalculatePathQualityNextHop();
+	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		withNeighborcalculatePathQualityNextHop();
 	}
 }
 
@@ -113,15 +117,10 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
 		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
-			neighborhoodTable.at(i).setDataRate(heartbeatMessage.getDataRate());
-			neighborhoodTable.at(i).setSeqNum(heartbeatMessage.getSeqNum());
-			neighborhoodTable.at(i).setQualityOfPath(heartbeatMessage.getQualityOfPath());
-			neighborhoodTable.at(i).setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
-			neighborhoodTable.at(i).setRouteFlag(heartbeatMessage.isRouteFlag());
-			neighborhoodTable.at(i).setSinkAddress(heartbeatMessage.getSinkAddress());
-			neighborhoodTable.at(i).setRelativeDistance(heartbeatMessage.getRelativeDistance());
-			neighborhoodTable.at(i).setRssi(heartbeatMessage.getRssi());
-			neighborhoodTable.at(i).updateTimeStamp();
+			updateNeighbor(neighborhoodTable.at(i), heartbeatMessage);
+			if (neighborhoodTable.at(i).getAddress().equals(nextHop.getAddress())) {
+				updateNeighbor(nextHop, heartbeatMessage);
+			}
 			found = true;
 			break;
 		}
@@ -172,7 +171,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", NextHopAddress: ");
-	nextHopAddress.printAddressASCII(&SerialUSB);
+	nextHop.getAddress().printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
 	for (int i = 0; i < neighborhoodTable.size(); i++) {
@@ -200,27 +199,34 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.println();
 }
 
-void HeartbeatProtocol::calculatePathQualityNextHop() {
+void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 	//Add 1 to include myself
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 	uint8_t qop = UINT8_MAX;
 	Neighbor neighbor;
 
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
+	if (nextHop.equals(Neighbor())) {
+		SerialUSB.println("I need a nextHop!");
+		/*If no neighbor is currently selected:
+		 * - Pick neighbor with smallest quality of path
+		 * - If quality of path is the same, pick with shorter relative distance
+		 */
+		for (int i = 0; i < neighborhoodTable.size(); i++) {
 
-		if (neighborhoodTable.at(i).isRouteFlag()) {
-			uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+			if (neighborhoodTable.at(i).isRouteFlag()) {
+				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
 
-			if (path < qop) {
-				qop = path;
-				neighbor = neighborhoodTable.at(i);
-
-			} else if (qop == path) {
-				double relativeDistanceCurrent = neighbor.getRelativeDistance();
-				double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
-				if (relativeDistanceCurrent > relativeDistanceNew) {
+				if (path < qop) {
+					qop = path;
 					neighbor = neighborhoodTable.at(i);
+
+				} else if (qop == path) {
+					double relativeDistanceCurrent = neighbor.getRelativeDistance();
+					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
+					if (relativeDistanceCurrent > relativeDistanceNew) {
+						neighbor = neighborhoodTable.at(i);
+					}
 				}
 			}
 		}
@@ -228,26 +234,45 @@ void HeartbeatProtocol::calculatePathQualityNextHop() {
 
 	//Make sure route exists
 	if (qop != UINT8_MAX) {
-
 		qualityOfPath = qop;
-		nextHopAddress = neighbor.getAddress();
+		nextHop = neighbor;
 		routeFlag = true;
 
 	} else {
 		//reset path if path does not exist
 		qualityOfPath = 0;
-		nextHopAddress = XBeeAddress64();
+		nextHop = Neighbor();
 		routeFlag = false;
-
 	}
 
-	/*SerialUSB.print("QualityOfPath ");
-	 SerialUSB.println(qualityOfPath);
+}
 
-	 SerialUSB.print("NextHopAddress ");
-	 nextHopAddress.printAddressASCII(&SerialUSB);
-	 SerialUSB.println();*/
+void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
+//Add 1 to include myself
+
+//Neighbor is already selected.  Should I make some adjustments?
+	SerialUSB.println("Should I adjust my nextHop neighbor?");
+	unsigned long timeStamp = nextHop.getTimeStamp();
+	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
+	unsigned long diff = timeStamp - previousTimeStamp;
+	diff = diff / 1000.0;
+	double distanceDiff = abs(nextHop.getRelativeDistance() - nextHop.getPreviousRelativeDistance());
+
+	SerialUSB.print("Difference from last timeStamp: ");
+
+	SerialUSB.print(diff);
+	SerialUSB.println(" seconds");
+
+	SerialUSB.print("Difference distance: ");
+	SerialUSB.println(distanceDiff);
+
+	if (abs(diff - 0) > EPISLON) {
+		double speed = distanceDiff / diff;
+		SerialUSB.print("Speed: ");
+		SerialUSB.print(speed, 12);
+		SerialUSB.println(" mps");
+	}
 }
 
 void HeartbeatProtocol::buildSaturationTable() {
@@ -279,12 +304,24 @@ float HeartbeatProtocol::getLocalCapacity() const {
 	return localCapacity;
 }
 
+void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
+	neighbor.setDataRate(heartbeatMessage.getDataRate());
+	neighbor.setSeqNum(heartbeatMessage.getSeqNum());
+	neighbor.setQualityOfPath(heartbeatMessage.getQualityOfPath());
+	neighbor.setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
+	neighbor.setRouteFlag(heartbeatMessage.isRouteFlag());
+	neighbor.setSinkAddress(heartbeatMessage.getSinkAddress());
+	neighbor.setRelativeDistance(heartbeatMessage.getRelativeDistance());
+	neighbor.setRssi(heartbeatMessage.getRssi());
+	neighbor.updateTimeStamp();
+}
+
 bool HeartbeatProtocol::isRouteFlag() const {
 	return routeFlag;
 }
 
-const XBeeAddress64& HeartbeatProtocol::getNextHopAddress() const {
-	return nextHopAddress;
+const Neighbor& HeartbeatProtocol::getNextHop() const {
+	return nextHop;
 }
 
 float HeartbeatProtocol::getDataRate() const {

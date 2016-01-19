@@ -57,7 +57,7 @@ void VoicePacketSender::generateVoicePacket() {
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 
 	heartbeatProtocol->setDataRate(injectionRate);
-	myNextHop = heartbeatProtocol->getNextHopAddress();
+	myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
 	uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
 	uint8_t code = 0;
@@ -132,7 +132,7 @@ void VoicePacketSender::generateVoicePacket() {
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
-	myNextHop = heartbeatProtocol->getNextHopAddress();
+	myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
 	//Extract the packet's final destination
 	XBeeAddress64 packetDestination;
@@ -200,10 +200,13 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		XBeeAddress64 nextHop;
 		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
 
-		SerialUSB.println("Forward Path Packet");
+		SerialUSB.print("Forward Path Packet - Stream Sender: ");
+		packetSource.printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 
 		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
+
 	} else {
 		SerialUSB.println("Received Path Packet");
 

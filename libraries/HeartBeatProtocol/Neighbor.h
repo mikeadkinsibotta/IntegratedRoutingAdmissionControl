@@ -15,6 +15,7 @@ class Neighbor {
 		XBeeAddress64 address;
 		XBeeAddress64 sinkAddress;
 		double relativeDistance;
+		double previousRelativeDistance;
 		float dataRate;
 		float neighborhoodCapacity;
 		float packetLoss;
@@ -22,6 +23,7 @@ class Neighbor {
 		uint8_t qualityOfPath;
 		bool routeFlag;
 		double rssi;
+		unsigned long previousTimeStamp;
 		unsigned long timeStamp;
 		unsigned long timeoutLength;
 
@@ -55,7 +57,10 @@ class Neighbor {
 		void printNeighbor() const;
 		double getRssi() const;
 		void setRssi(double rssi);
-
+		unsigned long getTimeStamp() const;
+		unsigned long getPreviousTimeStamp() const;
+		bool equals(const Neighbor& neighbor) const;
+		double getPreviousRelativeDistance() const;
 };
 
 #endif

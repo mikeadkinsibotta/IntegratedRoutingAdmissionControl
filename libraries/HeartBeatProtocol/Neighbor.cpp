@@ -12,6 +12,7 @@ Neighbor::Neighbor() {
 	relativeDistance = 0;
 	packetLoss = 0;
 	rssi = 0;
+	previousTimeStamp = 0;
 	timeStamp = 0;
 	timeoutLength = 0;
 }
@@ -31,6 +32,7 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 	this->packetLoss = 0;
 	this->rssi = rssi;
 	timeStamp = millis();
+	previousTimeStamp = timeStamp;
 	this->timeoutLength = timeoutLength;
 }
 
@@ -79,6 +81,7 @@ double Neighbor::getRelativeDistance() const {
 }
 
 void Neighbor::setRelativeDistance(double relativeDistance) {
+	previousRelativeDistance = this->relativeDistance;
 	this->relativeDistance = relativeDistance;
 }
 
@@ -107,6 +110,7 @@ void Neighbor::setSinkAddress(const XBeeAddress64& sinkAddress) {
 }
 
 void Neighbor::updateTimeStamp() {
+	previousTimeStamp = timeStamp;
 	timeStamp = millis();
 }
 
@@ -119,7 +123,30 @@ bool Neighbor::timerExpired() {
 
 bool Neighbor::compare(const Neighbor &b) {
 	return address.equals(b.address);
+}
 
+double Neighbor::getRssi() const {
+	return rssi;
+}
+
+void Neighbor::setRssi(double rssi) {
+	this->rssi = rssi;
+}
+
+unsigned long Neighbor::getPreviousTimeStamp() const {
+	return previousTimeStamp;
+}
+
+unsigned long Neighbor::getTimeStamp() const {
+	return timeStamp;
+}
+
+bool Neighbor::equals(const Neighbor& neighbor) const {
+	return address.equals(neighbor.getAddress());
+}
+
+double Neighbor::getPreviousRelativeDistance() const {
+	return previousRelativeDistance;
 }
 
 void Neighbor::printNeighbor() const {
@@ -130,13 +157,5 @@ void Neighbor::printNeighbor() const {
 	Serial.print(',');
 	Serial.print(neighborhoodCapacity);
 	Serial.print('>');
-
 }
 
-double Neighbor::getRssi() const {
-	return rssi;
-}
-
-void Neighbor::setRssi(double rssi) {
-	this->rssi = rssi;
-}
