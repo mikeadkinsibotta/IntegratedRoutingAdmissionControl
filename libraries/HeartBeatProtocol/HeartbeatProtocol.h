@@ -41,6 +41,7 @@ class HeartbeatProtocol {
 		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& message);
 		void noNeighborcalculatePathQualityNextHop();
 		void withNeighborcalculatePathQualityNextHop();
+
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
