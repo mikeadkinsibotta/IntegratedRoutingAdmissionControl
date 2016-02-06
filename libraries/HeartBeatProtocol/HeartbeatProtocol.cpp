@@ -8,7 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define DEBUG false
+#define DEBUG true
 
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
@@ -191,9 +191,9 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RSSI: ");
-		SerialUSB.print(neighborhoodTable.at(i).getRssiAvg());
-		SerialUSB.print(", RelativeDistance: ");
-		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance(), 12);
+		SerialUSB.print(neighborhoodTable.at(i).getRssi());
+		SerialUSB.print(", RelativeDistanceAvg: ");
+		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistanceAvg(), 12);
 
 	}
 	SerialUSB.println();
@@ -222,8 +222,8 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 					neighbor = neighborhoodTable.at(i);
 
 				} else if (qop == path) {
-					double relativeDistanceCurrent = neighbor.getRelativeDistance();
-					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistance();
+					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
+					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistanceAvg();
 					if (relativeDistanceCurrent > relativeDistanceNew) {
 						neighbor = neighborhoodTable.at(i);
 					}
@@ -257,7 +257,7 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
 	unsigned long diff = timeStamp - previousTimeStamp;
 	diff = diff / 1000.0;
-	double distanceDiff = abs(nextHop.getRelativeDistance() - nextHop.getPreviousRelativeDistance());
+	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
 	SerialUSB.print("Difference from last timeStamp: ");
 
@@ -311,8 +311,8 @@ void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessag
 	neighbor.setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
 	neighbor.setRouteFlag(heartbeatMessage.isRouteFlag());
 	neighbor.setSinkAddress(heartbeatMessage.getSinkAddress());
-	neighbor.setRelativeDistance(heartbeatMessage.getRelativeDistance());
-	neighbor.addToRssi(heartbeatMessage.getRssi());
+	neighbor.addToRelativeDistance(heartbeatMessage.getRelativeDistance());
+	neighbor.setRssi(heartbeatMessage.getRssi());
 	neighbor.updateTimeStamp();
 }
 

@@ -11,7 +11,8 @@ Neighbor::Neighbor() {
 	sinkAddress = XBeeAddress64();
 	relativeDistance = 0;
 	packetLoss = 0;
-	rssiAvg = 0;
+	relativeDistanceAvg = 0;
+	rssi = 0;
 	previousTimeStamp = 0;
 	timeStamp = 0;
 	timeoutLength = 0;
@@ -30,29 +31,29 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
 	this->sinkAddress = sinkAddress;
-	this->relativeDistance = relativeDistance;
+	this->rssi = rssi;
 	this->packetLoss = 0;
-	addToRssi(rssi);
+	addToRelativeDistance(relativeDistance);
 	timeStamp = millis();
 	previousTimeStamp = timeStamp;
 	this->timeoutLength = timeoutLength;
 	previousRelativeDistance = 0;
-	rssiAvg = 0;
+	relativeDistanceAvg = 0;
 }
 
-void Neighbor::addToRssi(const double rssi) {
-	if (rssiQueue.size() < MOVING_AVERAGE_SIZE) {
-		rssiQueue.push_front(rssi);
+void Neighbor::addToRelativeDistance(const double relativeDistance) {
+	if (relativeDistanceQueue.size() < MOVING_AVERAGE_SIZE) {
+		relativeDistanceQueue.push_front(relativeDistance);
 	} else {
-		rssiQueue.pop_back();
-		rssiQueue.push_front(rssi);
+		previousRelativeDistance = relativeDistanceQueue.back();
+		relativeDistanceQueue.pop_back();
 
 		double total = 0;
 		for (int i = 0; i < MOVING_AVERAGE_SIZE; ++i) {
-			total += rssiQueue[i];
+			total += relativeDistanceQueue[i];
 		}
 
-		rssiAvg = total / MOVING_AVERAGE_SIZE;
+		relativeDistanceAvg = total / MOVING_AVERAGE_SIZE;
 
 	}
 
@@ -96,15 +97,6 @@ uint8_t Neighbor::getQualityOfPath() const {
 
 void Neighbor::setQualityOfPath(uint8_t qualityOfPath) {
 	this->qualityOfPath = qualityOfPath;
-}
-
-double Neighbor::getRelativeDistance() const {
-	return relativeDistance;
-}
-
-void Neighbor::setRelativeDistance(double relativeDistance) {
-	previousRelativeDistance = this->relativeDistance;
-	this->relativeDistance = relativeDistance;
 }
 
 bool Neighbor::isRouteFlag() const {
@@ -163,8 +155,16 @@ double Neighbor::getPreviousRelativeDistance() const {
 	return previousRelativeDistance;
 }
 
-double Neighbor::getRssiAvg() const {
-	return rssiAvg;
+double Neighbor::getRelativeDistanceAvg() const {
+	return relativeDistanceAvg;
+}
+
+double Neighbor::getRssi() const {
+	return rssi;
+}
+
+void Neighbor::setRssi(double rssi) {
+	this->rssi = rssi;
 }
 
 void Neighbor::printNeighbor() const {
@@ -176,4 +176,3 @@ void Neighbor::printNeighbor() const {
 	Serial.print(neighborhoodCapacity);
 	Serial.print('>');
 }
-

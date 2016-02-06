@@ -26,8 +26,9 @@ class Neighbor {
 		uint8_t seqNum;
 		uint8_t qualityOfPath;
 		bool routeFlag;
-		deque<double> rssiQueue;
-		double rssiAvg;
+		deque<double> relativeDistanceQueue;
+		double rssi;
+		double relativeDistanceAvg;
 		unsigned long previousTimeStamp;
 		unsigned long timeStamp;
 		unsigned long timeoutLength;
@@ -48,8 +49,6 @@ class Neighbor {
 		void setPacketLoss(float packetLoss);
 		uint8_t getQualityOfPath() const;
 		void setQualityOfPath(uint8_t qualityOfPath);
-		double getRelativeDistance() const;
-		void setRelativeDistance(double relativeDistance);
 		bool isRouteFlag() const;
 		void setRouteFlag(bool routeFlag);
 		uint8_t getSeqNum() const;
@@ -60,13 +59,14 @@ class Neighbor {
 		bool timerExpired();
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
-		void addToRssi(const double rssi);
+		void addToRelativeDistance(const double relative);
 		unsigned long getTimeStamp() const;
 		unsigned long getPreviousTimeStamp() const;
 		bool equals(const Neighbor& neighbor) const;
 		double getPreviousRelativeDistance() const;
-		double getRssiAvg() const;
-
+		double getRelativeDistanceAvg() const;
+		double getRssi() const;
+		void setRssi(double rssi);
 };
 
 #endif
