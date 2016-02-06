@@ -1,5 +1,5 @@
 #include "Neighbor.h"
-
+const uint8_t MOVING_AVERAGE_SIZE = 5;
 Neighbor::Neighbor() {
 
 	address = XBeeAddress64();
@@ -11,10 +11,12 @@ Neighbor::Neighbor() {
 	sinkAddress = XBeeAddress64();
 	relativeDistance = 0;
 	packetLoss = 0;
-	rssi = 0;
+	rssiAvg = 0;
 	previousTimeStamp = 0;
 	timeStamp = 0;
 	timeoutLength = 0;
+	previousRelativeDistance = 0;
+
 }
 
 Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t seqNum, float qualityOfPath,
@@ -30,10 +32,30 @@ Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t
 	this->sinkAddress = sinkAddress;
 	this->relativeDistance = relativeDistance;
 	this->packetLoss = 0;
-	this->rssi = rssi;
+	addToRssi(rssi);
 	timeStamp = millis();
 	previousTimeStamp = timeStamp;
 	this->timeoutLength = timeoutLength;
+	previousRelativeDistance = 0;
+	rssiAvg = 0;
+}
+
+void Neighbor::addToRssi(const double rssi) {
+	if (rssiQueue.size() < MOVING_AVERAGE_SIZE) {
+		rssiQueue.push_front(rssi);
+	} else {
+		rssiQueue.pop_back();
+		rssiQueue.push_front(rssi);
+
+		double total = 0;
+		for (int i = 0; i < MOVING_AVERAGE_SIZE; ++i) {
+			total += rssiQueue[i];
+		}
+
+		rssiAvg = total / MOVING_AVERAGE_SIZE;
+
+	}
+
 }
 
 const XBeeAddress64& Neighbor::getAddress() const {
@@ -125,14 +147,6 @@ bool Neighbor::compare(const Neighbor &b) {
 	return address.equals(b.address);
 }
 
-double Neighbor::getRssi() const {
-	return rssi;
-}
-
-void Neighbor::setRssi(double rssi) {
-	this->rssi = rssi;
-}
-
 unsigned long Neighbor::getPreviousTimeStamp() const {
 	return previousTimeStamp;
 }
@@ -147,6 +161,10 @@ bool Neighbor::equals(const Neighbor& neighbor) const {
 
 double Neighbor::getPreviousRelativeDistance() const {
 	return previousRelativeDistance;
+}
+
+double Neighbor::getRssiAvg() const {
+	return rssiAvg;
 }
 
 void Neighbor::printNeighbor() const {

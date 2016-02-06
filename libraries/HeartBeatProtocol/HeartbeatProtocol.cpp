@@ -8,7 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define DEBUG true
+#define DEBUG false
 
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
@@ -191,7 +191,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RSSI: ");
-		SerialUSB.print(neighborhoodTable.at(i).getRssi());
+		SerialUSB.print(neighborhoodTable.at(i).getRssiAvg());
 		SerialUSB.print(", RelativeDistance: ");
 		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistance(), 12);
 
@@ -312,7 +312,7 @@ void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessag
 	neighbor.setRouteFlag(heartbeatMessage.isRouteFlag());
 	neighbor.setSinkAddress(heartbeatMessage.getSinkAddress());
 	neighbor.setRelativeDistance(heartbeatMessage.getRelativeDistance());
-	neighbor.setRssi(heartbeatMessage.getRssi());
+	neighbor.addToRssi(heartbeatMessage.getRssi());
 	neighbor.updateTimeStamp();
 }
 

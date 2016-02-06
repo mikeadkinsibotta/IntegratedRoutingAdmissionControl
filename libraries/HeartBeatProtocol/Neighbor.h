@@ -9,6 +9,10 @@
 #define LIBRARIES_NEIGHBOR_H_
 #include "Arduino.h"
 #include "XBee.h"
+#include <deque>
+
+using namespace std;
+
 class Neighbor {
 
 	private:
@@ -22,7 +26,8 @@ class Neighbor {
 		uint8_t seqNum;
 		uint8_t qualityOfPath;
 		bool routeFlag;
-		double rssi;
+		deque<double> rssiQueue;
+		double rssiAvg;
 		unsigned long previousTimeStamp;
 		unsigned long timeStamp;
 		unsigned long timeoutLength;
@@ -55,12 +60,13 @@ class Neighbor {
 		bool timerExpired();
 		bool compare(const Neighbor &b);
 		void printNeighbor() const;
-		double getRssi() const;
-		void setRssi(double rssi);
+		void addToRssi(const double rssi);
 		unsigned long getTimeStamp() const;
 		unsigned long getPreviousTimeStamp() const;
 		bool equals(const Neighbor& neighbor) const;
 		double getPreviousRelativeDistance() const;
+		double getRssiAvg() const;
+
 };
 
 #endif

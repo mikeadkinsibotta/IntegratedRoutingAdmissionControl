@@ -22,7 +22,7 @@ const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
-const unsigned long HEARTBEAT_INTERVAL = 5000;
+const unsigned long HEARTBEAT_INTERVAL = 10000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
 
 XBee xbee = XBee();
