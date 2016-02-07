@@ -21,6 +21,11 @@
 								<option id="it.baeyens.arduino.compiler.cpp.sketch.option.incpath.1688300069" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.cpp.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/ADPCM}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/ArduinoThread}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/HeartBeatProtocol}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/VoiceStatistics}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/XBee}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.1212703832" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -28,6 +33,11 @@
 								<option id="it.baeyens.arduino.compiler.c.sketch.option.incpath.473902510" name="Include Paths (-I)" superClass="it.baeyens.arduino.compiler.c.sketch.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/arduino/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/arduino/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/ADPCM}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/ArduinoThread}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/HeartBeatProtocol}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/VoiceStatistics}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/XBee}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.1688130405" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>

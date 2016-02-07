@@ -8,7 +8,7 @@
 
 const double MILLIWATTS = 0.000001995262315;
 const double DISTANCE = 1;
-const double N_P = 3.8823715247;
+const double N_P = 2.1187672094954;
 
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
