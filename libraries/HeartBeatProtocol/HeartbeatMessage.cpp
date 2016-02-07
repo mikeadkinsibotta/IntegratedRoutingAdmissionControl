@@ -6,9 +6,9 @@
  */
 #include "HeartbeatMessage.h"
 
-const double MILLIWATTS = 0.000001995262315;
+const double MILLIWATTS = 0.000001258925;
 const double DISTANCE = 1;
-const double N_P = 2.1187672094954;
+const double N_P = 3.16557667218;
 
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
