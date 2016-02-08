@@ -59,7 +59,7 @@ void VoicePacketSender::generateVoicePacket() {
 	heartbeatProtocol->setDataRate(injectionRate);
 	myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
-	uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
+	//uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
 	uint8_t code = 0;
 	int actualPayloadSize = 0;
 	int i = 0;
@@ -69,7 +69,7 @@ void VoicePacketSender::generateVoicePacket() {
 		switch (codecSetting) {
 			case 2:
 				code = admcpm.twoBitEncode();
-				payload[i] = code;
+				//payload[i] = code;
 				i++;
 				actualPayloadSize = i;
 				break;
@@ -78,7 +78,7 @@ void VoicePacketSender::generateVoicePacket() {
 					uint8_t buffer[3] = { 0 };
 					admcpm.threeBitEncode(buffer);
 					for (int j = 0; j < 3; ++j) {
-						payload[i] = buffer[j];
+						//payload[i] = buffer[j];
 						i++;
 					}
 					actualPayloadSize = i;
@@ -89,7 +89,7 @@ void VoicePacketSender::generateVoicePacket() {
 				break;
 			case 4:
 				code = admcpm.fourBitEncode();
-				payload[i] = code;
+				//payload[i] = code;
 				i++;
 				actualPayloadSize = i;
 				break;
@@ -99,7 +99,7 @@ void VoicePacketSender::generateVoicePacket() {
 					admcpm.fiveBitEncode(buffer);
 
 					for (int j = 0; j < 5; ++j) {
-						payload[i] = buffer[j];
+						//payload[i] = buffer[j];
 						i++;
 					}
 					actualPayloadSize = i;
@@ -112,10 +112,16 @@ void VoicePacketSender::generateVoicePacket() {
 	}
 
 	uint8_t combinedSize = 0;
-	uint8_t* combined = addDestinationToPayload(senderAddress, sinkAddress, payload, actualPayloadSize, combinedSize,
-			frameId);
 
-	Tx64Request tx = Tx64Request(myNextHop, combined, combinedSize);
+	uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (senderAddress.getMsb() >> 24) & 0xff,
+			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
+			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
+					& 0xff, senderAddress.getLsb() & 0xff, (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb()
+					>> 16) & 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff,
+			(sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8)
+					& 0xff, sinkAddress.getLsb() & 0xff, frameId, codecSetting };
+
+	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
 	xbee.send(tx);
 	frameId++;
@@ -125,9 +131,6 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 	}
 
-	//free malloc data
-	free(combined);
-	free(payload);
 }
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
