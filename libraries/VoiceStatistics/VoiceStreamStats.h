@@ -26,6 +26,7 @@ class VoiceStreamStats {
 		double voiceQuality;
 		uint8_t duplicateFrame;
 		uint8_t payloadSize;
+		uint8_t codecSetting;
 
 	public:
 		VoiceStreamStats(const XBeeAddress64& senderAddress, const uint8_t payloadSize);

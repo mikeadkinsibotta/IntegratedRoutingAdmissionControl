@@ -22,6 +22,7 @@ VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBe
 	timeStamp = (millis() / 1000.0);
 	voiceQuality = 0;
 	duplicateFrame = 0;
+	codecSetting = 2;
 
 }
 
@@ -39,6 +40,7 @@ VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const uin
 	timeStamp = (millis() / 1000.0);
 	voiceQuality = 0;
 	duplicateFrame = 0;
+	codecSetting = 2;
 
 }
 
@@ -76,6 +78,9 @@ void VoiceStreamStats::calculateThroughput() {
 	SerialUSB.print(" TotalPacketRecieved: ");
 	SerialUSB.print(totalPacketsRecieved);
 
+	SerialUSB.print("  Compression Last Packet: ");
+	SerialUSB.print(codecSetting);
+
 	voiceQuality = (voiceQuality / totalPacketsRecieved);
 	SerialUSB.print(" Average R-Quality ");
 	SerialUSB.println(voiceQuality);
@@ -96,7 +101,7 @@ void VoiceStreamStats::calculateThroughput() {
 void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 	receivedFrame = dataPtr[21];
-	const uint8_t codecSetting = dataPtr[22];
+	codecSetting = dataPtr[22];
 
 	//Ignore duplicate if we received the original packet
 	if (receivedFrame != duplicateFrame) {

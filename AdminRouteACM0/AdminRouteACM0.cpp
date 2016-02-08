@@ -92,7 +92,13 @@ void sendInitPacket() {
 }
 
 void sendVoicePacket() {
-	voicePacketSender->generateVoicePacket();
+	Neighbor nextHop = heartbeatProtocol->getNextHop();
+	if (nextHop.equals(Neighbor())) {
+		SerialUSB.println("Lost NextHop");
+		generateVoice.enabled = false;
+	} else {
+		voicePacketSender->generateVoicePacket();
+	}
 }
 
 void broadcastHeartbeat() {

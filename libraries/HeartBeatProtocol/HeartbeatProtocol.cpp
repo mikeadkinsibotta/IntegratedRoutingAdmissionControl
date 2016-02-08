@@ -64,6 +64,12 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 	seqNum++;
 
+	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+		noNeighborcalculatePathQualityNextHop();
+	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		withNeighborcalculatePathQualityNextHop();
+	}
+
 }
 
 void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
@@ -97,17 +103,20 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 
 	message.transcribeHeartbeatPacket(response);
 
-	if (!myAddress.equals(sinkAddress)) {
-		routeFlag = message.isRouteFlag();
-	}
+	if (message.getRssi() > -70.00) {
 
-	updateNeighborHoodTable(message);
-	reCalculateNeighborhoodCapacity();
+		if (!myAddress.equals(sinkAddress)) {
+			routeFlag = message.isRouteFlag();
+		}
 
-	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-		noNeighborcalculatePathQualityNextHop();
-	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-		withNeighborcalculatePathQualityNextHop();
+		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
+
+		if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+			noNeighborcalculatePathQualityNextHop();
+		} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+			withNeighborcalculatePathQualityNextHop();
+		}
 	}
 }
 
@@ -146,7 +155,15 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 				SerialUSB.print("Neighbor: ");
 				it->getAddress().printAddressASCII(&SerialUSB);
 				SerialUSB.println(" timer has expired and is purged.");
+				SerialUSB.print("Nexthop Address: ");
+				nextHop.getAddress().printAddressASCII(&SerialUSB);
+				SerialUSB.println();
+				if (it->getAddress().equals(nextHop.getAddress())) {
+					nextHop = Neighbor();
+					SerialUSB.println("NextHop Purged");
+				}
 				it = neighborhoodTable.erase(it);
+
 			} else {
 				++it;
 			}
@@ -252,24 +269,24 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 //Add 1 to include myself
 
 //Neighbor is already selected.  Should I make some adjustments?
-	SerialUSB.println("Should I adjust my nextHop neighbor?");
+	SerialUSB.print("Should I adjust my nextHop neighbor?  ");
 	unsigned long timeStamp = nextHop.getTimeStamp();
 	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
 	unsigned long diff = timeStamp - previousTimeStamp;
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
-	SerialUSB.print("Difference from last timeStamp: ");
+	SerialUSB.print("  Difference from last timeStamp:  ");
 
 	SerialUSB.print(diff);
-	SerialUSB.println(" seconds");
+	SerialUSB.print(" seconds   ");
 
 	SerialUSB.print("Difference distance: ");
-	SerialUSB.println(distanceDiff);
+	SerialUSB.print(distanceDiff);
 
 	if (abs(diff - 0) > EPISLON) {
 		double speed = distanceDiff / diff;
-		SerialUSB.print("Speed: ");
+		SerialUSB.print("   Speed: ");
 		SerialUSB.print(speed, 12);
 		SerialUSB.println(" mps");
 	}
