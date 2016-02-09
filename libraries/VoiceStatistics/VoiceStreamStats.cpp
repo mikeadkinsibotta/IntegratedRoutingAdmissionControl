@@ -23,6 +23,7 @@ VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBe
 	voiceQuality = 0;
 	duplicateFrame = 0;
 	codecSetting = 2;
+	numNoPacketReceived = 0;
 
 }
 
@@ -41,6 +42,7 @@ VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const uin
 	voiceQuality = 0;
 	duplicateFrame = 0;
 	codecSetting = 2;
+	numNoPacketReceived = 0;
 
 }
 
@@ -81,7 +83,14 @@ void VoiceStreamStats::calculateThroughput() {
 	SerialUSB.print("  Compression Last Packet: ");
 	SerialUSB.print(codecSetting);
 
-	voiceQuality = (voiceQuality / totalPacketsRecieved);
+	if (totalPacketsRecieved == 0) {
+		numNoPacketReceived++;
+		voiceQuality = 0;
+	} else {
+		numNoPacketReceived = 0;
+		voiceQuality = (voiceQuality / totalPacketsRecieved);
+	}
+
 	SerialUSB.print(" Average R-Quality ");
 	SerialUSB.println(voiceQuality);
 
@@ -205,4 +214,8 @@ uint8_t VoiceStreamStats::getTotalPacketsSent() const {
 
 void VoiceStreamStats::setTotalPacketsSent(uint8_t totalPacketsSent) {
 	this->totalPacketsSent = totalPacketsSent;
+}
+
+uint8_t VoiceStreamStats::getNumNoPacketReceived() const {
+	return numNoPacketReceived;
 }

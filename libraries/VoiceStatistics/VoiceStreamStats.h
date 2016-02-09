@@ -27,6 +27,7 @@ class VoiceStreamStats {
 		uint8_t duplicateFrame;
 		uint8_t payloadSize;
 		uint8_t codecSetting;
+		uint8_t numNoPacketReceived;
 
 	public:
 		VoiceStreamStats(const XBeeAddress64& senderAddress, const uint8_t payloadSize);
@@ -45,6 +46,7 @@ class VoiceStreamStats {
 		void setTotalPacketsRecieved(uint8_t totalPacketsRecieved);
 		uint8_t getTotalPacketsSent() const;
 		void setTotalPacketsSent(uint8_t totalPacketsSent);
+		uint8_t getNumNoPacketReceived() const;
 };
 
 #endif /* LIBRARIES_VOICESTATISTICS_VOICESTREAMSTATS_H_ */

@@ -24,27 +24,28 @@ VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee, const uint8_t payload
 	this->payloadSize = payloadSize;
 }
 
-void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSource) {
-	bool found = false;
+/*void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSource) {
+ bool found = false;
 
-	for (int i = 0; i < streams.size(); i++) {
-		//SerialUSB.println("Old Stream");
-		if (streams.at(i).getSenderAddress().equals(packetSource)) {
-			streams.at(i).calculateThroughput();
-			found = true;
-			break;
-		}
-	}
+ for (int i = 0; i < streams.size(); i++) {
+ //SerialUSB.println("Old Stream");
+ if (streams.at(i).getSenderAddress().equals(packetSource)) {
+ streams.at(i).calculateThroughput();
 
-	if (!found) {
-		//SerialUSB.println("New Stream");
-		VoiceStreamStats stream = VoiceStreamStats(packetSource, payloadSize);
-		stream.startStream();
-		stream.calculateThroughput();
-		streams.push_back(stream);
-	}
-	SerialUSB.println();
-}
+ found = true;
+
+ break;
+ }
+ }
+ if (!found) {
+ //SerialUSB.println("New Stream");
+ VoiceStreamStats stream = VoiceStreamStats(packetSource, payloadSize);
+ stream.startStream();
+ stream.calculateThroughput();
+ streams.push_back(stream);
+ }
+ SerialUSB.println();
+ }*/
 
 bool VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
 	int i = 0;
@@ -107,24 +108,31 @@ void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& 
 void VoiceStreamStatManager::sendPathPacket() {
 	int i = 0;
 
-	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
+	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
-		const XBeeAddress64 &dataSenderAddress = streams.at(i).getSenderAddress();
-		const uint8_t dataLoss = streams.at(i).getPacketLoss();
-		const uint8_t totalPacketsSent = streams.at(i).getTotalPacketsSent();
-		const uint8_t totalPacketsRecieved = streams.at(i).getTotalPacketsRecieved();
+		const XBeeAddress64 &dataSenderAddress = it->getSenderAddress();
+		const uint8_t dataLoss = it->getPacketLoss();
+		const uint8_t totalPacketsSent = it->getTotalPacketsSent();
+		const uint8_t totalPacketsRecieved = it->getTotalPacketsRecieved();
 
 		uint8_t payload[] = { 'P', 'A', 'T', 'H', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
 				(dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
 				dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff,
 				(dataSenderAddress.getLsb() >> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff,
 				dataSenderAddress.getLsb() & 0xff, dataLoss, totalPacketsSent, totalPacketsRecieved };
-		Tx64Request tx = Tx64Request(streams.at(i).getUpStreamNeighborAddress(), payload, sizeof(payload));
+		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), payload, sizeof(payload));
 		xbee.send(tx);
 
-		streams.at(i).calculateThroughput();
+		it->calculateThroughput();
 
-		i++;
+		if (streams.at(i).getNumNoPacketReceived() >= 3) {
+			SerialUSB.println("Stream Lost.  Removing stream from sender: ");
+			streams.at(i).getSenderAddress().printAddressASCII(&SerialUSB);
+			SerialUSB.println();
+			it = streams.erase(it);
+		} else {
+			it++;
+		}
 
 	}
 }

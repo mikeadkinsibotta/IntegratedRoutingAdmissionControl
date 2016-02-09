@@ -26,7 +26,7 @@ class VoiceStreamStatManager {
 		VoiceStreamStatManager(const uint8_t payloadSize);
 		VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize);
 
-		void calcuateThroughput(const XBeeAddress64& packetSource);
+		//void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
 				const uint8_t * dataPtr);
 		void updateStreamsIntermediateNode(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop);
