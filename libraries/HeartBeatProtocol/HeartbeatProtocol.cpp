@@ -103,21 +103,24 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 
 	message.transcribeHeartbeatPacket(response);
 
-	if (message.getRssi() > -70.00) {
+	SerialUSB.print("RSSI Heartbeat: ");
+	SerialUSB.println(message.getRssi());
 
-		if (!myAddress.equals(sinkAddress)) {
-			routeFlag = message.isRouteFlag();
-		}
+	//if (message.getRssi() > -70.00) {
 
-		updateNeighborHoodTable(message);
-		reCalculateNeighborhoodCapacity();
-
-		if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-			noNeighborcalculatePathQualityNextHop();
-		} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-			withNeighborcalculatePathQualityNextHop();
-		}
+	if (!myAddress.equals(sinkAddress)) {
+		routeFlag = message.isRouteFlag();
 	}
+
+	updateNeighborHoodTable(message);
+	reCalculateNeighborhoodCapacity();
+
+	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+		noNeighborcalculatePathQualityNextHop();
+	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		withNeighborcalculatePathQualityNextHop();
+	}
+	//}
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
