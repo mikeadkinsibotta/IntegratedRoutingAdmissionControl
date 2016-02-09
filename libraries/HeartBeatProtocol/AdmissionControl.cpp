@@ -60,10 +60,10 @@ void AdmissionControl::checkTimers() {
 }
 
 void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
-	SerialUSB.println("Sending Init");
+
 	bool hasNextHop = heartbeatProtocol->isRouteFlag();
 	if (hasNextHop) {
-
+		SerialUSB.println("Sending Init");
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);

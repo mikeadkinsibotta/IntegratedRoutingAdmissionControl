@@ -8,7 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define DEBUG false
+#define DEBUG true
 
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
@@ -103,24 +103,27 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 
 	message.transcribeHeartbeatPacket(response);
 
-	SerialUSB.print("RSSI Heartbeat: ");
+	SerialUSB.print("Sender: ");
+	message.getSenderAddress().printAddressASCII(&SerialUSB);
+
+	SerialUSB.print("  RSSI Heartbeat: ");
 	SerialUSB.println(message.getRssi());
 
-	//if (message.getRssi() > -70.00) {
+	if (message.getRssi() > -73.00) {
 
-	if (!myAddress.equals(sinkAddress)) {
-		routeFlag = message.isRouteFlag();
+		if (!myAddress.equals(sinkAddress)) {
+			routeFlag = message.isRouteFlag();
+		}
+
+		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
+
+		if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+			noNeighborcalculatePathQualityNextHop();
+		} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+			withNeighborcalculatePathQualityNextHop();
+		}
 	}
-
-	updateNeighborHoodTable(message);
-	reCalculateNeighborhoodCapacity();
-
-	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-		noNeighborcalculatePathQualityNextHop();
-	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-		withNeighborcalculatePathQualityNextHop();
-	}
-	//}
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
