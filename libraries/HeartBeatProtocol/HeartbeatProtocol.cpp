@@ -106,24 +106,26 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 	SerialUSB.print("Sender: ");
 	message.getSenderAddress().printAddressASCII(&SerialUSB);
 
-	SerialUSB.print("  RSSI Heartbeat: ");
-	SerialUSB.println(message.getRssi());
+	SerialUSB.print("  Distance Decimeter: ");
+	SerialUSB.println(message.getRelativeDistance());
 
-	if (message.getRssi() > -73.00) {
-
-		if (!myAddress.equals(sinkAddress)) {
-			routeFlag = message.isRouteFlag();
-		}
-
-		updateNeighborHoodTable(message);
-		reCalculateNeighborhoodCapacity();
-
-		if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-			noNeighborcalculatePathQualityNextHop();
-		} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-			withNeighborcalculatePathQualityNextHop();
-		}
+	if (!myAddress.equals(sinkAddress)) {
+		routeFlag = message.isRouteFlag();
 	}
+
+	updateNeighborHoodTable(message);
+	reCalculateNeighborhoodCapacity();
+
+	SerialUSB.print("Current Next Hop:  ");
+	nextHop.getAddress().printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
+	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+		noNeighborcalculatePathQualityNextHop();
+	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		withNeighborcalculatePathQualityNextHop();
+	}
+
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
@@ -150,7 +152,16 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				timeoutLength);
 		neighborhoodTable.push_back(neighbor);
 	}
+}
 
+bool HeartbeatProtocol::isNeighbor(const XBeeAddress64 &address) {
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		if (neighborhoodTable.at(i).getAddress().equals(address)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void HeartbeatProtocol::purgeNeighborhoodTable() {
@@ -275,20 +286,20 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 //Add 1 to include myself
 
 //Neighbor is already selected.  Should I make some adjustments?
-	SerialUSB.print("Should I adjust my nextHop neighbor?  ");
+	//SerialUSB.print("Should I adjust my nextHop neighbor?  ");
 	unsigned long timeStamp = nextHop.getTimeStamp();
 	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
 	unsigned long diff = timeStamp - previousTimeStamp;
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
-	SerialUSB.print("  Difference from last timeStamp:  ");
+	//SerialUSB.print("  Difference from last timeStamp:  ");
+//
+	//SerialUSB.print(diff);
+	//SerialUSB.print(" seconds   ");
 
-	SerialUSB.print(diff);
-	SerialUSB.print(" seconds   ");
-
-	SerialUSB.print("Difference distance: ");
-	SerialUSB.print(distanceDiff);
+	//SerialUSB.print("Difference distance: ");
+	//SerialUSB.print(distanceDiff);
 
 	if (abs(diff - 0) > EPISLON) {
 		double speed = distanceDiff / diff;

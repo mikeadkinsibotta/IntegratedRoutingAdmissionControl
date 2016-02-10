@@ -14,16 +14,20 @@
 #define IGNORE_HEARTBEAT false
 #define PAYLOAD_SIZE 76
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
-//#define HEARTBEAT_ADDRESS_2 0x40B31805
+//#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long GRANT_TIMEOUT_LENGTH = 5000;
-const unsigned long REJECT_TIMEOUT_LENGTH = 4000;
-const unsigned long HEARTBEAT_INTERVAL = 5000;
+const unsigned long GRANT_TIMEOUT_LENGTH = 3000;
+const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
+const unsigned long HEARTBEAT_INTERVAL = 3000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
+
+const double MILLIWATTS = 0.000000501187;
+const double DISTANCE = 3;
+const double N_P = 6.07502866042;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -126,29 +130,36 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			char control[5];
+			double rssi = response.getRssi() * -1;
+			const double milliWatts = pow(10.0, (rssi / 10.0));
+			double relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
 
-			for (int i = 0; i < 5; i++) {
-				control[i] = data[i];
-			}
+			if (relativeDistance < 4.00) {
 
-			if (!strcmp(control, "BEAT")) {
-				//routing data
-				heartbeatProtocol->receiveHeartBeat(response, IGNORE_HEARTBEAT);
-			} else if (!strcmp(control, "DATA")) {
-				//voice data
-				voicePacketSender->handleDataPacket(response);
-			} else if (!strcmp(control, "PATH")) {
-				//path loss packet
-				voicePacketSender->handlePathPacket(response);
-			} else if (!strcmp(control, "RSTR")) {
-				//voicePacketSender->handleStreamRestart(response);
-			} else if (!strcmp(control, "INIT")) {
-				admissionControl->handleInitPacket(response);
-			} else if (!strcmp(control, "REDJ")) {
-				admissionControl->handleREDJPacket(response);
-			} else if (!strcmp(control, "GRNT")) {
-				admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
+				char control[5];
+
+				for (int i = 0; i < 5; i++) {
+					control[i] = data[i];
+				}
+
+				if (!strcmp(control, "BEAT")) {
+					//routing data
+					heartbeatProtocol->receiveHeartBeat(response, IGNORE_HEARTBEAT);
+				} else if (!strcmp(control, "DATA")) {
+					//voice data
+					voicePacketSender->handleDataPacket(response);
+				} else if (!strcmp(control, "PATH")) {
+					//path loss packet
+					voicePacketSender->handlePathPacket(response);
+				} else if (!strcmp(control, "RSTR")) {
+					//voicePacketSender->handleStreamRestart(response);
+				} else if (!strcmp(control, "INIT")) {
+					admissionControl->handleInitPacket(response);
+				} else if (!strcmp(control, "REDJ")) {
+					admissionControl->handleREDJPacket(response);
+				} else if (!strcmp(control, "GRNT")) {
+					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
+				}
 			}
 		}
 	}

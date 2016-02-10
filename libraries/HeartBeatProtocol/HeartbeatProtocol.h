@@ -50,6 +50,8 @@ class HeartbeatProtocol {
 		void receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag);
 		void purgeNeighborhoodTable();
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
+		bool isNeighbor(const XBeeAddress64 &address);
+
 		void printNeighborHoodTable();
 		float requestToStream(XBee &xbee, const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop,
 				const float injectionRate);
