@@ -131,11 +131,7 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			double rssi = response.getRssi() * -1;
-			const double milliWatts = pow(10.0, (rssi / 10.0));
-			double relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
-
-			if (relativeDistance < 4.00) {
+			if (response.getRelativeDistance() < 4.00) {
 
 				char control[5];
 

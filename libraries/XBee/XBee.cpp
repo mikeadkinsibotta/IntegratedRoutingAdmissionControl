@@ -133,6 +133,10 @@ void Rx64Response::setRemoteAddress64(const XBeeAddress64& remoteAddress) {
 Rx64Response::Rx64Response() :
 		RxResponse() {
 	_remoteAddress = XBeeAddress64();
+	double rssiDbm = getRssi() * -1.0;
+	double milliWatts = pow(10.0, (rssiDbm / 10.0));
+	relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
+
 }
 
 Rx64Response::~Rx64Response() {
@@ -187,6 +191,10 @@ uint8_t RxResponse::getDataOffset() const {
 
 uint8_t Rx64Response::getRssiOffset() const {
 	return RX_64_RSSI_OFFSET;
+}
+
+double Rx64Response::getRelativeDistance() const {
+	return relativeDistance;
 }
 
 void XBeeResponse::getRx64Response(XBeeResponse &rx64Response) const {
@@ -1110,3 +1118,4 @@ void XBee::getMyAddress(XBeeAddress64& address, bool debug) {
 	Serial.print("ThisAddress");
 	address.printAddress(&Serial);
 }
+

@@ -237,6 +237,7 @@ class XBeeResponse {
 		uint8_t _frameLength;
 		bool _complete;
 		uint8_t _errorCode;
+
 };
 
 class XBeeAddress {
@@ -347,8 +348,15 @@ class Rx64Response: public RxResponse {
 		uint8_t getRssiOffset() const;
 		XBeeAddress64 getRemoteAddress64() const;
 		void setRemoteAddress64(const XBeeAddress64& remoteAddress);
+		double getRelativeDistance() const;
+
 	private:
+		static const double MILLIWATTS = 0.000000501187;
+		static const double DISTANCE = 3;
+		static const double N_P = 6.07502866042;
 		XBeeAddress64 _remoteAddress;
+		double relativeDistance;
+
 };
 
 /**

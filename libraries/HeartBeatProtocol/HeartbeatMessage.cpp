@@ -6,10 +6,6 @@
  */
 #include "HeartbeatMessage.h"
 
-const double MILLIWATTS = 0.000000501187;
-const double DISTANCE = 3;
-const double N_P = 6.07502866042;
-
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
@@ -100,9 +96,8 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 	senderAddress = response.getRemoteAddress64();
 
-	rssi = response.getRssi() * -1;
-	const double milliWatts = pow(10.0, (rssi / 10.0));
-	relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
+	relativeDistance = response.getRelativeDistance();
+	rssi = response.getRssi() * -1.0;
 
 	sinkAddress.setMsb(
 			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
