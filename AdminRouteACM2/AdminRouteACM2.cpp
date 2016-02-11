@@ -100,6 +100,7 @@ void sendVoicePacket() {
 	if (nextHop.equals(Neighbor())) {
 		SerialUSB.println("Lost NextHop");
 		generateVoice.enabled = false;
+		sendInital.enabled = true;
 	} else {
 		voicePacketSender->generateVoicePacket();
 	}
