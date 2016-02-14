@@ -25,10 +25,6 @@ const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
 const unsigned long HEARTBEAT_INTERVAL = 3000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
 
-const double MILLIWATTS = 0.000000501187;
-const double DISTANCE = 3;
-const double N_P = 6.07502866042;
-
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
