@@ -228,6 +228,9 @@ class XBeeResponse {
 		// pointer to frameData
 		uint8_t* _frameDataPtr;
 		Stream* _serial;
+		static const double MILLIWATTS = 0.000000501187;
+		static const double DISTANCE = 3;
+		static const double N_P = 6.07502866042;
 	private:
 		void setCommon(XBeeResponse &target) const;
 		uint8_t _apiId;
@@ -349,11 +352,10 @@ class Rx64Response: public RxResponse {
 		XBeeAddress64 getRemoteAddress64() const;
 		void setRemoteAddress64(const XBeeAddress64& remoteAddress);
 		double getRelativeDistance() const;
+		void setRelativeDistance(double relativeDistance);
 
 	private:
-		static const double MILLIWATTS = 0.000000501187;
-		static const double DISTANCE = 3;
-		static const double N_P = 6.07502866042;
+
 		XBeeAddress64 _remoteAddress;
 		double relativeDistance;
 

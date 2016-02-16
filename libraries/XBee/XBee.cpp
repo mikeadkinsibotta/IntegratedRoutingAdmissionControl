@@ -133,10 +133,7 @@ void Rx64Response::setRemoteAddress64(const XBeeAddress64& remoteAddress) {
 Rx64Response::Rx64Response() :
 		RxResponse() {
 	_remoteAddress = XBeeAddress64();
-	double rssiDbm = getRssi() * -1.0;
-	double milliWatts = pow(10.0, (rssiDbm / 10.0));
-	relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
-
+	relativeDistance = 0;
 }
 
 Rx64Response::~Rx64Response() {
@@ -215,6 +212,12 @@ void XBeeResponse::getRx64Response(XBeeResponse &rx64Response) const {
 					+ (uint16_t(getFrameData()[6]) << 8) + getFrameData()[7]);
 
 	rx64->setRemoteAddress64(remoteAddress);
+
+	double rssiDbm = rx64->getRssi() * -1.0;
+	double milliWatts = pow(10.0, (rssiDbm / 10.0));
+	double relativeDistance = DISTANCE * pow((milliWatts / MILLIWATTS), (-1.0 / N_P));
+
+	rx64->setRelativeDistance(relativeDistance);
 
 }
 
@@ -1119,3 +1122,6 @@ void XBee::getMyAddress(XBeeAddress64& address, bool debug) {
 	address.printAddress(&Serial);
 }
 
+void Rx64Response::setRelativeDistance(double relativeDistance) {
+	this->relativeDistance = relativeDistance;
+}
