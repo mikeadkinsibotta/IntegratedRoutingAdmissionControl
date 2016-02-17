@@ -264,6 +264,10 @@ void VoicePacketSender::updateDataRate(const uint8_t dataLoss) {
 
 }
 
+void VoicePacketSender::resetFrameID() {
+	frameId = 0;
+}
+
 const XBeeAddress64& VoicePacketSender::getMyNextHop() const {
 	return myNextHop;
 }

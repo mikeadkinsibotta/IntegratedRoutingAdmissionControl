@@ -109,10 +109,6 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool igno
 	SerialUSB.print("  Distance Decimeter: ");
 	SerialUSB.println(message.getRelativeDistance());
 
-	if (!myAddress.equals(sinkAddress)) {
-		routeFlag = message.isRouteFlag();
-	}
-
 	updateNeighborHoodTable(message);
 	reCalculateNeighborhoodCapacity();
 

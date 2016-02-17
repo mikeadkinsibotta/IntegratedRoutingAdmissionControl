@@ -9,6 +9,7 @@
 AdmissionControl::AdmissionControl() {
 	heartbeatProtocol = 0;
 	voiceStreamStatManager = 0;
+	voicePacketSender = 0;
 	grantTimeoutLength = 0;
 	rejcTimeoutLength = 0;
 
@@ -16,11 +17,13 @@ AdmissionControl::AdmissionControl() {
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
 		HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
-		const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength) {
+		VoicePacketSender * voicePacketSender, const unsigned long grantTimeoutLength,
+		const unsigned long rejcTimeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
 	this->voiceStreamStatManager = voiceStreamStatManager;
+	this->voicePacketSender = voicePacketSender;
 	this->xbee = xbee;
 	this->grantTimeoutLength = grantTimeoutLength;
 	this->rejcTimeoutLength = rejcTimeoutLength;
@@ -242,6 +245,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 	} else {
 		SerialUSB.println("Active Voice");
 		initThreadActive = false;
+		voicePacketSender->resetFrameID();
 		voiceThreadActive = true;
 	}
 }
