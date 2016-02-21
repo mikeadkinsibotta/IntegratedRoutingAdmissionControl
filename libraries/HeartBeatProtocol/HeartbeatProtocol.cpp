@@ -96,10 +96,6 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag) {
 
-	if (DEBUG) {
-		printNeighborHoodTable();
-	}
-
 	HeartbeatMessage message;
 
 	message.transcribeHeartbeatPacket(response);
@@ -138,6 +134,10 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
 		neighborhoodTable.push_back(neighbor);
+
+		if (DEBUG) {
+			printNeighborHoodTable();
+		}
 	}
 }
 
@@ -167,6 +167,10 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 					SerialUSB.println("NextHop Purged");
 				}
 				it = neighborhoodTable.erase(it);
+
+				if (DEBUG) {
+					printNeighborHoodTable();
+				}
 
 			} else {
 				++it;
