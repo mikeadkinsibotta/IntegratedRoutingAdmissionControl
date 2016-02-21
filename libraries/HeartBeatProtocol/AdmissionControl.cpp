@@ -189,7 +189,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	}
 
 	addPotentialStream(potentialStream, dataRate);
-	printPotentialStreams();
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {
@@ -227,7 +226,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 		SerialUSB.print("Forward GRANT recevied from: ");
 		previousHop.printAddressASCII(&SerialUSB);
 		SerialUSB.println();
-		printPotentialStreams();
+
 		for (int i = 0; i < potentialStreams.size(); i++) {
 			//SerialUSB.println("Old Stream");
 			if (potentialStreams.at(i).getSourceAddress().equals(sourceAddress)) {

@@ -292,12 +292,12 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	//SerialUSB.print("Difference distance: ");
 	//SerialUSB.print(distanceDiff);
 
-	if (abs(diff - 0) > EPISLON) {
-		double speed = distanceDiff / diff;
-		SerialUSB.print("   Speed: ");
-		SerialUSB.print(speed, 12);
-		SerialUSB.println(" mps");
-	}
+	/*	if (abs(diff - 0) > EPISLON) {
+	 double speed = distanceDiff / diff;
+	 SerialUSB.print("   Speed: ");
+	 SerialUSB.print(speed, 12);
+	 SerialUSB.println(" mps");
+	 }*/
 }
 
 void HeartbeatProtocol::buildSaturationTable() {

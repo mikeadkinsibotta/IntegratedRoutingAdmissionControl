@@ -45,6 +45,7 @@ XBeeAddress64 myAddress;
 void setup() {
 	arduinoSetup();
 
+	clearBuffer();
 	xbee.getMyAddress(myAddress, DEBUG);
 	SerialUSB.print("My Address: ");
 	myAddress.printAddressASCII(&SerialUSB);
