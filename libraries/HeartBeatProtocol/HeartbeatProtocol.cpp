@@ -8,7 +8,7 @@
 
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define DEBUG false
+#define DEBUG true
 
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
 const float MAX_FLT = 9999.0;
@@ -46,6 +46,10 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
+
+	if (DEBUG) {
+		printNeighborHoodTable();
+	}
 
 	HeartbeatMessage message = HeartbeatMessage(sinkAddress, seqNum, dataRate, qualityOfPath, neighborhoodCapacity,
 			routeFlag);
