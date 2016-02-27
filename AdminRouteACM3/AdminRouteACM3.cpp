@@ -153,6 +153,9 @@ void listenForResponses() {
 					admissionControl->handleREDJPacket(response);
 				} else if (!strcmp(control, "GRNT")) {
 					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
+				} else if (!strcmp(control, "TRCE")) {
+					SerialUSB.print("Received Trace Packet");
+					voicePacketSender->handleTracePacket(response);
 				}
 			}
 		}

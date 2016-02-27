@@ -39,6 +39,8 @@ class VoicePacketSender {
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 		void updateDataRate(uint8_t dataLoss);
+		void sendTracePacket();
+		;
 
 	public:
 		VoicePacketSender();
@@ -58,6 +60,7 @@ class VoicePacketSender {
 		float getDupSetting() const;
 		void setDupSetting(float dupSetting);
 		void handlePathPacket(const Rx64Response &response);
+		void handleTracePacket(const Rx64Response &response);
 		void resetFrameID();
 		//void sendStreamRestart(const XBeeAddress64& packetSource);
 		//void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,

@@ -5,6 +5,7 @@
  *      Author: mike
  */
 #include <VoicePacketSender.h>
+#include "TraceMessage.h"
 
 VoicePacketSender::VoicePacketSender() {
 	codecSetting = 2;
@@ -123,12 +124,17 @@ void VoicePacketSender::generateVoicePacket() {
 
 	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
-	xbee.send(tx);
+	//xbee.send(tx);
 	frameId++;
 
 	if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
-		xbee.send(tx);
+		//xbee.send(tx);
 		frameId++;
+	}
+
+	if (frameId % 50 == 0) {
+		SerialUSB.println("Sending out TRACE message");
+		sendTracePacket();
 	}
 
 }
@@ -276,6 +282,54 @@ void VoicePacketSender::updateDataRate(uint8_t dataLoss) {
 
 void VoicePacketSender::resetFrameID() {
 	frameId = 0;
+}
+
+void VoicePacketSender::sendTracePacket() {
+
+	TraceMessage traceMessage;
+
+	uint8_t traceMessagePayLoad[] = { 'T', 'R', 'C', 'E', '\0', 0 };
+	Tx64Request tx = Tx64Request(myNextHop, traceMessagePayLoad, sizeof(traceMessagePayLoad));
+	// send the command
+	xbee.send(tx);
+
+}
+
+void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
+
+	TraceMessage traceMessage;
+	traceMessage.transcribeMessage(response);
+
+	uint8_t* traceMessagePayLoad = (uint8_t*) malloc(6 + sizeof(XBeeAddress64) * traceMessage.getAddressListLength());
+	traceMessagePayLoad[0] = 'T';
+	traceMessagePayLoad[1] = 'R';
+	traceMessagePayLoad[2] = 'C';
+	traceMessagePayLoad[3] = 'E';
+	traceMessagePayLoad[4] = '\0';
+	traceMessagePayLoad[5] = traceMessage.getAddressListLength();
+
+	traceMessagePayLoad += 7;
+	for (int i = 0; i < traceMessage.getAddressListLength(); i++) {
+
+		traceMessagePayLoad[0] = (traceMessage.getAddresses().at(i).getMsb() >> 24) & 0xff;
+		traceMessagePayLoad[1] = (traceMessage.getAddresses().at(i).getMsb() >> 16) & 0xff;
+		traceMessagePayLoad[2] = (traceMessage.getAddresses().at(i).getMsb() >> 8) & 0xff;
+		traceMessagePayLoad[3] = traceMessage.getAddresses().at(i).getMsb() & 0xff;
+		traceMessagePayLoad[4] = (traceMessage.getAddresses().at(i).getLsb() >> 24) & 0xff;
+		traceMessagePayLoad[5] = (traceMessage.getAddresses().at(i).getLsb() >> 16) & 0xff;
+		traceMessagePayLoad[6] = (traceMessage.getAddresses().at(i).getLsb() >> 8) & 0xff;
+		traceMessagePayLoad += 8;
+
+	}
+
+	if (!senderAddress.equals(sinkAddress)) {
+		Tx64Request tx = Tx64Request(myNextHop, traceMessagePayLoad, sizeof(traceMessagePayLoad));
+		xbee.send(tx);
+	} else {
+
+		traceMessage.printTraceMessage();
+	}
+
 }
 
 const XBeeAddress64& VoicePacketSender::getMyNextHop() const {
