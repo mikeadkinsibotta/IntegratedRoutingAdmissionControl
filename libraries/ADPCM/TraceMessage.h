@@ -27,6 +27,7 @@ class TraceMessage {
 		uint8_t getAddressListLength() const;
 		void setAddressListLength(uint8_t addressListLength);
 		void printTraceMessage();
+		void addAddress(const XBeeAddress64 addresses);
 
 };
 

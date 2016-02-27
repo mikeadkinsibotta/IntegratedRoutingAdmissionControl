@@ -38,8 +38,18 @@ void TraceMessage::transcribeMessage(const Rx64Response& response) {
 	}
 
 	//Add last sender
-	addresses.push_back(senderAddress);
+	addAddress(senderAddress);
 
+}
+
+void TraceMessage::addAddress(const XBeeAddress64 address) {
+	addresses.push_back(address);
+	SerialUSB.print("Pushing Back Address:  ");
+	address.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+	addressListLength = addresses.size();
+	SerialUSB.print("Address Length: ");
+	SerialUSB.println(addressListLength);
 }
 
 const vector<XBeeAddress64>& TraceMessage::getAddresses() const {
@@ -59,7 +69,7 @@ void TraceMessage::setAddressListLength(uint8_t addressListLength) {
 }
 
 void TraceMessage::printTraceMessage() {
-	SerialUSB.print("Current Voice Path, Sender Address:  ");
+	SerialUSB.print("Current Voice Path - Sender Address:  ");
 	addresses.at(0).printAddressASCII(&SerialUSB);
 	SerialUSB.print("  Path:  ");
 	for (int i = 0; i < addressListLength; ++i) {

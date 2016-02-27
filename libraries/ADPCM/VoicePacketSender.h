@@ -26,7 +26,7 @@ class VoicePacketSender {
 		XBee xbee;
 		HeartbeatProtocol * heartbeatProtocol;
 		VoiceStreamStatManager * voiceStreamStatManager;
-		XBeeAddress64 senderAddress;
+		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
 

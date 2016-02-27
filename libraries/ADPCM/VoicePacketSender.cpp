@@ -11,7 +11,7 @@ VoicePacketSender::VoicePacketSender() {
 	codecSetting = 2;
 	dupSetting = 0.0;
 	admcpm = ADPCM();
-	senderAddress = XBeeAddress64();
+	myAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
 	frameId = 0;
 	myNextHop = XBeeAddress64();
@@ -33,7 +33,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
 	admcpm = ADPCM();
-	this->senderAddress = myAddress;
+	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->voiceStreamStatManager = voiceStreamStatManager;
 	this->payloadSize = payloadSize;
@@ -114,13 +114,13 @@ void VoicePacketSender::generateVoicePacket() {
 
 	uint8_t combinedSize = 0;
 
-	uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
-					& 0xff, senderAddress.getLsb() & 0xff, (sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb()
-					>> 16) & 0xff, (sinkAddress.getMsb() >> 8) & 0xff, sinkAddress.getMsb() & 0xff,
-			(sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb() >> 16) & 0xff, (sinkAddress.getLsb() >> 8)
-					& 0xff, sinkAddress.getLsb() & 0xff, frameId, codecSetting };
+	uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb() >> 16)
+			& 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24) & 0xff,
+			(myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+			(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+					& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+					>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+			codecSetting };
 
 	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -132,7 +132,7 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 	}
 
-	if (frameId % 50 == 0) {
+	if (frameId % 5 == 0) {
 		SerialUSB.println("Sending out TRACE message");
 		sendTracePacket();
 	}
@@ -171,7 +171,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	//check to see if the packet final destination is this node's address
 	//If not setup another request to forward it.
-	if (!senderAddress.equals(packetDestination)) {
+	if (!myAddress.equals(packetDestination)) {
 		//need to forward to next hop
 		Serial.print("ForwardData");
 
@@ -204,7 +204,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 	uint8_t totalPacketSent = dataPtr[14];
 	uint8_t totalPacketReceived = dataPtr[15];
 
-	if (!senderAddress.equals(packetSource)) {
+	if (!myAddress.equals(packetSource)) {
 
 		XBeeAddress64 nextHop;
 		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
@@ -298,35 +298,48 @@ void VoicePacketSender::sendTracePacket() {
 void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 
 	TraceMessage traceMessage;
+	SerialUSB.println("Begin Transcribe Message");
 	traceMessage.transcribeMessage(response);
+	SerialUSB.println("Finish Transcribe Message");
 
-	uint8_t* traceMessagePayLoad = (uint8_t*) malloc(6 + sizeof(XBeeAddress64) * traceMessage.getAddressListLength());
-	traceMessagePayLoad[0] = 'T';
-	traceMessagePayLoad[1] = 'R';
-	traceMessagePayLoad[2] = 'C';
-	traceMessagePayLoad[3] = 'E';
-	traceMessagePayLoad[4] = '\0';
-	traceMessagePayLoad[5] = traceMessage.getAddressListLength();
+	XBeeAddress64 senderAddress = response.getRemoteAddress64();
+	SerialUSB.print("Received From: ");
+	senderAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 
-	traceMessagePayLoad += 7;
-	for (int i = 0; i < traceMessage.getAddressListLength(); i++) {
+	if (!myAddress.equals(sinkAddress)) {
 
-		traceMessagePayLoad[0] = (traceMessage.getAddresses().at(i).getMsb() >> 24) & 0xff;
-		traceMessagePayLoad[1] = (traceMessage.getAddresses().at(i).getMsb() >> 16) & 0xff;
-		traceMessagePayLoad[2] = (traceMessage.getAddresses().at(i).getMsb() >> 8) & 0xff;
-		traceMessagePayLoad[3] = traceMessage.getAddresses().at(i).getMsb() & 0xff;
-		traceMessagePayLoad[4] = (traceMessage.getAddresses().at(i).getLsb() >> 24) & 0xff;
-		traceMessagePayLoad[5] = (traceMessage.getAddresses().at(i).getLsb() >> 16) & 0xff;
-		traceMessagePayLoad[6] = (traceMessage.getAddresses().at(i).getLsb() >> 8) & 0xff;
-		traceMessagePayLoad += 8;
+		uint8_t* traceMessagePayLoad = (uint8_t*) malloc(
+				6 + sizeof(XBeeAddress64) * traceMessage.getAddressListLength());
+		traceMessagePayLoad[0] = 'T';
+		traceMessagePayLoad[1] = 'R';
+		traceMessagePayLoad[2] = 'C';
+		traceMessagePayLoad[3] = 'E';
+		traceMessagePayLoad[4] = '\0';
+		traceMessagePayLoad[5] = traceMessage.getAddressListLength();
 
-	}
+		traceMessagePayLoad += 7;
+		for (int i = 0; i < traceMessage.getAddressListLength(); i++) {
 
-	if (!senderAddress.equals(sinkAddress)) {
+			traceMessagePayLoad[0] = (traceMessage.getAddresses().at(i).getMsb() >> 24) & 0xff;
+			traceMessagePayLoad[1] = (traceMessage.getAddresses().at(i).getMsb() >> 16) & 0xff;
+			traceMessagePayLoad[2] = (traceMessage.getAddresses().at(i).getMsb() >> 8) & 0xff;
+			traceMessagePayLoad[3] = traceMessage.getAddresses().at(i).getMsb() & 0xff;
+			traceMessagePayLoad[4] = (traceMessage.getAddresses().at(i).getLsb() >> 24) & 0xff;
+			traceMessagePayLoad[5] = (traceMessage.getAddresses().at(i).getLsb() >> 16) & 0xff;
+			traceMessagePayLoad[6] = (traceMessage.getAddresses().at(i).getLsb() >> 8) & 0xff;
+			traceMessagePayLoad += 8;
+
+		}
+
 		Tx64Request tx = Tx64Request(myNextHop, traceMessagePayLoad, sizeof(traceMessagePayLoad));
 		xbee.send(tx);
-	} else {
 
+		free(traceMessagePayLoad);
+
+	} else {
+		//Reach the sink
+		traceMessage.addAddress(myAddress);
 		traceMessage.printTraceMessage();
 	}
 

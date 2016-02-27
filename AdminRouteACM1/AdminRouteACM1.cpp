@@ -4,9 +4,9 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
+#define VOICE_DATA_INTERVAL 4000
 #define REQUEST_STREAM 12000
-#define SENDER false
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -154,7 +154,7 @@ void listenForResponses() {
 				} else if (!strcmp(control, "GRNT")) {
 					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
 				} else if (!strcmp(control, "TRCE")) {
-					SerialUSB.print("Received Trace Packet");
+					SerialUSB.println("Received Trace Packet");
 					voicePacketSender->handleTracePacket(response);
 				}
 			}
