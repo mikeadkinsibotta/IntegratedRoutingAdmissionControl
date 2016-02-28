@@ -6,7 +6,7 @@
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
 #define REQUEST_STREAM 12000
-#define SENDER false
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -24,7 +24,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 3000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 60000;
+const unsigned long STREAM_DELAY_START = 240000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();

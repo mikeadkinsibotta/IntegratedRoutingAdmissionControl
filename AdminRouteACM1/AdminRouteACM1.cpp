@@ -24,7 +24,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 3000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 60000;
+const unsigned long STREAM_DELAY_START = 300000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
