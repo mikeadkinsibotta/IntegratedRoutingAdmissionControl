@@ -132,7 +132,7 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 	}
 
-	if (frameId % 50 == 0) {
+	if (frameId % 150 == 0) {
 		sendTracePacket();
 	}
 

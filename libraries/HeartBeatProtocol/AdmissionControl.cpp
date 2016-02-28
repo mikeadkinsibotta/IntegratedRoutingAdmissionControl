@@ -36,8 +36,8 @@ void AdmissionControl::checkTimers() {
 		XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
-			SerialUSB.println("Grant Timer Expired. Sink sends GRNT");
-			SerialUSB.println();
+			/*SerialUSB.println("Grant Timer Expired. Sink sends GRNT");
+			 SerialUSB.println();*/
 
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 
@@ -118,9 +118,9 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
-	SerialUSB.print("Receiving request for new stream via: ");
-	receivedAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.println();
+	/*SerialUSB.print("Receiving request for new stream via: ");
+	 receivedAddress.printAddressASCII(&SerialUSB);
+	 SerialUSB.println();*/
 
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;
@@ -139,13 +139,13 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
-
-	SerialUSB.print("Sender Address: ");
-	senderAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(" Nexthop Address: ");
-	nextHop.printAddressASCII(&SerialUSB);
-	SerialUSB.print(" Potential Data Rate: ");
-	SerialUSB.println(dataRate);
+	/*
+	 SerialUSB.print("Sender Address: ");
+	 senderAddress.printAddressASCII(&SerialUSB);
+	 SerialUSB.print(" Nexthop Address: ");
+	 nextHop.printAddressASCII(&SerialUSB);
+	 SerialUSB.print(" Potential Data Rate: ");
+	 SerialUSB.println(dataRate);*/
 
 	//remove any old streams
 	voiceStreamStatManager->removeStream(senderAddress);
@@ -158,7 +158,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
-		SerialUSB.println("Start Grant Timer");
+		/*SerialUSB.println("Start Grant Timer");*/
 		potentialStream.setOnPath(true);
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
@@ -223,17 +223,17 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	if (!myAddress.equals(sourceAddress)) {
-		SerialUSB.print("Forward GRANT recevied from: ");
-		previousHop.printAddressASCII(&SerialUSB);
-		SerialUSB.println();
+		/*	SerialUSB.print("Forward GRANT recevied from: ");
+		 previousHop.printAddressASCII(&SerialUSB);
+		 SerialUSB.println();*/
 
 		for (int i = 0; i < potentialStreams.size(); i++) {
 			//SerialUSB.println("Old Stream");
 			if (potentialStreams.at(i).getSourceAddress().equals(sourceAddress)) {
 
-				SerialUSB.print("Forward GRANT to: ");
-				potentialStreams.at(i).getUpStreamNeighbor().printAddressASCII(&SerialUSB);
-				SerialUSB.println();
+				/*	SerialUSB.print("Forward GRANT to: ");
+				 potentialStreams.at(i).getUpStreamNeighbor().printAddressASCII(&SerialUSB);
+				 SerialUSB.println();*/
 
 				sendGRANTPacket(sourceAddress, potentialStreams.at(i).getUpStreamNeighbor());
 				removePotentialStream(sourceAddress);
@@ -242,7 +242,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 		}
 
 	} else {
-		SerialUSB.println("Active Voice");
+		/*SerialUSB.println("Active Voice");*/
 		initThreadActive = false;
 		voicePacketSender->resetFrameID();
 		voiceThreadActive = true;
@@ -259,9 +259,9 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 	int i = 0;
 	for (vector<PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end(); ++it) {
 		if (potentialStreams.at(i).getSourceAddress().equals(packetSource)) {
-			SerialUSB.print("Removed Potential Stream: ");
-			potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
-			SerialUSB.println();
+			/*SerialUSB.print("Removed Potential Stream: ");
+			 potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
+			 SerialUSB.println();*/
 			potentialStreams.erase(it);
 			return true;
 		}
@@ -290,8 +290,8 @@ void AdmissionControl::addPotentialStream(const PotentialStream& potentialStream
 void AdmissionControl::printPotentialStreams() const {
 	SerialUSB.println("Potential Streams: ");
 	for (int i = 0; i < potentialStreams.size(); i++) {
-		SerialUSB.print("    ");
-		potentialStreams.at(i).printPotentialStream();
+		/*	SerialUSB.print("    ");
+		 potentialStreams.at(i).printPotentialStream();*/
 	}
 }
 
@@ -300,21 +300,21 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
 
-	SerialUSB.print("Potential Stream: ");
-	sourceAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(" Potential Data Rate: ");
-	SerialUSB.print(potentialDataRate);
+	/*SerialUSB.print("Potential Stream: ");
+	 sourceAddress.printAddressASCII(&SerialUSB);
+	 SerialUSB.print(" Potential Data Rate: ");
+	 SerialUSB.print(potentialDataRate);
 
-	SerialUSB.print(" Local Capacity: ");
-	SerialUSB.print(neighborhoodCapacity);
-	SerialUSB.println();
-
+	 SerialUSB.print(" Local Capacity: ");
+	 SerialUSB.print(neighborhoodCapacity);
+	 SerialUSB.println();
+	 */
 	if (potentialDataRate > neighborhoodCapacity) {
-		SerialUSB.println("Stream Rejected");
-		SerialUSB.println();
+		/*SerialUSB.println("Stream Rejected");
+		 SerialUSB.println();*/
 		return true;
 	}
-	SerialUSB.println("Stream Accepted");
-	SerialUSB.println();
+	/*SerialUSB.println("Stream Accepted");
+	 SerialUSB.println();*/
 	return false;
 }

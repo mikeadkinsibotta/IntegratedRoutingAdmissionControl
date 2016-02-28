@@ -245,7 +245,17 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		 */
 		for (int i = 0; i < neighborhoodTable.size(); i++) {
 
-			if (neighborhoodTable.at(i).isRouteFlag()) {
+			/*XBeeAddress64 gotTo = XBeeAddress64(0x0013A200, 0x40B519FC);
+
+			 if (neighborhoodTable.at(i).isRouteFlag() && neighborhoodTable.at(i).getAddress().equals(gotTo)) {
+			 qualityOfPath = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+			 qualityOfPath = qop;
+			 nextHop = neighborhoodTable.at(i);
+			 routeFlag = true;
+			 return;
+			 }*/
+
+			if (neighborhoodTable.at(i).isRouteFlag() && !neighborhoodTable.at(i).getNextHop().equals(myAddress)) {
 				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
 
 				if (path < qop) {
