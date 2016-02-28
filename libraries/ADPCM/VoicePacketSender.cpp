@@ -297,20 +297,16 @@ void VoicePacketSender::sendTracePacket() {
 
 void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 
-	TraceMessage traceMessage;
-	SerialUSB.println("Begin Transcribe Message");
-	traceMessage.transcribeMessage(response);
-	SerialUSB.println("Finish Transcribe Message");
+	myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
-	XBeeAddress64 senderAddress = response.getRemoteAddress64();
-	SerialUSB.print("Received From: ");
-	senderAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.println();
+	TraceMessage traceMessage;
+	traceMessage.transcribeMessage(response);
 
 	if (!myAddress.equals(sinkAddress)) {
 
-		uint8_t* traceMessagePayLoad = (uint8_t*) malloc(
-				6 + sizeof(XBeeAddress64) * traceMessage.getAddressListLength());
+		uint8_t traceMessagePayLoad[62];
+		memset(traceMessagePayLoad, 0, sizeof(traceMessagePayLoad));
+
 		traceMessagePayLoad[0] = 'T';
 		traceMessagePayLoad[1] = 'R';
 		traceMessagePayLoad[2] = 'C';
@@ -318,24 +314,24 @@ void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 		traceMessagePayLoad[4] = '\0';
 		traceMessagePayLoad[5] = traceMessage.getAddressListLength();
 
-		traceMessagePayLoad += 7;
-		for (int i = 0; i < traceMessage.getAddressListLength(); i++) {
+		uint8_t lastAddress = traceMessage.getAddressListLength() * 8 + 6;
+		uint8_t i = 6;
 
-			traceMessagePayLoad[0] = (traceMessage.getAddresses().at(i).getMsb() >> 24) & 0xff;
-			traceMessagePayLoad[1] = (traceMessage.getAddresses().at(i).getMsb() >> 16) & 0xff;
-			traceMessagePayLoad[2] = (traceMessage.getAddresses().at(i).getMsb() >> 8) & 0xff;
-			traceMessagePayLoad[3] = traceMessage.getAddresses().at(i).getMsb() & 0xff;
-			traceMessagePayLoad[4] = (traceMessage.getAddresses().at(i).getLsb() >> 24) & 0xff;
-			traceMessagePayLoad[5] = (traceMessage.getAddresses().at(i).getLsb() >> 16) & 0xff;
-			traceMessagePayLoad[6] = (traceMessage.getAddresses().at(i).getLsb() >> 8) & 0xff;
-			traceMessagePayLoad += 8;
+		for (int j = 0; j < traceMessage.getAddressListLength(); ++j) {
 
+			traceMessagePayLoad[i] = (traceMessage.getAddresses().at(j).getMsb() >> 24) & 0xff;
+			traceMessagePayLoad[i + 1] = (traceMessage.getAddresses().at(j).getMsb() >> 16) & 0xff;
+			traceMessagePayLoad[i + 2] = (traceMessage.getAddresses().at(j).getMsb() >> 8) & 0xff;
+			traceMessagePayLoad[i + 3] = traceMessage.getAddresses().at(j).getMsb() & 0xff;
+			traceMessagePayLoad[i + 4] = (traceMessage.getAddresses().at(j).getLsb() >> 24) & 0xff;
+			traceMessagePayLoad[i + 5] = (traceMessage.getAddresses().at(j).getLsb() >> 16) & 0xff;
+			traceMessagePayLoad[i + 6] = (traceMessage.getAddresses().at(j).getLsb() >> 8) & 0xff;
+			traceMessagePayLoad[i + 7] = traceMessage.getAddresses().at(j).getLsb() & 0xff;
+			i += 8;
 		}
 
 		Tx64Request tx = Tx64Request(myNextHop, traceMessagePayLoad, sizeof(traceMessagePayLoad));
 		xbee.send(tx);
-
-		free(traceMessagePayLoad);
 
 	} else {
 		//Reach the sink

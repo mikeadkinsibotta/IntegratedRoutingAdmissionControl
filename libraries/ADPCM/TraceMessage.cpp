@@ -44,12 +44,8 @@ void TraceMessage::transcribeMessage(const Rx64Response& response) {
 
 void TraceMessage::addAddress(const XBeeAddress64 address) {
 	addresses.push_back(address);
-	SerialUSB.print("Pushing Back Address:  ");
-	address.printAddressASCII(&SerialUSB);
-	SerialUSB.println();
 	addressListLength = addresses.size();
-	SerialUSB.print("Address Length: ");
-	SerialUSB.println(addressListLength);
+
 }
 
 const vector<XBeeAddress64>& TraceMessage::getAddresses() const {
