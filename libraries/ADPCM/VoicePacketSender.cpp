@@ -124,15 +124,15 @@ void VoicePacketSender::generateVoicePacket() {
 
 	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
-	//xbee.send(tx);
+	xbee.send(tx);
 	frameId++;
 
 	if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
-		//xbee.send(tx);
+		xbee.send(tx);
 		frameId++;
 	}
 
-	if (frameId % 5 == 0) {
+	if (frameId % 50 == 0) {
 		SerialUSB.println("Sending out TRACE message");
 		sendTracePacket();
 	}
