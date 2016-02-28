@@ -19,6 +19,7 @@ class HeartbeatMessage {
 	private:
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 sinkAddress;
+		XBeeAddress64 myNextHop;
 		uint8_t seqNum;
 		float dataRate;
 		double rssi;
@@ -30,8 +31,9 @@ class HeartbeatMessage {
 	public:
 		HeartbeatMessage();
 
-		HeartbeatMessage(const XBeeAddress64& sinkAddress, const uint8_t seqNum, const float dataRate,
-				const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag);
+		HeartbeatMessage(const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop, const uint8_t seqNum,
+				const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
+				const bool routeFlag);
 
 		void generateBeatMessage(uint8_t payload[]);
 		void transcribeHeartbeatPacket(const Rx64Response& response);
@@ -62,6 +64,8 @@ class HeartbeatMessage {
 		void setRelativeDistance(double relativeDistance);
 		double getRssi() const;
 		void setRssi(double rssi);
+		const XBeeAddress64& getMyNextHop() const;
+		void setMyNextHop(const XBeeAddress64& myNextHop);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATMESSAGE_H_ */

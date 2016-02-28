@@ -18,6 +18,7 @@ class Neighbor {
 	private:
 		XBeeAddress64 address;
 		XBeeAddress64 sinkAddress;
+		XBeeAddress64 nextHop;
 		double relativeDistance;
 		double previousRelativeDistance;
 		float dataRate;
@@ -35,9 +36,9 @@ class Neighbor {
 
 	public:
 		Neighbor();
-		Neighbor(const XBeeAddress64 &address, float neighborDataRate, uint8_t seqNum, float qosCost,
-				float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance,
-				double rssi, unsigned long timeoutLength);
+		Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float neighborDataRate, uint8_t seqNum,
+				float qualityOfPath, float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress,
+				double relativeDistance, double rssi, unsigned long timeoutLength);
 
 		const XBeeAddress64& getAddress() const;
 		void setAddress(const XBeeAddress64& address);
@@ -67,6 +68,8 @@ class Neighbor {
 		double getRelativeDistanceAvg() const;
 		double getRssi() const;
 		void setRssi(double rssi);
+		const XBeeAddress64& getNextHop() const;
+		void setNextHop(const XBeeAddress64& nextHop);
 };
 
 #endif

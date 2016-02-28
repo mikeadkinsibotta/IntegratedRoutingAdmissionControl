@@ -9,6 +9,7 @@
 HeartbeatMessage::HeartbeatMessage() {
 	senderAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
+	myNextHop = XBeeAddress64();
 	relativeDistance = 0.0;
 	seqNum = 0;
 	dataRate = 0.0;
@@ -18,11 +19,13 @@ HeartbeatMessage::HeartbeatMessage() {
 	rssi = 0;
 }
 
-HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& sinkAddress, const uint8_t seqNum, const float dataRate,
-		const uint8_t qualityOfPath, const float neighborhoodCapacity, const bool routeFlag) {
+HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop,
+		const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
+		const bool routeFlag) {
 
 	this->senderAddress = XBeeAddress64();
 	this->sinkAddress = sinkAddress;
+	this->myNextHop = myNextHop;
 	this->relativeDistance = 0.0;
 	this->seqNum = seqNum;
 	this->dataRate = dataRate;
@@ -39,6 +42,8 @@ void HeartbeatMessage::printMessage() {
 	senderAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", MyNextHop: ");
+	myNextHop.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", seqNum: ");
 	SerialUSB.print(seqNum);
 	SerialUSB.print(", Relative Distance: ");
@@ -77,17 +82,25 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 	payload[10] = (sinkAddress.getLsb() >> 16) & 0xff;
 	payload[11] = (sinkAddress.getLsb() >> 8) & 0xff;
 	payload[12] = sinkAddress.getLsb() & 0xff;
-	payload[13] = seqNum;
-	payload[14] = qualityOfPath;
-	payload[15] = routeFlag;
-	payload[16] = dataRateP[0];
-	payload[17] = dataRateP[1];
-	payload[18] = dataRateP[2];
-	payload[19] = dataRateP[3];
-	payload[20] = neighborhoodCapacityP[0];
-	payload[21] = neighborhoodCapacityP[1];
-	payload[22] = neighborhoodCapacityP[2];
-	payload[23] = neighborhoodCapacityP[3];
+	payload[13] = (myNextHop.getMsb() >> 24) & 0xff;
+	payload[14] = (myNextHop.getMsb() >> 16) & 0xff;
+	payload[15] = (myNextHop.getMsb() >> 8) & 0xff;
+	payload[16] = myNextHop.getMsb() & 0xff;
+	payload[17] = (myNextHop.getLsb() >> 24) & 0xff;
+	payload[18] = (myNextHop.getLsb() >> 16) & 0xff;
+	payload[19] = (myNextHop.getLsb() >> 8) & 0xff;
+	payload[20] = myNextHop.getLsb() & 0xff;
+	payload[21] = seqNum;
+	payload[22] = qualityOfPath;
+	payload[23] = routeFlag;
+	payload[24] = dataRateP[0];
+	payload[25] = dataRateP[1];
+	payload[26] = dataRateP[2];
+	payload[27] = dataRateP[3];
+	payload[28] = neighborhoodCapacityP[0];
+	payload[29] = neighborhoodCapacityP[1];
+	payload[30] = neighborhoodCapacityP[2];
+	payload[31] = neighborhoodCapacityP[3];
 }
 
 void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
@@ -105,14 +118,20 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	sinkAddress.setLsb(
 			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
 
-	seqNum = dataPtr[8];
-	qualityOfPath = dataPtr[9];
-	routeFlag = dataPtr[10];
+	myNextHop.setMsb(
+			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
 
-	float * dataRateP = (float*) (dataPtr + 11);
+	myNextHop.setLsb(
+			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
+
+	seqNum = dataPtr[16];
+	qualityOfPath = dataPtr[17];
+	routeFlag = dataPtr[18];
+
+	float * dataRateP = (float*) (dataPtr + 19);
 	dataRate = *dataRateP;
 
-	dataRateP = (float*) (dataPtr + 15);
+	dataRateP = (float*) (dataPtr + 23);
 	neighborhoodCapacity = *dataRateP;
 
 }
@@ -187,4 +206,12 @@ double HeartbeatMessage::getRssi() const {
 
 void HeartbeatMessage::setRssi(double rssi) {
 	this->rssi = rssi;
+}
+
+const XBeeAddress64& HeartbeatMessage::getMyNextHop() const {
+	return myNextHop;
+}
+
+void HeartbeatMessage::setMyNextHop(const XBeeAddress64& myNextHop) {
+	this->myNextHop = myNextHop;
 }

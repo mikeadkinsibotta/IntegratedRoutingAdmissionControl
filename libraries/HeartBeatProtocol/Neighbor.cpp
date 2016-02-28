@@ -3,6 +3,7 @@ const uint8_t MOVING_AVERAGE_SIZE = 5;
 Neighbor::Neighbor() {
 
 	address = XBeeAddress64();
+	nextHop = XBeeAddress64();
 	dataRate = 0;
 	seqNum = 0;
 	qualityOfPath = 0;
@@ -20,11 +21,12 @@ Neighbor::Neighbor() {
 
 }
 
-Neighbor::Neighbor(const XBeeAddress64& address, float neighborDataRate, uint8_t seqNum, float qualityOfPath,
-		float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress, double relativeDistance,
-		double rssi, unsigned long timeoutLength) {
+Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float neighborDataRate, uint8_t seqNum,
+		float qualityOfPath, float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress,
+		double relativeDistance, double rssi, unsigned long timeoutLength) {
 
 	this->address = address;
+	this->nextHop = nextHop;
 	this->dataRate = dataRate;
 	this->seqNum = seqNum;
 	this->qualityOfPath = qualityOfPath;
@@ -175,4 +177,12 @@ void Neighbor::printNeighbor() const {
 	Serial.print(',');
 	Serial.print(neighborhoodCapacity);
 	Serial.print('>');
+}
+
+const XBeeAddress64& Neighbor::getNextHop() const {
+	return nextHop;
+}
+
+void Neighbor::setNextHop(const XBeeAddress64& nextHop) {
+	this->nextHop = nextHop;
 }

@@ -10,7 +10,7 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define DEBUG false
 
-const uint8_t HEARTBEAT_PAYLOAD_SIZE = 24;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 32;
 const float MAX_FLT = 9999.0;
 const float EPISLON = 0.001;
 
@@ -51,8 +51,8 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 		printNeighborHoodTable();
 	}
 
-	HeartbeatMessage message = HeartbeatMessage(sinkAddress, seqNum, dataRate, qualityOfPath, neighborhoodCapacity,
-			routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(sinkAddress, nextHop.getAddress(), seqNum, dataRate, qualityOfPath,
+			neighborhoodCapacity, routeFlag);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 
@@ -132,8 +132,8 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	if (!found) {
 		//Sets timestamp when constructor is called.
-		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getDataRate(),
-				heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
+		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getMyNextHop(),
+				heartbeatMessage.getDataRate(), heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
@@ -219,6 +219,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
 		SerialUSB.print(", SinkAddress: ");
 		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", NextHopAddress: ");
+		neighborhoodTable.at(i).getNextHop().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RSSI: ");
 		SerialUSB.print(neighborhoodTable.at(i).getRssi());
 		SerialUSB.print(", RelativeDistanceAvg: ");
@@ -335,6 +337,7 @@ float HeartbeatProtocol::getLocalCapacity() const {
 
 void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
 	neighbor.setDataRate(heartbeatMessage.getDataRate());
+	neighbor.setNextHop(heartbeatMessage.getMyNextHop());
 	neighbor.setSeqNum(heartbeatMessage.getSeqNum());
 	neighbor.setQualityOfPath(heartbeatMessage.getQualityOfPath());
 	neighbor.setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
