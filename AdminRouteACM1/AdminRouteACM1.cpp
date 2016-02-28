@@ -6,7 +6,7 @@
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
 #define REQUEST_STREAM 12000
-#define SENDER true
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -24,6 +24,8 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 3000;
 const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
 const unsigned long HEARTBEAT_INTERVAL = 3000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
+const unsigned long STREAM_DELAY_START = 60000;
+unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -60,6 +62,7 @@ void setup() {
 	setupThreads();
 
 	digitalWrite(13, LOW);
+	STREAM_DELAY_START_BEGIN = millis();
 }
 
 void loop() {
@@ -89,7 +92,10 @@ void arduinoSetup() {
 }
 
 void sendInitPacket() {
-	admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
+
+	if (millis() - STREAM_DELAY_START_BEGIN > STREAM_DELAY_START) {
+		admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
+	}
 }
 
 void sendVoicePacket() {
