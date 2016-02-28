@@ -133,7 +133,6 @@ void VoicePacketSender::generateVoicePacket() {
 	}
 
 	if (frameId % 50 == 0) {
-		SerialUSB.println("Sending out TRACE message");
 		sendTracePacket();
 	}
 
