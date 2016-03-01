@@ -5,13 +5,14 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
-#define REQUEST_STREAM 4000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
-#define IGNORE_HEARTBEAT false
+#define MANIPULATE false
+#define MANIPULATE_ADDRESS_1 0x00000000
+#define MANIPULATE_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
@@ -20,8 +21,9 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long GRANT_TIMEOUT_LENGTH = 3000;
-const unsigned long REJECT_TIMEOUT_LENGTH = 1000;
+const unsigned long REQUEST_STREAM = 400;
+const unsigned long GRANT_TIMEOUT_LENGTH = 300;
+const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 30000;
@@ -41,6 +43,7 @@ Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
+XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
@@ -54,7 +57,8 @@ void setup() {
 	SerialUSB.println();
 
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
-	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, myAddress, sinkAddress, xbee);
+	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
+			xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
 			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
@@ -144,7 +148,7 @@ void listenForResponses() {
 
 				if (!strcmp(control, "BEAT")) {
 					//routing data
-					heartbeatProtocol->receiveHeartBeat(response, IGNORE_HEARTBEAT);
+					heartbeatProtocol->receiveHeartBeat(response);
 				} else if (!strcmp(control, "DATA")) {
 					//voice data
 					voicePacketSender->handleDataPacket(response);

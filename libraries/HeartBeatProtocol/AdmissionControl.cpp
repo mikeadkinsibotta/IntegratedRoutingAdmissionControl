@@ -45,7 +45,7 @@ void AdmissionControl::checkTimers() {
 			removePotentialStream(sourceAddress);
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
 			//Wait for all init messages then send rejc if violate local capacity
-			SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
+			//SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
 				SerialUSB.println("Sending Reject Packet...");
@@ -118,9 +118,9 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
-	/*SerialUSB.print("Receiving request for new stream via: ");
-	 receivedAddress.printAddressASCII(&SerialUSB);
-	 SerialUSB.println();*/
+	SerialUSB.print("Receiving request for new stream via: ");
+	receivedAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;

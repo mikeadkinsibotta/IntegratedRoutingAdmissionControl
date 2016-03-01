@@ -25,14 +25,16 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	nextHop = Neighbor();
 }
 
-HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAdress, XBee& xbee) {
+HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
+		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAdress;
 	this->routeFlag = false;
 	this->broadcastAddress = broadcastAddress;
+	this->manipulateAddress = manipulateAddress;
+	this->manipulate = manipulateFlag;
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = MAX_FLT;
@@ -98,7 +100,7 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 
 }
 
-void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response, bool ignoreHeartBeatFlag) {
+void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	HeartbeatMessage message;
 
@@ -245,15 +247,17 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		 */
 		for (int i = 0; i < neighborhoodTable.size(); i++) {
 
-			/*XBeeAddress64 gotTo = XBeeAddress64(0x0013A200, 0x40B519FC);
+			if (manipulate) {
 
-			 if (neighborhoodTable.at(i).isRouteFlag() && neighborhoodTable.at(i).getAddress().equals(gotTo)) {
-			 qualityOfPath = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
-			 qualityOfPath = qop;
-			 nextHop = neighborhoodTable.at(i);
-			 routeFlag = true;
-			 return;
-			 }*/
+				if (neighborhoodTable.at(i).isRouteFlag()
+						&& neighborhoodTable.at(i).getAddress().equals(manipulateAddress)) {
+					qualityOfPath = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+					qualityOfPath = qop;
+					nextHop = neighborhoodTable.at(i);
+					routeFlag = true;
+					return;
+				}
+			}
 
 			if (neighborhoodTable.at(i).isRouteFlag() && !neighborhoodTable.at(i).getNextHop().equals(myAddress)) {
 				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
@@ -340,8 +344,8 @@ float HeartbeatProtocol::getLocalCapacity() const {
 		localCapacity = neighborhoodCapacity;
 	}
 
-	SerialUSB.print("Local Capacity: ");
-	SerialUSB.println(localCapacity);
+//	SerialUSB.print("Local Capacity: ");
+//	SerialUSB.println(localCapacity);
 	return localCapacity;
 }
 
