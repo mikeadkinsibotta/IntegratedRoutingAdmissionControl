@@ -96,7 +96,7 @@ void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 				>> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
 				(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb()
 						>> 8) & 0xff, senderAddress.getLsb() & 0xff };
-		Tx64Request tx = Tx64Request(nextHop, payload, sizeof(payload));
+		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), 1);
 		xbee.send(tx);
 	} else {
 		Serial.print("No nextHop for reject message");
@@ -110,7 +110,7 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
 			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
 					& 0xff, senderAddress.getLsb() & 0xff };
-	Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), 0);
+	Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), 1);
 	xbee.send(tx);
 
 }

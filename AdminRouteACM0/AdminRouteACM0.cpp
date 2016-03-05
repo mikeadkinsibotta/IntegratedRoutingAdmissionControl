@@ -167,6 +167,9 @@ void listenForResponses() {
 					voicePacketSender->handleTracePacket(response);
 				}
 			}
+		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+			SerialUSB.println("TX_STATUS_RESPONSE");
+
 		}
 	}
 }
