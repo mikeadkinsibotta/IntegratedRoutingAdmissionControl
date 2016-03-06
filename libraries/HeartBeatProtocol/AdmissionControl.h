@@ -29,7 +29,7 @@ class AdmissionControl {
 		VoicePacketSender * voicePacketSender;
 		unsigned long grantTimeoutLength;
 		unsigned long rejcTimeoutLength;
-		void addPotentialStream(const PotentialStream& potentialStream, const float addDataRate);
+		void addPotentialStream(PotentialStream& potentialStream, const float addDataRate);
 		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
 	public:
 		AdmissionControl();

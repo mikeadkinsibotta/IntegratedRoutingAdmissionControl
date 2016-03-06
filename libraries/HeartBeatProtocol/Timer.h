@@ -20,10 +20,12 @@ class Timer {
 	public:
 		Timer();
 		Timer(unsigned long timeoutLength);
+		Timer(const Timer &obj);
+		Timer& operator =(const Timer &obj);
 
 		void startTimer();
 		bool timeoutTimer();
-
+		bool isActive() const;
 };
 
 #endif /* LIBRARIES_ADPCM_TIMER_H_ */

@@ -18,6 +18,19 @@ Timer::Timer(const unsigned long timeoutLength) {
 
 }
 
+Timer& Timer::operator =(const Timer &obj) {
+	active = obj.active;
+	timeoutLength = obj.timeoutLength;
+	timeStamp = obj.timeStamp;
+	return *this;
+}
+
+Timer::Timer(const Timer &obj) {
+	active = obj.active;
+	timeoutLength = obj.timeoutLength;
+	timeStamp = obj.timeStamp;
+}
+
 void Timer::startTimer() {
 	timeStamp = millis();
 	active = true;
@@ -31,3 +44,6 @@ bool Timer::timeoutTimer() {
 	return false;
 }
 
+bool Timer::isActive() const {
+	return active;
+}

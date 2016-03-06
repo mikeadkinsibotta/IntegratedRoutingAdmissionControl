@@ -26,7 +26,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 15000;
+const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -138,7 +138,7 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 3.00) {
+			if (response.getRelativeDistance() < 4.00) {
 
 				char control[5];
 
@@ -168,8 +168,13 @@ void listenForResponses() {
 				}
 			}
 		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
-			SerialUSB.println("TX_STATUS_RESPONSE");
-
+			TxStatusResponse response;
+			xbee.getResponse().getTxStatusResponse(response);
+			uint8_t status = response.getStatus();
+			if (status != 0) {
+				SerialUSB.print("TX_STATUS_ERROR: ");
+				SerialUSB.println(status);
+			}
 		}
 	}
 }

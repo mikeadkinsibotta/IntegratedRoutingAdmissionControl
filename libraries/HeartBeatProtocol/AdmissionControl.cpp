@@ -36,11 +36,7 @@ void AdmissionControl::checkTimers() {
 		XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
-			/*SerialUSB.println("Grant Timer Expired. Sink sends GRNT");
-			 SerialUSB.println();*/
-
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
-
 			sendGRANTPacket(sourceAddress, nextHop);
 			removePotentialStream(sourceAddress);
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
@@ -139,9 +135,6 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	XBeeAddress64 receivedAddress = response.getRemoteAddress64();
-	SerialUSB.print("Receiving request for new stream via: ");
-	receivedAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.println();
 
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;
@@ -160,13 +153,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
-	/*
-	 SerialUSB.print("Sender Address: ");
-	 senderAddress.printAddressASCII(&SerialUSB);
-	 SerialUSB.print(" Nexthop Address: ");
-	 nextHop.printAddressASCII(&SerialUSB);
-	 SerialUSB.print(" Potential Data Rate: ");
-	 SerialUSB.println(dataRate);*/
 
 	//remove any old streams
 	voiceStreamStatManager->removeStream(senderAddress);
@@ -176,24 +162,23 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 		//sink node
+		SerialUSB.print("Receiving request for new stream via: ");
+		receivedAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Sender Address: ");
+		senderAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Potential Data Rate: ");
+		SerialUSB.println(dataRate);
 
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
-		/*SerialUSB.println("Start Grant Timer");*/
 		potentialStream.setOnPath(true);
+
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
-		SerialUSB.print("Received INIT Forwarding ");
-		SerialUSB.print(" Message Next Hop  ");
-		nextHop.printAddressASCII(&SerialUSB);
-		SerialUSB.print("  My Next Hop: ");
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
-		myNextHop.printAddressASCII(&SerialUSB);
-		SerialUSB.print("  My Address:  ");
-		myAddress.printAddressASCII(&SerialUSB);
-		SerialUSB.println();
+
 		uint8_t * injectionRateP = (uint8_t *) &dataRate;
 
 		uint8_t payloadBroadCast[25];
@@ -231,7 +216,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	} else {
 		//node affected but node on path
-		SerialUSB.println("I am affected, but not on path");
 		potentialStream.getRejcTimer().startTimer();
 
 	}
@@ -271,18 +255,9 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	if (!myAddress.equals(sourceAddress)) {
-		/*	SerialUSB.print("Forward GRANT recevied from: ");
-		 previousHop.printAddressASCII(&SerialUSB);
-		 SerialUSB.println();*/
-
 		for (int i = 0; i < potentialStreams.size(); i++) {
 			//SerialUSB.println("Old Stream");
 			if (potentialStreams.at(i).getSourceAddress().equals(sourceAddress)) {
-
-				/*	SerialUSB.print("Forward GRANT to: ");
-				 potentialStreams.at(i).getUpStreamNeighbor().printAddressASCII(&SerialUSB);
-				 SerialUSB.println();*/
-
 				sendGRANTPacket(sourceAddress, potentialStreams.at(i).getUpStreamNeighbor());
 				removePotentialStream(sourceAddress);
 				break;
@@ -304,27 +279,32 @@ void AdmissionControl::intializationSenderTimeout() {
 }
 
 bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) {
-	int i = 0;
-	for (vector<PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end(); ++it) {
-		if (potentialStreams.at(i).getSourceAddress().equals(packetSource)) {
+
+	for (vector<PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end();) {
+		if (it->getSourceAddress().equals(packetSource)) {
 			/*SerialUSB.print("Removed Potential Stream: ");
 			 potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
 			 SerialUSB.println();*/
-			potentialStreams.erase(it);
+			it = potentialStreams.erase(it);
 			return true;
 		}
-		++i;
+		++it;
 	}
 	return false;
 }
 
-void AdmissionControl::addPotentialStream(const PotentialStream& potentialStream, float const addDataRate) {
+void AdmissionControl::addPotentialStream(PotentialStream& potentialStream, float const addDataRate) {
 
 	bool found = false;
 
 	for (int i = 0; i < potentialStreams.size(); i++) {
 		if (potentialStreams.at(i).getSourceAddress().equals(potentialStream.getSourceAddress())) {
 			potentialStreams.at(i).increaseDataRate(addDataRate);
+			if (potentialStream.isOnPath()) {
+				potentialStream.increaseDataRate(potentialStreams.at(i).getIncreasedDataRate());
+				potentialStreams.at(i) = potentialStream;
+			}
+
 			found = true;
 			break;
 		}

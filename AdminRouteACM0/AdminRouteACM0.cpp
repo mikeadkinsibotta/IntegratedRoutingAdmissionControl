@@ -26,7 +26,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 30000;
+const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -138,7 +138,7 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 3.00) {
+			if (response.getRelativeDistance() < 4.00) {
 
 				char control[5];
 

@@ -66,8 +66,6 @@ void VoiceStreamStats::calculateThroughput() {
 
 	if (totalPacketsRecieved == 0) {
 		numNoPacketReceived++;
-		SerialUSB.print("NumPacketsRecieved: ");
-		SerialUSB.println(numNoPacketReceived);
 		voiceQuality = 0;
 	} else {
 		numNoPacketReceived = 0;
