@@ -74,13 +74,34 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 
 		SerialUSB.print("Injection Rate: ");
 		SerialUSB.println(injectionRate);
+		uint8_t payloadBroadCast[25];
 
-		uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-				myNextHop.getMsb() >> 24, myNextHop.getMsb() >> 16, myNextHop.getMsb() >> 8, myNextHop.getMsb(),
-				myNextHop.getLsb() >> 24, myNextHop.getLsb() >> 16, myNextHop.getLsb() >> 8, myNextHop.getLsb(),
-				injectionRateP[0], injectionRateP[1], injectionRateP[2], injectionRateP[3] };
+		payloadBroadCast[0] = 'I';
+		payloadBroadCast[1] = 'N';
+		payloadBroadCast[2] = 'I';
+		payloadBroadCast[3] = 'T';
+		payloadBroadCast[4] = '\0';
+		payloadBroadCast[5] = (myAddress.getMsb() >> 24) & 0xff;
+		payloadBroadCast[6] = (myAddress.getMsb() >> 16) & 0xff;
+		payloadBroadCast[7] = (myAddress.getMsb() >> 8) & 0xff;
+		payloadBroadCast[8] = myAddress.getMsb() & 0xff;
+		payloadBroadCast[9] = (myAddress.getLsb() >> 24) & 0xff;
+		payloadBroadCast[10] = (myAddress.getLsb() >> 16) & 0xff;
+		payloadBroadCast[11] = (myAddress.getLsb() >> 8) & 0xff;
+		payloadBroadCast[12] = myAddress.getLsb() & 0xff;
+		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
+		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
+		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
+		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
+		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
+		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
+		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
+		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+		payloadBroadCast[21] = injectionRateP[0];
+		payloadBroadCast[22] = injectionRateP[1];
+		payloadBroadCast[23] = injectionRateP[2];
+		payloadBroadCast[24] = injectionRateP[3];
+
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 		// send the command
 		xbee.send(tx);
@@ -96,7 +117,7 @@ void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 				>> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
 				(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb()
 						>> 8) & 0xff, senderAddress.getLsb() & 0xff };
-		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), 1);
+		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), DEFAULT_FRAME_ID);
 		xbee.send(tx);
 	} else {
 		Serial.print("No nextHop for reject message");
@@ -110,7 +131,7 @@ void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const
 			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
 			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
 					& 0xff, senderAddress.getLsb() & 0xff };
-	Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), 1);
+	Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), DEFAULT_FRAME_ID);
 	xbee.send(tx);
 
 }
@@ -162,19 +183,45 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		potentialStream.setOnPath(true);
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
+		SerialUSB.print("Received INIT Forwarding ");
+		SerialUSB.print(" Message Next Hop  ");
+		nextHop.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  My Next Hop: ");
 
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
-
+		myNextHop.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  My Address:  ");
+		myAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 		uint8_t * injectionRateP = (uint8_t *) &dataRate;
 
-		uint8_t payloadBroadCast[] = { 'I', 'N', 'I', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-				(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb()
-						& 0xff, (senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff,
-				(senderAddress.getLsb() >> 8) & 0xff, senderAddress.getLsb() & 0xff, myNextHop.getMsb() >> 24,
-				myNextHop.getMsb() >> 16, myNextHop.getMsb() >> 8, myNextHop.getMsb(), myNextHop.getLsb() >> 24,
-				myNextHop.getLsb() >> 16, myNextHop.getLsb() >> 8, myNextHop.getLsb(), injectionRateP[0],
-				injectionRateP[1], injectionRateP[2], injectionRateP[3] };
+		uint8_t payloadBroadCast[25];
+		payloadBroadCast[0] = 'I';
+		payloadBroadCast[1] = 'N';
+		payloadBroadCast[2] = 'I';
+		payloadBroadCast[3] = 'T';
+		payloadBroadCast[4] = '\0';
+		payloadBroadCast[5] = (senderAddress.getMsb() >> 24) & 0xff;
+		payloadBroadCast[6] = (senderAddress.getMsb() >> 16) & 0xff;
+		payloadBroadCast[7] = (senderAddress.getMsb() >> 8) & 0xff;
+		payloadBroadCast[8] = senderAddress.getMsb() & 0xff;
+		payloadBroadCast[9] = (senderAddress.getLsb() >> 24) & 0xff;
+		payloadBroadCast[10] = (senderAddress.getLsb() >> 16) & 0xff;
+		payloadBroadCast[11] = (senderAddress.getLsb() >> 8) & 0xff;
+		payloadBroadCast[12] = senderAddress.getLsb() & 0xff;
+		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
+		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
+		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
+		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
+		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
+		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
+		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
+		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+		payloadBroadCast[21] = injectionRateP[0];
+		payloadBroadCast[22] = injectionRateP[1];
+		payloadBroadCast[23] = injectionRateP[2];
+		payloadBroadCast[24] = injectionRateP[3];
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
@@ -184,6 +231,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	} else {
 		//node affected but node on path
+		SerialUSB.println("I am affected, but not on path");
 		potentialStream.getRejcTimer().startTimer();
 
 	}

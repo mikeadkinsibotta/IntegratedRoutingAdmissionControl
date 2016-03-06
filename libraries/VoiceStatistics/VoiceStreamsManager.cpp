@@ -106,7 +106,6 @@ void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& 
 }
 
 void VoiceStreamStatManager::sendPathPacket() {
-	int i = 0;
 
 	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
@@ -125,9 +124,9 @@ void VoiceStreamStatManager::sendPathPacket() {
 
 		it->calculateThroughput();
 
-		if (streams.at(i).getNumNoPacketReceived() >= 3) {
+		if (it->getNumNoPacketReceived() >= 3) {
 			SerialUSB.println("Stream Lost.  Removing stream from sender: ");
-			streams.at(i).getSenderAddress().printAddressASCII(&SerialUSB);
+			it->getSenderAddress().printAddressASCII(&SerialUSB);
 			SerialUSB.println();
 			it = streams.erase(it);
 		} else {

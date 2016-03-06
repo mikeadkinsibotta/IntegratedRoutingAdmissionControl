@@ -64,6 +64,22 @@ void VoiceStreamStats::calculateThroughput() {
 	double inKb = totaldata / 1000.0;
 	throughput = inKb / timeDiff;
 
+	if (totalPacketsRecieved == 0) {
+		numNoPacketReceived++;
+		SerialUSB.print("NumPacketsRecieved: ");
+		SerialUSB.println(numNoPacketReceived);
+		voiceQuality = 0;
+	} else {
+		numNoPacketReceived = 0;
+		voiceQuality = (voiceQuality / totalPacketsRecieved);
+	}
+
+	SerialUSB.print("(");
+	SerialUSB.print(timepoint);
+	SerialUSB.print(", ");
+	SerialUSB.print(voiceQuality);
+	SerialUSB.print(")  ");
+
 	SerialUSB.print("Source Address: ");
 	senderAddress.printAddressASCII(&SerialUSB);
 
@@ -82,14 +98,6 @@ void VoiceStreamStats::calculateThroughput() {
 
 	SerialUSB.print("  Compression Last Packet: ");
 	SerialUSB.print(codecSetting);
-
-	if (totalPacketsRecieved == 0) {
-		numNoPacketReceived++;
-		voiceQuality = 0;
-	} else {
-		numNoPacketReceived = 0;
-		voiceQuality = (voiceQuality / totalPacketsRecieved);
-	}
 
 	SerialUSB.print(" Average R-Quality ");
 	SerialUSB.println(voiceQuality);

@@ -26,7 +26,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 90000;
+const unsigned long STREAM_DELAY_START = 45000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -43,7 +43,7 @@ Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
-XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, HEARTBEAT_ADDRESS_2);
+XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 

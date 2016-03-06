@@ -257,9 +257,8 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 					routeFlag = true;
 					return;
 				}
-			}
-
-			if (neighborhoodTable.at(i).isRouteFlag() && !neighborhoodTable.at(i).getNextHop().equals(myAddress)) {
+			} else if (neighborhoodTable.at(i).isRouteFlag()
+					&& !neighborhoodTable.at(i).getNextHop().equals(myAddress)) {
 				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
 
 				if (path < qop) {

@@ -733,7 +733,7 @@ void XBeeAddress64::printAddressASCII(Stream* _serial) const {
 }
 
 Tx64Request::Tx64Request() :
-		PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, NULL, 0) {
+		PayloadRequest(TX_64_REQUEST, NO_RESPONSE_FRAME_ID, NULL, 0) {
 
 }
 
@@ -749,7 +749,7 @@ Tx64Request::Tx64Request(const XBeeAddress64 &addr64, const uint8_t option, uint
 }
 
 Tx64Request::Tx64Request(const XBeeAddress64 &addr64, uint8_t *data, const uint8_t dataLength) :
-		PayloadRequest(TX_64_REQUEST, DEFAULT_FRAME_ID, data, dataLength) {
+		PayloadRequest(TX_64_REQUEST, NO_RESPONSE_FRAME_ID, data, dataLength) {
 	_addr64 = addr64;
 	_option = ACK_OPTION;
 }
@@ -800,7 +800,7 @@ void Tx64Request::setOption(const uint8_t option) {
 }
 
 AtCommandRequest::AtCommandRequest() :
-		XBeeRequest(AT_COMMAND_REQUEST, DEFAULT_FRAME_ID) {
+		XBeeRequest(AT_COMMAND_REQUEST, NO_RESPONSE_FRAME_ID) {
 	_command = NULL;
 	clearCommandValue();
 }

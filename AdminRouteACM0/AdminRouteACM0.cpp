@@ -4,7 +4,7 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
+#define VOICE_DATA_INTERVAL 1000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -21,7 +21,7 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long REQUEST_STREAM = 400;
+const unsigned long REQUEST_STREAM = 3000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
@@ -43,7 +43,7 @@ Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
-XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, HEARTBEAT_ADDRESS_2);
+XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
@@ -168,8 +168,13 @@ void listenForResponses() {
 				}
 			}
 		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
-			SerialUSB.println("TX_STATUS_RESPONSE");
-
+			TxStatusResponse response;
+			xbee.getResponse().getTxStatusResponse(response);
+			uint8_t status = response.getStatus();
+			if (status != 0) {
+				SerialUSB.print("TX_STATUS_ERROR: ");
+				SerialUSB.println(status);
+			}
 		}
 	}
 }
