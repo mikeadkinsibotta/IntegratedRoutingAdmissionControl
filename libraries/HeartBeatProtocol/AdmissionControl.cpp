@@ -328,15 +328,15 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
 
-	/*SerialUSB.print("Potential Stream: ");
-	 sourceAddress.printAddressASCII(&SerialUSB);
-	 SerialUSB.print(" Potential Data Rate: ");
-	 SerialUSB.print(potentialDataRate);
+	SerialUSB.print("Potential Stream: ");
+	sourceAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(" Potential Data Rate: ");
+	SerialUSB.print(potentialDataRate);
 
-	 SerialUSB.print(" Local Capacity: ");
-	 SerialUSB.print(neighborhoodCapacity);
-	 SerialUSB.println();
-	 */
+	SerialUSB.print(" Local Capacity: ");
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.println();
+
 	if (potentialDataRate > neighborhoodCapacity) {
 		/*SerialUSB.println("Stream Rejected");
 		 SerialUSB.println();*/
