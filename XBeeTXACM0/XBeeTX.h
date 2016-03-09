@@ -16,6 +16,7 @@
 #include <XBeeResponseThread.h>
 #include <ThreadController.h>
 #include <VoiceStreamsManager.h>
+#include <VoicePacketSender.h>
 #include <AODV.h>
 #include <Frame.h>
 
