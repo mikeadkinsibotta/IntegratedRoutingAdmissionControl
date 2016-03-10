@@ -13,6 +13,7 @@
 #include "RREQ.h"
 #include "RREP.h"
 #include "RoutingTableEntry.h"
+#include "Neighbor.h"
 
 #define SENDER false
 
@@ -22,9 +23,12 @@ class AODV {
 
 	private:
 		XBeeAddress64 broadCastaddr;
+		XBeeAddress64 myAddress;
+		XBeeAddress64 sinkAddress;
+		XBeeAddress64 nextHop;
 		static const uint8_t rreqC[];
 		static const uint8_t rrepC[];
-		XBeeAddress64 myAddress;
+
 		std::map<XBeeAddress64, RoutingTableEntry> routingTable;
 		XBee xbee;
 		std::map<XBeeAddress64, uint32_t> receivedRREQ;
@@ -38,15 +42,16 @@ class AODV {
 		void handleRREQ(RREQ& req, const XBeeAddress64& remoteSender);
 		void handleRREP(RREP& rep, const XBeeAddress64& remoteSender);
 		bool find(const RREQ& req);
-
+		void pathDiscovery(const XBeeAddress64& destination);
 	public:
 		AODV();
-		AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr);
+		AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
+				const XBeeAddress64& sinkAddress);
 		bool routeExists(const XBeeAddress64& address, uint32_t seqNum, uint8_t hopCount, RoutingTableEntry &found);
-		void getRoute(const XBeeAddress64& destination);
-		void pathDiscovery(const XBeeAddress64& destination);
+		void getRoute();
+		const XBeeAddress64& getNextHop();
 		void listenForResponses(Rx64Response& response, const char control[]);
-		bool hasRoute(const XBeeAddress64& destination, XBeeAddress64& nextHop);
+		const XBeeAddress64& getNextHop(const XBeeAddress64& destination);
 		bool checkRouteTimer();
 		void purgeExpiredRoutes();
 		void printRoutingTable();

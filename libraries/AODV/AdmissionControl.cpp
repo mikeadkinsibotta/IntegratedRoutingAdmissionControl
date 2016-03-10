@@ -59,8 +59,10 @@ void AdmissionControl::checkTimers() {
 
 void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 	//TODO fixed next hop
-	bool hasNextHop = 0;
-	if (hasNextHop) {
+
+	XBeeAddress64 nextHop = aodv->getNextHop();
+
+	if (!nextHop.equals(XBeeAddress64())) {
 		SerialUSB.println("Sending Init");
 		//XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		//XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
@@ -108,7 +110,7 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 }
 
 void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
-	//TODO fixed next hop
+//TODO fixed next hop
 	XBeeAddress64 nextHop = XBeeAddress64(); //nextHopheartbeatProtocol->getNextHop().getAddress();
 	if (!nextHop.equals(XBeeAddress64())) {
 
@@ -157,7 +159,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
 
-	//remove any old streams
+//remove any old streams
 	voiceStreamStatManager->removeStream(senderAddress);
 
 	PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
@@ -279,7 +281,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 void AdmissionControl::intializationSenderTimeout() {
 	SerialUSB.print("InitializationTimeout");
 
-	//TODO need to resend INIT message;
+//TODO need to resend INIT message;
 }
 
 bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) {
@@ -328,7 +330,7 @@ void AdmissionControl::printPotentialStreams() const {
 }
 
 bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
-	//TODO fixed next hop
+//TODO fixed next hop
 	float neighborhoodCapacity = 0; //heartbeatProtocol->getLocalCapacity();
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();

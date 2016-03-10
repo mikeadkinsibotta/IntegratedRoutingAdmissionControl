@@ -10,14 +10,14 @@ void AODV::listenForResponses(Rx64Response& response, const char control[]) {
 	XBeeAddress64 remoteSender = response.getRemoteAddress64();
 	uint8_t* data = response.getData();
 
-	if(!strcmp(control, "RREQ")) {
+	if (!strcmp(control, "RREQ")) {
 		//RREQ
 		//Serial.print("HandlingRREQ");
 		RREQ rreq = RREQ(response.getData());
 
 		handleRREQ(rreq, remoteSender);
 
-	} else if(!strcmp(control, "RREP")) {
+	} else if (!strcmp(control, "RREP")) {
 		//	Serial.print("HandlingRREP");
 		//RREP
 		RREP rrep = RREP(response.getData());
@@ -29,14 +29,13 @@ void AODV::listenForResponses(Rx64Response& response, const char control[]) {
 
 AODV::AODV() {
 	this->broadCastaddr = XBeeAddress64(0x00000000, 0x0000FFFF);
-	this->xbee = XBee();
-	this->myAddress = XBeeAddress64();
 	this->sourceSequenceNum = 0;
 	this->broadcastId = 0;
 
 }
 
-AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr) {
+AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
+		const XBeeAddress64& sinkAddress) {
 	this->broadCastaddr = broadCastaddr;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -45,15 +44,15 @@ AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64
 
 }
 
-void AODV::getRoute(const XBeeAddress64& destination) {
+void AODV::getRoute() {
 	routeTimer = millis();
 	routeTimerActive = true;
 
 	sourceSequenceNum++;
 	broadcastId++;
-	if(routingTable.count(destination) == 0) {
+	if (routingTable.count(sinkAddress) == 0) {
 		//Serial.print("PathDiscovery");
-		pathDiscovery(destination);
+		pathDiscovery (sinkAddress);
 	}
 
 }
@@ -79,7 +78,7 @@ void AODV::pathDiscovery(const XBeeAddress64& destination) {
 
 void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
-	if(routingTable.count(remoteSender) == 0) {
+	if (routingTable.count(remoteSender) == 0) {
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
 
@@ -91,7 +90,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		routingTable[remoteSender] = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
 	}
 //have I received this RREQ from this source before?
-	if(find(req)) {
+	if (find(req)) {
 		receivedRREQ[req.getSourceAddr()] = req.getBroadcastId();
 
 		/* First, it first increments the hop count value in the RREQ by one, to
@@ -107,7 +106,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		 * Checking for reverse route entry
 		 */
 
-		if(routingTable.count(req.getSourceAddr()) == 0) {
+		if (routingTable.count(req.getSourceAddr()) == 0) {
 			RoutingTableEntry reversePathEntry = RoutingTableEntry(req.getSourceAddr(), remoteSender, req.getHopCount(),
 					req.getSourceSeqNum(), millis());
 
@@ -123,7 +122,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 			 * in the routing table becomes the node from which the RREQ was received.
 			 */
 			RoutingTableEntry reverseRoute = routingTable[req.getSourceAddr()];
-			if(req.getSourceSeqNum() > reverseRoute.getSeqNumDest()) {
+			if (req.getSourceSeqNum() > reverseRoute.getSeqNumDest()) {
 				routingTable[req.getSourceAddr()] = RoutingTableEntry(req.getSourceAddr(), remoteSender,
 						req.getHopCount(), req.getSourceSeqNum(), millis());
 			}
@@ -134,8 +133,8 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		 * Checking for forward route to destination
 		 */
 
-		if(req.getDestAddr().equals(myAddress)) {
-			if(sourceSequenceNum + 1 == req.getDestSeqNum())
+		if (req.getDestAddr().equals(myAddress)) {
+			if (sourceSequenceNum + 1 == req.getDestSeqNum())
 				sourceSequenceNum++;
 
 			RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), sourceSequenceNum, 0, 3000);
@@ -156,7 +155,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 			Tx64Request tx = Tx64Request(rrepRoute.getNextHop(), ACK_OPTION, payload, sizeof(payload), 0);
 			xbee.send(tx);
 
-		} else if(routingTable.count(req.getDestAddr()) > 0) {
+		} else if (routingTable.count(req.getDestAddr()) > 0) {
 			RoutingTableEntry forwardRoute = routingTable[req.getDestAddr()];
 			/*
 			 * The intermediate node also updates its route table entry
@@ -173,7 +172,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 			 */
 			forwardRoute.getActiveNeighbors().push_back(remoteSender);
 
-			if(forwardRoute.getSeqNumDest() >= req.getDestSeqNum()) {
+			if (forwardRoute.getSeqNumDest() >= req.getDestSeqNum()) {
 
 				RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), forwardRoute.getSeqNumDest(),
 						forwardRoute.getHopCount(), millis() - forwardRoute.getExperiationTime());
@@ -221,7 +220,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 	RoutingTableEntry foundRoute;
 
 	/* When a node receives a RREP message, it searches for a route to the previous hop.  */
-	if(routingTable.count(remoteSender) == 0) {
+	if (routingTable.count(remoteSender) == 0) {
 
 		//No Route Exists in table for forward pointing route
 
@@ -250,7 +249,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 	 */
 	routeReply.incrementHopCount();
 
-	if(routingTable.count(routeReply.getDestAddr()) == 0) {
+	if (routingTable.count(routeReply.getDestAddr()) == 0) {
 		//No Route Exists in table for forward pointing route
 		//Now Check for route to RREP Destination
 
@@ -286,7 +285,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 		 *
 		 */
 
-		if((routeReply.getDestSeqNum() > foundRoute.getSeqNumDest())
+		if ((routeReply.getDestSeqNum() > foundRoute.getSeqNumDest())
 				|| (routeReply.getDestSeqNum() == foundRoute.getSeqNumDest()
 						&& routeReply.getHopCount() < foundRoute.getHopCount())) {
 
@@ -318,7 +317,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 
 //OK forward route pointer figured out.  Now where to I send the RREP message?
 //Fist, check to see if I need to foward at all.  This node may be the original node looking for a route
-	if(!myAddress.equals(routeReply.getSourceAddr())) {
+	if (!myAddress.equals(routeReply.getSourceAddr())) {
 		XBeeAddress64 reverseRouteNextHop;
 
 		//Look in the routing table for the reverse route that was created through the RREQ.
@@ -363,15 +362,15 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 
 bool AODV::find(const RREQ& req) {
 
-	if(req.getSourceAddr().equals(myAddress))
+	if (req.getSourceAddr().equals(myAddress))
 		//make sure to ignore my own RREQ
 		return false;
 
 //check if this <source_addr, broadcast_id> has been received by this node
-	if(receivedRREQ.count(req.getSourceAddr()) > 0) {
+	if (receivedRREQ.count(req.getSourceAddr()) > 0) {
 		//rreq from this address has been received
 		uint32_t broadcast_id = receivedRREQ[req.getSourceAddr()];
-		if(broadcast_id >= req.getBroadcastId()) {
+		if (broadcast_id >= req.getBroadcastId()) {
 			//broadcast_id in table is greater than or equal to this req ignore
 			return false;
 		}
@@ -388,15 +387,15 @@ void AODV::purgeExpiredRoutes() {
 	std::map < XBeeAddress64, RoutingTableEntry > newRoutingTable;
 
 	vector < XBeeAddress64 > v;
-	for(std::map<XBeeAddress64, RoutingTableEntry>::iterator it = routingTable.begin(); it != routingTable.end();
+	for (std::map<XBeeAddress64, RoutingTableEntry>::iterator it = routingTable.begin(); it != routingTable.end();
 			++it) {
 		v.push_back(it->first);
 	}
 
 	uint8_t size = routingTable.size();
-	for(int i = 0; i < routingTable.size(); ++i) {
+	for (int i = 0; i < routingTable.size(); ++i) {
 
-		if(millis() - routingTable[v.at(i)].getExperiationTime() > 3000) {
+		if (millis() - routingTable[v.at(i)].getExperiationTime() > 3000) {
 			routingTable[v.at(i)].setActive(false);
 		}
 	}
@@ -404,7 +403,7 @@ void AODV::purgeExpiredRoutes() {
 }
 
 bool AODV::checkRouteTimer() {
-	if(routeTimerActive && millis() - routeTimer < 3000) {
+	if (routeTimerActive && millis() - routeTimer < 3000) {
 		return false;
 	}
 	routeTimerActive = false;
@@ -413,21 +412,21 @@ bool AODV::checkRouteTimer() {
 
 }
 
-bool AODV::hasRoute(const XBeeAddress64& destination, XBeeAddress64& nextHop) {
-	if(routingTable.count(destination) == 0) {
-		return false;
+const XBeeAddress64& AODV::getNextHop() {
+	if (routingTable.count(sinkAddress) == 0) {
+		return XBeeAddress64();
 	}
 
-	RoutingTableEntry entry = routingTable[destination];
+	RoutingTableEntry entry = routingTable[sinkAddress];
 	nextHop = entry.getNextHop();
-	return true;
+	return nextHop;
 
 }
 
 void AODV::printRoutingTable() {
 
 	Serial.print("PrintRoutingTable");
-	for(std::map<XBeeAddress64, RoutingTableEntry>::const_iterator it = routingTable.begin(); it != routingTable.end();
+	for (std::map<XBeeAddress64, RoutingTableEntry>::const_iterator it = routingTable.begin(); it != routingTable.end();
 			it++) {
 		XBeeAddress64 key = it->first;
 		RoutingTableEntry value = it->second;
