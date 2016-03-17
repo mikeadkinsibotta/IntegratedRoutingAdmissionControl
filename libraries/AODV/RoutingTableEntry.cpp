@@ -75,18 +75,18 @@ void RoutingTableEntry::setActive(bool active) {
 	this->active = active;
 }
 
-void RoutingTableEntry::printRoute(Stream* _serial) {
-	_serial->print('<');
-	destinationAddress.printAddress(_serial);
-	_serial->print(',');
-	nextHop.printAddress(_serial);
-	_serial->print(',');
-	_serial->print(hopCount);
-	_serial->print(',');
-	_serial->print(seqNumDest);
-	_serial->print(',');
-	_serial->print(experiationTime);
-	_serial->print('>');
+void RoutingTableEntry::printRoute() {
+	SerialUSB.print('<');
+	destinationAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	nextHop.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	SerialUSB.print(hopCount);
+	SerialUSB.print(',');
+	SerialUSB.print(seqNumDest);
+	SerialUSB.print(',');
+	SerialUSB.print(experiationTime);
+	SerialUSB.print('>');
 
 }
 

@@ -36,7 +36,7 @@ class RoutingTableEntry {
 		void setNextHop(const XBeeAddress64& nextHop);
 		uint32_t getSeqNumDest() const;
 		void setSeqNumDest(uint32_t seqNumDest);
-		void printRoute(Stream* _serial);
+		void printRoute();
 		bool isActive() const;
 		void setActive(bool valid);
 		vector<XBeeAddress64>& getActiveNeighbors();

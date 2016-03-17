@@ -41,7 +41,7 @@ class RREQ {
 		void setDestSeqNum(uint32_t destSeqNum);
 		void incrementHopCount();
 		bool compare(const RREQ &j) const;
-		void print(Stream* _serial) const;
+		void print() const;
 
 };
 

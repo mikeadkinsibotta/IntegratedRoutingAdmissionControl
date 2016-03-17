@@ -34,7 +34,7 @@ class RREP {
 		const XBeeAddress64& getSourceAddr() const;
 		void setSourceAddr(const XBeeAddress64& sourceAddr);
 		void incrementHopCount();
-		void print(Stream* _serial) const;
+		void print() const;
 };
 
 #endif /* LIBRARIES_AODV_RREP_H_ */

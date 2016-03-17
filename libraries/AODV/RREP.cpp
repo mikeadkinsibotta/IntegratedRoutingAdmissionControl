@@ -80,19 +80,19 @@ void RREP::incrementHopCount() {
 	hopCount++;
 }
 
-void RREP::print(Stream* _serial) const {
-	_serial->print("RREP");
-	_serial->print('<');
-	sourceAddr.printAddress(_serial);
-	_serial->print(',');
-	destAddr.printAddress(_serial);
-	_serial->print(',');
-	_serial->print(destSeqNum);
-	_serial->print(',');
-	_serial->print(hopCount);
-	_serial->print(',');
-	_serial->print(lifeTime);
-	_serial->print('>');
+void RREP::print() const {
+	SerialUSB.print("RREP");
+	SerialUSB.print('<');
+	sourceAddr.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	destAddr.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	SerialUSB.print(destSeqNum);
+	SerialUSB.print(',');
+	SerialUSB.print(hopCount);
+	SerialUSB.print(',');
+	SerialUSB.print(lifeTime);
+	SerialUSB.println('>');
 
 }
 

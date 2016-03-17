@@ -51,7 +51,7 @@ void AODV::getRoute() {
 	sourceSequenceNum++;
 	broadcastId++;
 	if (routingTable.count(sinkAddress) == 0) {
-		//Serial.print("PathDiscovery");
+		SerialUSB.print("No Route, starting PathDiscovery");
 		pathDiscovery (sinkAddress);
 	}
 
@@ -71,14 +71,20 @@ void AODV::pathDiscovery(const XBeeAddress64& destination) {
 			destination.getLsb() >> 24, destination.getLsb() >> 16, destination.getLsb() >> 8, destination.getLsb(),
 			request.getDestSeqNum(), 0 };
 
-	Tx64Request tx = Tx64Request(broadCastaddr, ACK_OPTION, payload, sizeof(payload), 0);
+	SerialUSB.print("Sending RREQ:  ");
+	request.print();
+	Tx64Request tx = Tx64Request(broadCastaddr, payload, sizeof(payload));
 	xbee.send(tx);
 
 }
 
 void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
+	SerialUSB.print("Receiving RREQ:  ");
+	req.print();
 
 	if (routingTable.count(remoteSender) == 0) {
+		remoteSender.printAddressASCII(&SerialUSB);
+		SerialUSB.println("   Sender not in route table, adding...");
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
 
@@ -87,10 +93,16 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 						forwardPathEntry));
 
 	} else {
+		remoteSender.printAddressASCII(&SerialUSB);
+		SerialUSB.println("   Sender in route table, updating...");
 		routingTable[remoteSender] = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
 	}
-//have I received this RREQ from this source before?
+	//have I received this RREQ from this source before?
 	if (find(req)) {
+		SerialUSB.print("I have received RREQ from this source");
+		req.getSourceAddr().printAddressASCII(&SerialUSB);
+		SerialUSB.println();
+
 		receivedRREQ[req.getSourceAddr()] = req.getBroadcastId();
 
 		/* First, it first increments the hop count value in the RREQ by one, to
@@ -107,6 +119,9 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		 */
 
 		if (routingTable.count(req.getSourceAddr()) == 0) {
+			SerialUSB.print("I do not have a reverse route to address:  ");
+			req.getSourceAddr().printAddressASCII(&SerialUSB);
+			SerialUSB.println("  Need to add reverse route");
 			RoutingTableEntry reversePathEntry = RoutingTableEntry(req.getSourceAddr(), remoteSender, req.getHopCount(),
 					req.getSourceSeqNum(), millis());
 
@@ -115,6 +130,9 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 							reversePathEntry));
 
 		} else {
+			SerialUSB.print("I have a reverse route, need to figure out if this route is better");
+			SerialUSB.print("For address:  ");
+			req.getSourceAddr().printAddressASCII(&SerialUSB);
 			/*
 			 * the Originator Sequence Number from the RREQ is compared to the
 			 * corresponding destination sequence number in the route table entry
@@ -136,6 +154,10 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		if (req.getDestAddr().equals(myAddress)) {
 			if (sourceSequenceNum + 1 == req.getDestSeqNum())
 				sourceSequenceNum++;
+			SerialUSB.println("I am the sink, I will send a RREP");
+			SerialUSB.print("My Address:  ");
+			myAddress.printAddressASCII(&SerialUSB);
+			SerialUSB.println();
 
 			RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), sourceSequenceNum, 0, 3000);
 
@@ -151,7 +173,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 					routeReply.getLifeTime() };
 
 			RoutingTableEntry rrepRoute = routingTable[req.getSourceAddr()];
-
+			routeReply.print();
 			Tx64Request tx = Tx64Request(rrepRoute.getNextHop(), ACK_OPTION, payload, sizeof(payload), 0);
 			xbee.send(tx);
 
@@ -173,10 +195,10 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 			forwardRoute.getActiveNeighbors().push_back(remoteSender);
 
 			if (forwardRoute.getSeqNumDest() >= req.getDestSeqNum()) {
-
+				SerialUSB.println("Here I am an intermediate and I have a route to destination");
 				RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), forwardRoute.getSeqNumDest(),
 						forwardRoute.getHopCount(), millis() - forwardRoute.getExperiationTime());
-
+				routeReply.print();
 				uint8_t payload[] = { rrepC[0], rrepC[1], rrepC[2], rrepC[3], rrepC[4],
 						routeReply.getSourceAddr().getMsb() >> 24, routeReply.getSourceAddr().getMsb() >> 16,
 						routeReply.getSourceAddr().getMsb() >> 8, routeReply.getSourceAddr().getMsb(),
@@ -195,7 +217,9 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 		} else {
 			//Serial.print("NoRouteRebroadcast");
-			//Damn, no route found.  Rebroadcast
+			SerialUSB.println("Damn, no route found.  Rebroadcast");
+			req.print();
+
 			uint8_t payload[] =
 					{ rreqC[0], rreqC[1], rreqC[2], rreqC[3], rreqC[4], req.getSourceAddr().getMsb() >> 24,
 							req.getSourceAddr().getMsb() >> 16, req.getSourceAddr().getMsb() >> 8,
@@ -221,7 +245,8 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 
 	/* When a node receives a RREP message, it searches for a route to the previous hop.  */
 	if (routingTable.count(remoteSender) == 0) {
-
+		SerialUSB.println("I received a RREP, but I don't have a route to the sender");
+		SerialUSB.println("Need to add");
 		//No Route Exists in table for forward pointing route
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
@@ -234,12 +259,11 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 		routingTable.insert(std::pair<XBeeAddress64, RoutingTableEntry>(remoteSender, forwardPathEntry));
 
 	} else {
-
+		SerialUSB.println("I have a route to the sender");
 		foundRoute = routingTable[remoteSender];
 
 		routingTable[remoteSender] = RoutingTableEntry(remoteSender, remoteSender, 1, routeReply.getDestSeqNum(),
 				millis());
-
 	}
 
 	/*

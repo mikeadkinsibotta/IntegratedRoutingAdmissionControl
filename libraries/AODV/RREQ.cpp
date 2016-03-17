@@ -84,27 +84,27 @@ void RREQ::incrementHopCount() {
 }
 
 bool RREQ::compare(const RREQ &j) const {
-	if(!sourceAddr.equals(j.sourceAddr))
+	if (!sourceAddr.equals(j.sourceAddr))
 		return false;
-	else if(broadcastId != j.broadcastId)
+	else if (broadcastId != j.broadcastId)
 		return false;
 	return true;
 }
 
-void RREQ::print(Stream* _serial) const {
-	_serial->print("RREQ");
-	_serial->print('<');
-	sourceAddr.printAddress(_serial);
-	_serial->print(',');
-	_serial->print(sourceSeqNum);
-	_serial->print(',');
-	_serial->print(broadcastId);
-	_serial->print(',');
-	destAddr.printAddress(_serial);
-	_serial->print(',');
-	_serial->print(destSeqNum);
-	_serial->print(',');
-	_serial->print(hopCount);
-	_serial->print('>');
+void RREQ::print() const {
+	SerialUSB.print("RREQ");
+	SerialUSB.print('<');
+	sourceAddr.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	SerialUSB.print(sourceSeqNum);
+	SerialUSB.print(',');
+	SerialUSB.print(broadcastId);
+	SerialUSB.print(',');
+	destAddr.printAddressASCII(&SerialUSB);
+	SerialUSB.print(',');
+	SerialUSB.print(destSeqNum);
+	SerialUSB.print(',');
+	SerialUSB.print(hopCount);
+	SerialUSB.println('>');
 
 }
