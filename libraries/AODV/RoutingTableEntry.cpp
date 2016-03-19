@@ -10,7 +10,7 @@ RoutingTableEntry::RoutingTableEntry() {
 }
 
 RoutingTableEntry::RoutingTableEntry(const XBeeAddress64& destinationAddress, const XBeeAddress64& nextHop,
-		uint8_t hopCount, uint32_t seqNum, unsigned long experiationTime) {
+		uint8_t hopCount, uint32_t seqNumDest, unsigned long experiationTime) {
 	this->destinationAddress = destinationAddress;
 	this->nextHop = nextHop;
 	this->hopCount = hopCount;
@@ -76,15 +76,15 @@ void RoutingTableEntry::setActive(bool active) {
 }
 
 void RoutingTableEntry::printRoute() {
-	SerialUSB.print('<');
+	SerialUSB.print("<DestionationAddress: ");
 	destinationAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", NextHop: ");
 	nextHop.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", HopCount: ");
 	SerialUSB.print(hopCount);
-	SerialUSB.print(',');
+	SerialUSB.print(", SeqNumDest: ");
 	SerialUSB.print(seqNumDest);
-	SerialUSB.print(',');
+	SerialUSB.print(", experiationTime: ");
 	SerialUSB.print(experiationTime);
 	SerialUSB.print('>');
 

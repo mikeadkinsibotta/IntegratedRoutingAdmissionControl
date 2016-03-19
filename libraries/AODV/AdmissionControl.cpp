@@ -33,6 +33,7 @@ void AdmissionControl::checkTimers() {
 
 	for (int i = 0; i < potentialStreams.size(); i++) {
 		XBeeAddress64 sourceAddress = potentialStreams.at(i).getSourceAddress();
+
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();

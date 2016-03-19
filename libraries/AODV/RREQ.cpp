@@ -93,17 +93,17 @@ bool RREQ::compare(const RREQ &j) const {
 
 void RREQ::print() const {
 	SerialUSB.print("RREQ");
-	SerialUSB.print('<');
+	SerialUSB.print("<SourceAddress: ");
 	sourceAddr.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", SourceSeqNum: ");
 	SerialUSB.print(sourceSeqNum);
-	SerialUSB.print(',');
+	SerialUSB.print(", BroadcastId: ");
 	SerialUSB.print(broadcastId);
-	SerialUSB.print(',');
+	SerialUSB.print(", DestinationAddress: ");
 	destAddr.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", DestinationSeqNum: ");
 	SerialUSB.print(destSeqNum);
-	SerialUSB.print(',');
+	SerialUSB.print(", HopCount: ");
 	SerialUSB.print(hopCount);
 	SerialUSB.println('>');
 

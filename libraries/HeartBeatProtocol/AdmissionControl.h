@@ -9,7 +9,6 @@
 #define LIBRARIES_HEARTBEATPROTOCOL_ADMISSIONCONTROL_H_
 #include <XBee.h>
 #include <HeartbeatProtocol.h>
-#include <AdmissionControl.h>
 #include <PotentialStream.h>
 #include <VoiceStreamsManager.h>
 #include <VoicePacketSender.h>

@@ -4,7 +4,7 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
+#define VOICE_DATA_INTERVAL 6000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
@@ -103,22 +103,17 @@ void sendInitPacket() {
 
 void sendVoicePacket() {
 //TODO fix heartbeat
-	Neighbor nextHop;
-	if (nextHop.equals(Neighbor())) {
-		SerialUSB.println("Lost NextHop");
-		generateVoice.enabled = false;
-		sendInital.enabled = true;
-	} else {
-		voicePacketSender->generateVoicePacket();
-	}
-}
+	aodv->printRoutingTable();
 
-/*void broadcastHeartbeat() {
- if (millis() > 10000) {
- //TODO fix heartbeat
- //heartbeatProtocol->broadcastHeartBeat();
- }
- }*/
+	Neighbor nextHop;
+//	if (aodv->getNextHop().equals(XBeeAddress64())) {
+//		SerialUSB.println("Lost NextHop");
+//		generateVoice.enabled = false;
+//		sendInital.enabled = true;
+//	} else {
+//		voicePacketSender->generateVoicePacket();
+//	}
+}
 
 void sendPathPacket() {
 	voiceStreamStatManager->sendPathPacket();
@@ -202,7 +197,7 @@ void setupThreads() {
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = false;
+	generateVoice.enabled = true;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
 	generateVoice.onRun(sendVoicePacket);
 

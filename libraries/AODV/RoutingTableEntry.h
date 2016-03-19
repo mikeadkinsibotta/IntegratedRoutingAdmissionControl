@@ -25,7 +25,7 @@ class RoutingTableEntry {
 	public:
 		RoutingTableEntry();
 		RoutingTableEntry(const XBeeAddress64& destinationAddress, const XBeeAddress64& nextHop, uint8_t hopCount,
-				uint32_t seqNum, unsigned long experiationTime);
+				uint32_t seqNumDest, unsigned long experiationTime);
 		const XBeeAddress64& getDestinationAddress() const;
 		void setDestinationAddress(const XBeeAddress64& destinationAddress);
 		unsigned long getExperiationTime() const;

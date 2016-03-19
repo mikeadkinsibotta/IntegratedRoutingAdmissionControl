@@ -31,12 +31,14 @@ AODV::AODV() {
 	this->broadCastaddr = XBeeAddress64(0x00000000, 0x0000FFFF);
 	this->sourceSequenceNum = 0;
 	this->broadcastId = 0;
-
+	this->sinkAddress = XBeeAddress64();
 }
 
 AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
 		const XBeeAddress64& sinkAddress) {
+
 	this->broadCastaddr = broadCastaddr;
+	this->sinkAddress = sinkAddress;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
 	this->sourceSequenceNum = 0;
@@ -51,7 +53,7 @@ void AODV::getRoute() {
 	sourceSequenceNum++;
 	broadcastId++;
 	if (routingTable.count(sinkAddress) == 0) {
-		SerialUSB.print("No Route, starting PathDiscovery");
+		SerialUSB.println("No Route, starting PathDiscovery");
 		pathDiscovery (sinkAddress);
 	}
 
@@ -86,7 +88,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		remoteSender.printAddressASCII(&SerialUSB);
 		SerialUSB.println("   Sender not in route table, adding...");
 
-		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
+		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
 
 		routingTable.insert(
 				std::pair<XBeeAddress64, RoutingTableEntry>(forwardPathEntry.getDestinationAddress(),
@@ -95,11 +97,11 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 	} else {
 		remoteSender.printAddressASCII(&SerialUSB);
 		SerialUSB.println("   Sender in route table, updating...");
-		routingTable[remoteSender] = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
+		routingTable[remoteSender] = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
 	}
 	//have I received this RREQ from this source before?
 	if (find(req)) {
-		SerialUSB.print("I have received RREQ from this source");
+		SerialUSB.print("I have received RREQ from this source ");
 		req.getSourceAddr().printAddressASCII(&SerialUSB);
 		SerialUSB.println();
 
@@ -131,8 +133,9 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 		} else {
 			SerialUSB.print("I have a reverse route, need to figure out if this route is better");
-			SerialUSB.print("For address:  ");
+			SerialUSB.print(" for address:  ");
 			req.getSourceAddr().printAddressASCII(&SerialUSB);
+			SerialUSB.println();
 			/*
 			 * the Originator Sequence Number from the RREQ is compared to the
 			 * corresponding destination sequence number in the route table entry
@@ -245,11 +248,10 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 
 	/* When a node receives a RREP message, it searches for a route to the previous hop.  */
 	if (routingTable.count(remoteSender) == 0) {
-		SerialUSB.println("I received a RREP, but I don't have a route to the sender");
-		SerialUSB.println("Need to add");
+		SerialUSB.println("I received a RREP, but I don't have a route to the previous hop need to add to my table.");
 		//No Route Exists in table for forward pointing route
 
-		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, -1, millis());
+		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
 
 		//set up precursor list
 		vector < XBeeAddress64 > activeNeighbors;
@@ -380,6 +382,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 		xbee.send(tx);
 	} else {
 		//Route has been setup Can transmit data
+		SerialUSB.println("Route has been setup Can transmit data");
 
 	}
 }
@@ -405,7 +408,6 @@ bool AODV::find(const RREQ& req) {
 	return true;
 }
 
-//TODO set routes to inactive when no data is using them.
 void AODV::purgeExpiredRoutes() {
 
 	std::map < XBeeAddress64, RoutingTableEntry > newRoutingTable;
@@ -449,23 +451,20 @@ const XBeeAddress64& AODV::getNextHop() {
 
 void AODV::printRoutingTable() {
 
-	Serial.print("PrintRoutingTable");
+	SerialUSB.println("PrintRoutingTable");
 	for (std::map<XBeeAddress64, RoutingTableEntry>::const_iterator it = routingTable.begin(); it != routingTable.end();
 			it++) {
 		XBeeAddress64 key = it->first;
 		RoutingTableEntry value = it->second;
 
-		Serial.print('<');
-		value.getDestinationAddress().printAddress(&Serial);
-		Serial.print(',');
-		value.getNextHop().printAddress(&Serial);
-		Serial.print(',');
-		Serial.print(value.getHopCount());
-		Serial.print(',');
-		Serial.print(value.getSeqNumDest());
-		Serial.print('>');
-
-//Do something
+		SerialUSB.print("<DestinationAddress: ");
+		value.getDestinationAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", NextHop: ");
+		value.getNextHop().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", HopCount: ");
+		SerialUSB.print(value.getHopCount());
+		SerialUSB.print(", SeqNumDest: ");
+		SerialUSB.print(value.getSeqNumDest());
+		SerialUSB.println('>');
 	}
-
 }

@@ -82,15 +82,14 @@ void RREP::incrementHopCount() {
 
 void RREP::print() const {
 	SerialUSB.print("RREP");
-	SerialUSB.print('<');
+	SerialUSB.print("<SourceAddress: ");
 	sourceAddr.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", DestinationAddress: ");
 	destAddr.printAddressASCII(&SerialUSB);
-	SerialUSB.print(',');
+	SerialUSB.print(", DestinationSeqNum: ");
 	SerialUSB.print(destSeqNum);
-	SerialUSB.print(',');
-	SerialUSB.print(hopCount);
-	SerialUSB.print(',');
+	SerialUSB.print(", HopCount: ");
+	SerialUSB.print(", lifeTime: ");
 	SerialUSB.print(lifeTime);
 	SerialUSB.println('>');
 
