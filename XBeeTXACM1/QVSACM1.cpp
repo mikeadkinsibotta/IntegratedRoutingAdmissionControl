@@ -5,7 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 6000
-#define SENDER true
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define BROADCAST_ADDRESS_1 0x00000000
@@ -14,8 +14,8 @@
 #define MANIPULATE_ADDRESS_1 0x00000000
 #define MANIPULATE_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
-//#define HEARTBEAT_ADDRESS_1 0x0013A200
-//#define HEARTBEAT_ADDRESS_2 0x40B317F6
+//#define BROADCAST_ADDRESS_1 0x0013A200
+//#define BROADCAST_ADDRESS_2 0x40B317F6
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
@@ -202,11 +202,11 @@ void setupThreads() {
 	generateVoice.onRun(sendVoicePacket);
 
 	sendInital.ThreadName = "Send Voice Data";
-//	if (SENDER) {
-//		sendInital.enabled = true;
-//	} else {
-//		sendInital.enabled = false;
-//	}
+	if (SENDER) {
+		sendInital.enabled = true;
+	} else {
+		sendInital.enabled = false;
+	}
 	sendInital.setInterval(REQUEST_STREAM);
 	sendInital.onRun(sendInitPacket);
 
