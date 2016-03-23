@@ -39,6 +39,9 @@ class AODV {
 		bool routeTimerActive = false;
 		unsigned long routeTimer = 0;
 
+		uint8_t codecSetting = 0;
+		float initialDuplicationSetting = 0;
+
 		void handleRREQ(RREQ& req, const XBeeAddress64& remoteSender);
 		void handleRREP(RREP& rep, const XBeeAddress64& remoteSender);
 		bool find(const RREQ& req);
@@ -46,7 +49,7 @@ class AODV {
 	public:
 		AODV();
 		AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
-				const XBeeAddress64& sinkAddress);
+				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float initialDuplicationSetting);
 		bool routeExists(const XBeeAddress64& address, uint32_t seqNum, uint8_t hopCount, RoutingTableEntry &found);
 		void getRoute();
 //		const XBeeAddress64& setNextHop();

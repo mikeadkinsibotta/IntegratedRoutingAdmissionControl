@@ -56,7 +56,7 @@ void setup() {
 	myAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
-	aodv = new AODV(xbee, myAddress, broadcastAddress, sinkAddress);
+	aodv = new AODV(xbee, myAddress, broadcastAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	voicePacketSender = new VoicePacketSender(xbee, aodv, &pathLoss, voiceStreamStatManager, myAddress, sinkAddress,
 			CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);

@@ -32,10 +32,12 @@ AODV::AODV() {
 	this->sourceSequenceNum = 0;
 	this->broadcastId = 0;
 	this->sinkAddress = XBeeAddress64();
+	this->codecSetting = 0;
+	this->initialDuplicationSetting = 0;
 }
 
 AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
-		const XBeeAddress64& sinkAddress) {
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float initialDuplicationSetting) {
 
 	this->broadCastaddr = broadCastaddr;
 	this->sinkAddress = sinkAddress;
@@ -43,6 +45,8 @@ AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64
 	this->myAddress = myAddress;
 	this->sourceSequenceNum = 0;
 	this->broadcastId = 0;
+	this->codecSetting = codecSetting;
+	this->initialDuplicationSetting = initialDuplicationSetting;
 
 }
 
@@ -385,7 +389,7 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 		SerialUSB.println("Route has been setup Can transmit data");
 
 		//admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
-		sendInitPacket(0, 0);
+		sendInitPacket(codecSetting, initialDuplicationSetting);
 	}
 }
 
