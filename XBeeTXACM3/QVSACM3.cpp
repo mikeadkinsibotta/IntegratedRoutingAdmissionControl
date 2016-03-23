@@ -94,7 +94,7 @@ void arduinoSetup() {
 
 }
 
-void sendInitPacket() {
+void startPathDiscovery() {
 
 	if (millis() - STREAM_DELAY_START_BEGIN > STREAM_DELAY_START) {
 		aodv->getRoute();
@@ -208,11 +208,11 @@ void setupThreads() {
 		sendInital.enabled = false;
 	}
 	sendInital.setInterval(REQUEST_STREAM);
-	sendInital.onRun(sendInitPacket);
+	sendInital.onRun(startPathDiscovery);
 
 	controller.add(&responseThread);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
 	controller.add(&generateVoice);
-//	controller.add(&heartbeat);
+
 }
