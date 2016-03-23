@@ -384,6 +384,8 @@ void AODV::handleRREP(RREP& routeReply, const XBeeAddress64& remoteSender) {
 		//Route has been setup Can transmit data
 		SerialUSB.println("Route has been setup Can transmit data");
 
+		//admissionControl->sendInitPacket(CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
+		sendInitPacket(0, 0);
 	}
 }
 
@@ -438,16 +440,15 @@ bool AODV::checkRouteTimer() {
 
 }
 
-const XBeeAddress64& AODV::getNextHop() {
-	if (routingTable.count(sinkAddress) == 0) {
-		return XBeeAddress64();
-	}
-
-	RoutingTableEntry entry = routingTable[sinkAddress];
-	nextHop = entry.getNextHop();
-	return nextHop;
-
-}
+//const XBeeAddress64& AODV::setNextHop() {
+//	if (routingTable.count(sinkAddress) == 0) {
+//		return XBeeAddress64();
+//	}
+//
+//	RoutingTableEntry entry = routingTable[sinkAddress];
+//	nextHop = entry.getNextHop();
+//
+//}
 
 void AODV::printRoutingTable() {
 
@@ -466,5 +467,57 @@ void AODV::printRoutingTable() {
 		SerialUSB.print(", SeqNumDest: ");
 		SerialUSB.print(value.getSeqNumDest());
 		SerialUSB.println('>');
+	}
+}
+
+void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
+	//TODO fixed next hop
+	RoutingTableEntry entry = routingTable[sinkAddress];
+	nextHop = entry.getNextHop();
+
+	if (!nextHop.equals(XBeeAddress64())) {
+		SerialUSB.println("Sending Init");
+		//XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
+		//XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
+
+		XBeeAddress64 heartbeatAddress = XBeeAddress64();
+		XBeeAddress64 myNextHop = XBeeAddress64();
+
+		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
+		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+
+		SerialUSB.print("Injection Rate: ");
+		SerialUSB.println(injectionRate);
+		uint8_t payloadBroadCast[25];
+
+		payloadBroadCast[0] = 'I';
+		payloadBroadCast[1] = 'N';
+		payloadBroadCast[2] = 'I';
+		payloadBroadCast[3] = 'T';
+		payloadBroadCast[4] = '\0';
+		payloadBroadCast[5] = (myAddress.getMsb() >> 24) & 0xff;
+		payloadBroadCast[6] = (myAddress.getMsb() >> 16) & 0xff;
+		payloadBroadCast[7] = (myAddress.getMsb() >> 8) & 0xff;
+		payloadBroadCast[8] = myAddress.getMsb() & 0xff;
+		payloadBroadCast[9] = (myAddress.getLsb() >> 24) & 0xff;
+		payloadBroadCast[10] = (myAddress.getLsb() >> 16) & 0xff;
+		payloadBroadCast[11] = (myAddress.getLsb() >> 8) & 0xff;
+		payloadBroadCast[12] = myAddress.getLsb() & 0xff;
+		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
+		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
+		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
+		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
+		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
+		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
+		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
+		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+		payloadBroadCast[21] = injectionRateP[0];
+		payloadBroadCast[22] = injectionRateP[1];
+		payloadBroadCast[23] = injectionRateP[2];
+		payloadBroadCast[24] = injectionRateP[3];
+
+		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+		// send the command
+		xbee.send(tx);
 	}
 }
