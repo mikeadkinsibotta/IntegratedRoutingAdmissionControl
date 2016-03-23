@@ -58,7 +58,7 @@ void VoicePacketSender::generateVoicePacket() {
 
 	//TODO fixed heartbeat
 	//heartbeatProtocol->setDataRate(injectionRate);
-	//myNextHop = heartbeatProtocol->getNextHop().getAddress();
+	myNextHop = aodv->getNextHop(sinkAddress);
 
 	//uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
 	uint8_t code = 0;

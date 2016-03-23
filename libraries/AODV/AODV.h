@@ -22,10 +22,10 @@ using namespace std;
 class AODV {
 
 	private:
-		XBeeAddress64 broadCastaddr;
+		XBeeAddress64 broadcastAddress;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
-		XBeeAddress64 nextHop;
+
 		static const uint8_t rreqC[];
 		static const uint8_t rrepC[];
 
@@ -48,7 +48,7 @@ class AODV {
 		void pathDiscovery(const XBeeAddress64& destination);
 	public:
 		AODV();
-		AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
+		AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadcastAddress,
 				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float initialDuplicationSetting);
 		bool routeExists(const XBeeAddress64& address, uint32_t seqNum, uint8_t hopCount, RoutingTableEntry &found);
 		void getRoute();

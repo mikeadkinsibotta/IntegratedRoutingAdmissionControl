@@ -111,7 +111,7 @@ void sendVoicePacket() {
 //		generateVoice.enabled = false;
 //		sendInital.enabled = true;
 //	} else {
-//		voicePacketSender->generateVoicePacket();
+	voicePacketSender->generateVoicePacket();
 //	}
 }
 

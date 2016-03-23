@@ -4,18 +4,18 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 6000
+#define VOICE_DATA_INTERVAL 2000
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-//#define BROADCAST_ADDRESS_1 0x00000000
-//#define BROADCAST_ADDRESS_2 0x0000FFFF
+#define BROADCAST_ADDRESS_1 0x00000000
+#define BROADCAST_ADDRESS_2 0x0000FFFF
 #define MANIPULATE false
 #define MANIPULATE_ADDRESS_1 0x00000000
 #define MANIPULATE_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
-#define BROADCAST_ADDRESS_1 0x0013A200
-#define BROADCAST_ADDRESS_2 0x40B317F6
+//#define BROADCAST_ADDRESS_1 0x0013A200
+//#define BROADCAST_ADDRESS_2 0x40B317F6
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
@@ -103,7 +103,7 @@ void startPathDiscovery() {
 
 void sendVoicePacket() {
 //TODO fix heartbeat
-	aodv->printRoutingTable();
+	//aodv->printRoutingTable();
 
 	Neighbor nextHop;
 //	if (aodv->getNextHop().equals(XBeeAddress64())) {
@@ -111,7 +111,7 @@ void sendVoicePacket() {
 //		generateVoice.enabled = false;
 //		sendInital.enabled = true;
 //	} else {
-//		voicePacketSender->generateVoicePacket();
+	voicePacketSender->generateVoicePacket();
 //	}
 }
 
@@ -197,7 +197,7 @@ void setupThreads() {
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = true;
+	generateVoice.enabled = false;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
 	generateVoice.onRun(sendVoicePacket);
 

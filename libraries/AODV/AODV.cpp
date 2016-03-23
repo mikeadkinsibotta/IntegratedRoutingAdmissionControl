@@ -28,7 +28,7 @@ void AODV::listenForResponses(Rx64Response& response, const char control[]) {
 }
 
 AODV::AODV() {
-	this->broadCastaddr = XBeeAddress64(0x00000000, 0x0000FFFF);
+	this->broadcastAddress = XBeeAddress64(0x00000000, 0x0000FFFF);
 	this->sourceSequenceNum = 0;
 	this->broadcastId = 0;
 	this->sinkAddress = XBeeAddress64();
@@ -39,7 +39,7 @@ AODV::AODV() {
 AODV::AODV(const XBee& xbee, const XBeeAddress64& myAddress, const XBeeAddress64& broadCastaddr,
 		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float initialDuplicationSetting) {
 
-	this->broadCastaddr = broadCastaddr;
+	this->broadcastAddress = broadCastaddr;
 	this->sinkAddress = sinkAddress;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -79,7 +79,7 @@ void AODV::pathDiscovery(const XBeeAddress64& destination) {
 
 	SerialUSB.print("Sending RREQ:  ");
 	request.print();
-	Tx64Request tx = Tx64Request(broadCastaddr, payload, sizeof(payload));
+	Tx64Request tx = Tx64Request(broadcastAddress, payload, sizeof(payload));
 	xbee.send(tx);
 
 }
@@ -238,7 +238,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 									>> 24, req.getDestAddr().getLsb() >> 16, req.getDestAddr().getLsb() >> 8,
 							req.getDestAddr().getLsb(), req.getDestSeqNum(), req.getHopCount() };
 
-			Tx64Request tx = Tx64Request(broadCastaddr, ACK_OPTION, payload, sizeof(payload), 0);
+			Tx64Request tx = Tx64Request(broadcastAddress, ACK_OPTION, payload, sizeof(payload), 0);
 			xbee.send(tx);
 
 		}
@@ -477,15 +477,10 @@ void AODV::printRoutingTable() {
 void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 	//TODO fixed next hop
 	RoutingTableEntry entry = routingTable[sinkAddress];
-	nextHop = entry.getNextHop();
+	XBeeAddress64 nextHop = entry.getNextHop();
 
 	if (!nextHop.equals(XBeeAddress64())) {
 		SerialUSB.println("Sending Init");
-		//XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
-		//XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
-
-		XBeeAddress64 heartbeatAddress = XBeeAddress64();
-		XBeeAddress64 myNextHop = XBeeAddress64();
 
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
@@ -507,21 +502,27 @@ void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 		payloadBroadCast[10] = (myAddress.getLsb() >> 16) & 0xff;
 		payloadBroadCast[11] = (myAddress.getLsb() >> 8) & 0xff;
 		payloadBroadCast[12] = myAddress.getLsb() & 0xff;
-		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
-		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
-		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
-		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
-		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
-		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
-		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
-		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+		payloadBroadCast[13] = (nextHop.getMsb() >> 24) & 0xff;
+		payloadBroadCast[14] = (nextHop.getMsb() >> 16) & 0xff;
+		payloadBroadCast[15] = (nextHop.getMsb() >> 8) & 0xff;
+		payloadBroadCast[16] = nextHop.getMsb() & 0xff;
+		payloadBroadCast[17] = (nextHop.getLsb() >> 24) & 0xff;
+		payloadBroadCast[18] = (nextHop.getLsb() >> 16) & 0xff;
+		payloadBroadCast[19] = (nextHop.getLsb() >> 8) & 0xff;
+		payloadBroadCast[20] = nextHop.getLsb() & 0xff;
 		payloadBroadCast[21] = injectionRateP[0];
 		payloadBroadCast[22] = injectionRateP[1];
 		payloadBroadCast[23] = injectionRateP[2];
 		payloadBroadCast[24] = injectionRateP[3];
 
-		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+		Tx64Request tx = Tx64Request(broadcastAddress, payloadBroadCast, sizeof(payloadBroadCast));
 		// send the command
 		xbee.send(tx);
 	}
+}
+
+const XBeeAddress64& AODV::getNextHop(const XBeeAddress64& destination) {
+	RoutingTableEntry entry = routingTable[destination];
+	return entry.getNextHop();
+
 }

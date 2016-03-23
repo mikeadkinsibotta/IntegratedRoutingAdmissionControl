@@ -4,8 +4,8 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 6000
-#define SENDER false
+#define VOICE_DATA_INTERVAL 2000
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define BROADCAST_ADDRESS_1 0x00000000
@@ -103,7 +103,7 @@ void startPathDiscovery() {
 
 void sendVoicePacket() {
 //TODO fix heartbeat
-	aodv->printRoutingTable();
+	//aodv->printRoutingTable();
 
 	Neighbor nextHop;
 //	if (aodv->getNextHop().equals(XBeeAddress64())) {
@@ -111,7 +111,7 @@ void sendVoicePacket() {
 //		generateVoice.enabled = false;
 //		sendInital.enabled = true;
 //	} else {
-//		voicePacketSender->generateVoicePacket();
+	voicePacketSender->generateVoicePacket();
 //	}
 }
 
@@ -197,7 +197,7 @@ void setupThreads() {
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = true;
+	generateVoice.enabled = false;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
 	generateVoice.onRun(sendVoicePacket);
 

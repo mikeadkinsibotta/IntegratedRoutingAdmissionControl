@@ -125,7 +125,7 @@ void VoiceStreamStatManager::sendPathPacket() {
 		it->calculateThroughput();
 
 		if (it->getNumNoPacketReceived() >= 3) {
-			SerialUSB.println("Stream Lost.  Removing stream from sender: ");
+			SerialUSB.println("Stream Lost.  Removing stream sent by: ");
 			it->getSenderAddress().printAddressASCII(&SerialUSB);
 			SerialUSB.println();
 			it = streams.erase(it);
