@@ -137,8 +137,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		//on path node
 
 		//TODO fixed next hop
-		XBeeAddress64 heartbeatAddress = XBeeAddress64(); //heartbeatProtocol->getBroadcastAddress();
-		XBeeAddress64 myNextHop = XBeeAddress64(); //heartbeatProtocol->getNextHop().getAddress();
+		XBeeAddress64 broadcastAddress = aodv->getBroadcastAddress();
+		XBeeAddress64 myNextHop = aodv->getNextHop(sinkAddress);
 
 		uint8_t * injectionRateP = (uint8_t *) &dataRate;
 
@@ -169,7 +169,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		payloadBroadCast[23] = injectionRateP[2];
 		payloadBroadCast[24] = injectionRateP[3];
 
-		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+		Tx64Request tx = Tx64Request(broadcastAddress, payloadBroadCast, sizeof(payloadBroadCast));
 
 		potentialStream.getRejcTimer().startTimer();
 		potentialStream.setOnPath(true);
