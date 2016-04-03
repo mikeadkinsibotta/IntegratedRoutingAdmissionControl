@@ -60,10 +60,7 @@ class VoicePacketSender {
 		void handlePathPacket(const Rx64Response &response);
 		void handleTracePacket(const Rx64Response &response);
 		void resetFrameID();
-		//void sendStreamRestart(const XBeeAddress64& packetSource);
-		//void requestToStream(const XBeeAddress64& senderAddress, const XBeeAddress64& myNextHop,
-		//		const float injectionRate);
-		//void handleInitPacket(const Rx64Response &response);
+		float getInjectionRate() const;
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */

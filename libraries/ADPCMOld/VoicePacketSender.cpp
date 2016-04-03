@@ -372,3 +372,6 @@ void VoicePacketSender::setDupSetting(float dupSetting) {
 	this->dupSetting = dupSetting;
 }
 
+float VoicePacketSender::getInjectionRate() const {
+	return injectionRate;
+}
