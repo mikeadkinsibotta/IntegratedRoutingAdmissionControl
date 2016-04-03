@@ -6,12 +6,16 @@
  */
 #include "AdmissionControl.h"
 
+const float MAX_FLT = 9999.0;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 17;
 AdmissionControl::AdmissionControl() {
 	aodv = 0;
 	voiceStreamStatManager = 0;
 	voicePacketSender = 0;
 	grantTimeoutLength = 0;
 	rejcTimeoutLength = 0;
+	localCapacity = MAX_FLT;
+	//buildSaturationTable();
 
 }
 
@@ -26,6 +30,8 @@ AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAdd
 	this->xbee = xbee;
 	this->grantTimeoutLength = grantTimeoutLength;
 	this->rejcTimeoutLength = rejcTimeoutLength;
+	localCapacity = MAX_FLT;
+	//buildSaturationTable();
 
 }
 
@@ -229,8 +235,6 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 
 void AdmissionControl::intializationSenderTimeout() {
 	SerialUSB.print("InitializationTimeout");
-
-//TODO need to resend INIT message;
 }
 
 bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) {
@@ -301,4 +305,82 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	/*SerialUSB.println("Stream Accepted");
 	 SerialUSB.println();*/
 	return false;
+}
+
+void AdmissionControl::broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadcastAddress,
+		const XBeeAddress64& downStreamNeighbor) {
+
+	HeartbeatMessage message = HeartbeatMessage(myDataRate, downStreamNeighbor);
+	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
+	message.generateBeatMessage(payload);
+
+	Tx64Request tx = Tx64Request(broadcastAddress, payload, sizeof(payload));
+	xbee.send(tx);
+
+}
+
+void AdmissionControl::receiveHeartBeat(const float myDataRate, const Rx64Response& response) {
+
+	HeartbeatMessage message;
+
+	message.transcribeHeartbeatPacket(response);
+	message.print();
+	updateNeighborHoodTable(message);
+	getLocalCapacity(myDataRate);
+
+}
+
+void AdmissionControl::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
+	neighbor.setDataRate(heartbeatMessage.getDataRate());
+	neighbor.setDownStreamNeighbor(heartbeatMessage.getDownStreamNeighbor());
+}
+
+void AdmissionControl::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
+
+	bool found = false;
+
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
+			updateNeighbor(neighborhoodTable.at(i), heartbeatMessage);
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		//Sets timestamp when constructor is called.
+		Neighbor neighbor = Neighbor(heartbeatMessage.getDataRate(), heartbeatMessage.getSenderAddress(),
+				heartbeatMessage.getDownStreamNeighbor());
+		neighborhoodTable.push_back(neighbor);
+	}
+}
+
+void AdmissionControl::getLocalCapacity(float myDataRate) {
+
+	localCapacity = MAX_FLT;
+	float neighborhoodRate = 0;
+	for (int i = 0; i < neighborhoodTable.size(); i++) {
+		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
+		if (neighborhoodTable.at(i).getDownStreamNeighbor().equals(myAddress)) {
+			//Account for forwarding any data
+			myDataRate += neighborhoodTable.at(i).getDataRate();
+		}
+
+	}
+	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
+	neighborhoodRate += myDataRate;
+	if (neighborHoodSize > 1) {
+		Saturation i = satT[neighborHoodSize - 2];
+		localCapacity = i.getRate() - neighborhoodRate;
+	}
+
+}
+
+void AdmissionControl::buildSaturationTable() {
+	satT[0] = Saturation(2, 120.90);
+	satT[1] = Saturation(3, 153.39);
+	satT[2] = Saturation(4, 151.2);
+	satT[3] = Saturation(5, 154.45);
+	satT[4] = Saturation(6, 111.42);
+
 }

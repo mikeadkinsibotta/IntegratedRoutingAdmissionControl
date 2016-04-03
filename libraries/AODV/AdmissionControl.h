@@ -14,6 +14,8 @@
 #include <VoicePacketSender.h>
 #include <Thread.h>
 #include <vector>
+#include "HeartbeatMessage.h"
+#include <Saturation.h>
 
 using namespace std;
 
@@ -28,8 +30,14 @@ class AdmissionControl {
 		VoicePacketSender * voicePacketSender;
 		unsigned long grantTimeoutLength;
 		unsigned long rejcTimeoutLength;
+		vector<Neighbor> neighborhoodTable;
+		float localCapacity;
+		Saturation satT[4];
+
 		void addPotentialStream(PotentialStream& potentialStream, const float addDataRate);
 		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
+		void getLocalCapacity(float myDataRate);
+		void buildSaturationTable();
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
@@ -46,6 +54,11 @@ class AdmissionControl {
 		void checkTimers();
 		bool removePotentialStream(const XBeeAddress64& packetSource);
 		void printPotentialStreams() const;
+		void receiveHeartBeat(const float myDataRate, const Rx64Response& response);
+		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
+		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage);
+		void broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadCastAddress,
+				const XBeeAddress64& downStreamNeighbor);
 
 };
 
