@@ -59,7 +59,7 @@ class AODV {
 		void purgeExpiredRoutes();
 		void printRoutingTable();
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
-
+		const XBeeAddress64& getBroadcastAddress() const;
 };
 
 #endif /* LIBRARIES_AODV_AODV_H_ */

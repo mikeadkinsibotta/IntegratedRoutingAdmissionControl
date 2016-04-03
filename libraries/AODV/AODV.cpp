@@ -90,9 +90,15 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 	if (routingTable.count(remoteSender) == 0) {
 		remoteSender.printAddressASCII(&SerialUSB);
+		SerialUSB.println();
 		SerialUSB.println("   Sender not in route table, adding...");
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
+
+		SerialUSB.println("Sender now in table1");
+
+		SerialUSB.print("Destination Address: ");
+		forwardPathEntry.getDestinationAddress().printAddressASCII(&SerialUSB);
 
 		routingTable.insert(
 				std::pair<XBeeAddress64, RoutingTableEntry>(forwardPathEntry.getDestinationAddress(),
@@ -243,7 +249,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 		}
 	} else {
-		//Serial.print("AlreadyRREQ");
+		SerialUSB.print("RREQNotFound");
 	}
 }
 
@@ -522,7 +528,14 @@ void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 }
 
 const XBeeAddress64& AODV::getNextHop(const XBeeAddress64& destination) {
-	RoutingTableEntry entry = routingTable[destination];
-	return entry.getNextHop();
+	if (routingTable.find(destination) != routingTable.end()) {
+		RoutingTableEntry entry = routingTable[destination];
+		return entry.getNextHop();
 
+	}
+	return XBeeAddress64();
+}
+
+const XBeeAddress64& AODV::getBroadcastAddress() const {
+	return broadcastAddress;
 }
