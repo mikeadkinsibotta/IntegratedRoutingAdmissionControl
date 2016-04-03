@@ -37,4 +37,3 @@ class HeartbeatMessage {
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATMESSAGE_H_ */
-
