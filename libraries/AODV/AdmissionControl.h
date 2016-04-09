@@ -32,7 +32,7 @@ class AdmissionControl {
 		unsigned long rejcTimeoutLength;
 		vector<Neighbor> neighborhoodTable;
 		float localCapacity;
-		Saturation satT[4];
+		Saturation satT[7];
 
 		void addPotentialStream(PotentialStream& potentialStream, const float addDataRate);
 		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
