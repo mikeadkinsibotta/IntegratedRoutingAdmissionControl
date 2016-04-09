@@ -4,18 +4,15 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 6000
+#define VOICE_DATA_INTERVAL 2
 #define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-//#define BROADCAST_ADDRESS_1 0x00000000
-//#define BROADCAST_ADDRESS_2 0x0000FFFF
-#define MANIPULATE false
-#define MANIPULATE_ADDRESS_1 0x00000000
-#define MANIPULATE_ADDRESS_2 0x0000FFFF
+#define BROADCAST_ADDRESS_1 0x00000000
+#define BROADCAST_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
-#define BROADCAST_ADDRESS_1 0x0013A200
-#define BROADCAST_ADDRESS_2 0x40B317F6
+//#define BROADCAST_ADDRESS_1 0x0013A200
+//#define BROADCAST_ADDRESS_2 0x40B317FA
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
@@ -24,9 +21,9 @@ const uint8_t CODEC_SETTTING = 2;
 const unsigned long REQUEST_STREAM = 3000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
-const unsigned long HEARTBEAT_INTERVAL = 1000;
+const unsigned long HEARTBEAT_INTERVAL = 15000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 5000;
+const unsigned long STREAM_DELAY_START = 150000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -36,14 +33,13 @@ VoiceStreamStatManager * voiceStreamStatManager;
 AODV * aodv;
 
 ThreadController controller = ThreadController();
-//Thread heartbeat = Thread();
+Thread heartbeat = Thread();
 Thread sendInital = Thread();
 Thread responseThread = Thread();
 Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 
 XBeeAddress64 broadcastAddress = XBeeAddress64(BROADCAST_ADDRESS_1, BROADCAST_ADDRESS_2);
-XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
@@ -101,18 +97,13 @@ void startPathDiscovery() {
 	}
 }
 
-void sendVoicePacket() {
-//TODO fix heartbeat
-	aodv->printRoutingTable();
+void broadcastHeartbeat() {
+	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
+			aodv->getNextHop(sinkAddress));
+}
 
-	Neighbor nextHop;
-//	if (aodv->getNextHop().equals(XBeeAddress64())) {
-//		SerialUSB.println("Lost NextHop");
-//		generateVoice.enabled = false;
-//		sendInital.enabled = true;
-//	} else {
+void sendVoicePacket() {
 	voicePacketSender->generateVoicePacket();
-//	}
 }
 
 void sendPathPacket() {
@@ -126,8 +117,6 @@ void clearBuffer() {
 
 void listenForResponses() {
 	admissionControl->checkTimers();
-//TODO fix heartbeat
-//heartbeatProtocol->purgeNeighborhoodTable();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
@@ -151,9 +140,9 @@ void listenForResponses() {
 					voicePacketSender->handleDataPacket(response);
 				} else if (!strcmp(control, "PATH")) {
 					//path loss packet
-					voicePacketSender->handlePathPacket(response);
-				} else if (!strcmp(control, "RSTR")) {
-					//voicePacketSender->handleStreamRestart(response);
+					//voicePacketSender->handlePathPacket(response);
+				} else if (!strcmp(control, "BEAT")) {
+					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
 				} else if (!strcmp(control, "INIT")) {
 					admissionControl->handleInitPacket(response);
 				} else if (!strcmp(control, "REDJ")) {
@@ -183,21 +172,18 @@ void setupThreads() {
 	responseThread.setInterval(1);
 	responseThread.onRun(listenForResponses);
 
-//	heartbeat.ThreadName = "Broadcast Heartbeat";
-//	heartbeat.enabled = true;
-//	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
-//	heartbeat.onRun(broadcastHeartbeat);
-
-//TODO fix heartbeat
-//heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
+	heartbeat.ThreadName = "Broadcast Heartbeat";
+	heartbeat.enabled = true;
+	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
+	heartbeat.onRun(broadcastHeartbeat);
 
 	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = false;
+	pathLoss.enabled = true;
 	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = true;
+	generateVoice.enabled = false;
 	generateVoice.setInterval(VOICE_DATA_INTERVAL);
 	generateVoice.onRun(sendVoicePacket);
 
@@ -211,6 +197,7 @@ void setupThreads() {
 	sendInital.onRun(startPathDiscovery);
 
 	controller.add(&responseThread);
+	controller.add(&heartbeat);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
 	controller.add(&generateVoice);

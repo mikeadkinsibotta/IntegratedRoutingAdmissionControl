@@ -8,14 +8,11 @@
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-#define BROADCAST_ADDRESS_1 0x00000000
-#define BROADCAST_ADDRESS_2 0x0000FFFF
-#define MANIPULATE false
-#define MANIPULATE_ADDRESS_1 0x00000000
-#define MANIPULATE_ADDRESS_2 0x0000FFFF
+//#define BROADCAST_ADDRESS_1 0x00000000
+//#define BROADCAST_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
-//#define BROADCAST_ADDRESS_1 0x0013A200
-//#define BROADCAST_ADDRESS_2 0x40B317F6
+#define BROADCAST_ADDRESS_1 0x0013A200
+#define BROADCAST_ADDRESS_2 0x40B317FA
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
@@ -24,7 +21,7 @@ const uint8_t CODEC_SETTTING = 2;
 const unsigned long REQUEST_STREAM = 3000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
-const unsigned long HEARTBEAT_INTERVAL = 5000;
+const unsigned long HEARTBEAT_INTERVAL = 15000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
@@ -43,7 +40,6 @@ Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 
 XBeeAddress64 broadcastAddress = XBeeAddress64(BROADCAST_ADDRESS_1, BROADCAST_ADDRESS_2);
-XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
@@ -144,7 +140,7 @@ void listenForResponses() {
 					voicePacketSender->handleDataPacket(response);
 				} else if (!strcmp(control, "PATH")) {
 					//path loss packet
-					voicePacketSender->handlePathPacket(response);
+					//voicePacketSender->handlePathPacket(response);
 				} else if (!strcmp(control, "BEAT")) {
 					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
 				} else if (!strcmp(control, "INIT")) {
@@ -182,7 +178,7 @@ void setupThreads() {
 	heartbeat.onRun(broadcastHeartbeat);
 
 	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = false;
+	pathLoss.enabled = true;
 	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
 	pathLoss.onRun(sendPathPacket);
 

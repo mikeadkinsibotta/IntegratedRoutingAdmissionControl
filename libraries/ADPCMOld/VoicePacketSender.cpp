@@ -139,8 +139,7 @@ void VoicePacketSender::generateVoicePacket() {
 }
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
-	//TODO fixed heartbeat
-	//myNextHop = heartbeatProtocol->getNextHop().getAddress();
+	myNextHop = aodv->getNextHop(sinkAddress);
 
 	//Extract the packet's final destination
 	XBeeAddress64 packetDestination;
@@ -295,8 +294,7 @@ void VoicePacketSender::sendTracePacket() {
 }
 
 void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
-	//TODO fixed heartbeat
-	//myNextHop = heartbeatProtocol->getNextHop().getAddress();
+	myNextHop = aodv->getNextHop(sinkAddress);
 
 	TraceMessage traceMessage;
 	traceMessage.transcribeMessage(response);

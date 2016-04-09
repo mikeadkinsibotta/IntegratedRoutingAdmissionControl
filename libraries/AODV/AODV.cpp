@@ -90,12 +90,11 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 	if (routingTable.count(remoteSender) == 0) {
 		remoteSender.printAddressASCII(&SerialUSB);
-		SerialUSB.println();
-		SerialUSB.println("   Sender not in route table, adding...");
+		SerialUSB.println("  Sender not in route table, adding...");
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
 
-		SerialUSB.println("Sender now in table1");
+		SerialUSB.println("Sender now in table");
 
 		SerialUSB.print("Destination Address: ");
 		forwardPathEntry.getDestinationAddress().printAddressASCII(&SerialUSB);
@@ -111,7 +110,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 	}
 	//have I received this RREQ from this source before?
 	if (find(req)) {
-		SerialUSB.print("I have received RREQ from this source ");
+		SerialUSB.print("  I have received RREQ from this source ");
 		req.getSourceAddr().printAddressASCII(&SerialUSB);
 		SerialUSB.println();
 
