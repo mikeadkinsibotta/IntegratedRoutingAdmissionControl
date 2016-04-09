@@ -42,12 +42,13 @@ void AdmissionControl::checkTimers() {
 
 		if (potentialStreams.at(i).getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
+			SerialUSB.println("GRNT Timer Expired.");
 			XBeeAddress64 nextHop = potentialStreams.at(i).getUpStreamNeighbor();
 			sendGRANTPacket(sourceAddress, nextHop);
 			removePotentialStream(sourceAddress);
 		} else if (potentialStreams.at(i).getRejcTimer().timeoutTimer()) {
 			//Wait for all init messages then send rejc if violate local capacity
-			//SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
+			SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
 			bool rejected = checkLocalCapacity(potentialStreams.at(i));
 			if (rejected) {
 				SerialUSB.println("Sending Reject Packet...");
@@ -297,12 +298,11 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	SerialUSB.println();
 
 	if (potentialDataRate > localCapacity) {
-		/*SerialUSB.println("Stream Rejected");
-		 SerialUSB.println();*/
+		SerialUSB.println("Stream Rejected");
 		return true;
 	}
-	/*SerialUSB.println("Stream Accepted");
-	 SerialUSB.println();*/
+	SerialUSB.println("Stream Accepted");
+
 	return false;
 }
 
@@ -323,7 +323,6 @@ void AdmissionControl::receiveHeartBeat(const float myDataRate, const Rx64Respon
 	HeartbeatMessage message;
 
 	message.transcribeHeartbeatPacket(response);
-	message.print();
 	updateNeighborHoodTable(message);
 	getLocalCapacity(myDataRate);
 
