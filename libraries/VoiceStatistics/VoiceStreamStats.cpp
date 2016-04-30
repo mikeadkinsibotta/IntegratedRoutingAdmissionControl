@@ -76,7 +76,7 @@ void VoiceStreamStats::calculateThroughput() {
 	SerialUSB.print(timepoint);
 	SerialUSB.print(", ");
 	SerialUSB.print(voiceQuality);
-	SerialUSB.print(")  ");
+	SerialUSB.println(")");
 
 	SerialUSB.print("Source Address: ");
 	senderAddress.printAddressASCII(&SerialUSB);

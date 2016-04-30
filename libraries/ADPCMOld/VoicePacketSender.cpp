@@ -125,12 +125,11 @@ void VoicePacketSender::generateVoicePacket() {
 	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
 	xbee.send(tx);
-	frameId++;
-
-	if (dupSetting != 0 && floor(frameId * dupSetting) == (frameId * dupSetting)) {
+	bool r = (random(100)) < (dupSetting * 100);
+	if (dupSetting != 0 && r) {
 		xbee.send(tx);
-		frameId++;
 	}
+	frameId++;
 
 	if (frameId % 150 == 0) {
 		sendTracePacket();
