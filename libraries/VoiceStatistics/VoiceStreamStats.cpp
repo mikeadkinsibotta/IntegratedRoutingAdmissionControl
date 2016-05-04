@@ -54,11 +54,11 @@ double VoiceStreamStats::getThroughput() const {
 	return throughput;
 }
 
-void VoiceStreamStats::calculateThroughput() {
+void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 
 	double timepoint = millis() / 1000.0;
-	double timeDiff = timepoint - timeStamp;
-	timeStamp = timepoint;
+	double timeDiff = timepoint - timeStamp - timeDifference;
+	timeStamp = timepoint - timeDifference;
 
 	unsigned long totaldata = totalPacketsRecieved * payloadSize * 8;
 	double inKb = totaldata / 1000.0;
@@ -73,7 +73,7 @@ void VoiceStreamStats::calculateThroughput() {
 	}
 
 	SerialUSB.print("(");
-	SerialUSB.print(timepoint);
+	SerialUSB.print(timeStamp);
 	SerialUSB.print(", ");
 	SerialUSB.print(voiceQuality);
 	SerialUSB.println(")");
@@ -81,8 +81,8 @@ void VoiceStreamStats::calculateThroughput() {
 	SerialUSB.print("Source Address: ");
 	senderAddress.printAddressASCII(&SerialUSB);
 
-	SerialUSB.print(" Time Point ");
-	SerialUSB.print(timepoint);
+	SerialUSB.print(" Timestamp: ");
+	SerialUSB.print(timeStamp);
 
 	SerialUSB.print(" ThroughputRate: ");
 	SerialUSB.print(throughput);

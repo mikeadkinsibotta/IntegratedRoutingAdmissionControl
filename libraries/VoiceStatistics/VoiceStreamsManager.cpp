@@ -10,42 +10,20 @@
 VoiceStreamStatManager::VoiceStreamStatManager() {
 	xbee = XBee();
 	payloadSize = 0;
-
+	timeDifference = 0;
 }
 
 VoiceStreamStatManager::VoiceStreamStatManager(const uint8_t payloadSize) {
 	xbee = XBee();
 	this->payloadSize = payloadSize;
-
+	timeDifference = 0;
 }
 
 VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize) {
 	this->xbee = xbee;
 	this->payloadSize = payloadSize;
+	timeDifference = 0;
 }
-
-/*void VoiceStreamStatManager::calcuateThroughput(const XBeeAddress64& packetSource) {
- bool found = false;
-
- for (int i = 0; i < streams.size(); i++) {
- //SerialUSB.println("Old Stream");
- if (streams.at(i).getSenderAddress().equals(packetSource)) {
- streams.at(i).calculateThroughput();
-
- found = true;
-
- break;
- }
- }
- if (!found) {
- //SerialUSB.println("New Stream");
- VoiceStreamStats stream = VoiceStreamStats(packetSource, payloadSize);
- stream.startStream();
- stream.calculateThroughput();
- streams.push_back(stream);
- }
- SerialUSB.println();
- }*/
 
 bool VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
 	int i = 0;
@@ -121,7 +99,11 @@ void VoiceStreamStatManager::sendPathPacket() {
 		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), payload, sizeof(payload));
 		xbee.send(tx);
 
-		it->calculateThroughput();
+		if (setTimeDifference) {
+			timeDifference = (millis() / 1000.0);
+			setTimeDifference = false;
+		}
+		it->calculateThroughput(timeDifference);
 
 		if (it->getNumNoPacketReceived() >= 3) {
 			SerialUSB.println("Stream Lost.  Removing stream sent by: ");

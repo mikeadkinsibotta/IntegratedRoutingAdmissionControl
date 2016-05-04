@@ -20,6 +20,8 @@ class VoiceStreamStatManager {
 		vector<VoiceStreamStats> streams;
 		XBee xbee;
 		uint8_t payloadSize;
+		double timeDifference;
+		bool setTimeDifference = true;
 
 	public:
 		VoiceStreamStatManager();
