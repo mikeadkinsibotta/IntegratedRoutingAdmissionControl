@@ -72,7 +72,9 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 		voiceQuality = (voiceQuality / totalPacketsRecieved);
 	}
 
-	SerialUSB.print("(");
+	senderAddress.printAddressASCII(&SerialUSB);
+
+	SerialUSB.print("   (");
 	SerialUSB.print(timeStamp);
 	SerialUSB.print(", ");
 	SerialUSB.print(voiceQuality);

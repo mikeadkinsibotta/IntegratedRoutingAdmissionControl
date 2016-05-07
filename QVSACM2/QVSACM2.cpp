@@ -8,11 +8,11 @@
 #define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
-//#define BROADCAST_ADDRESS_1 0x00000000
-//#define BROADCAST_ADDRESS_2 0x0000FFFF
+#define BROADCAST_ADDRESS_1 0x00000000
+#define BROADCAST_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
-#define BROADCAST_ADDRESS_1 0x0013A200
-#define BROADCAST_ADDRESS_2 0x40B317FA
+//#define BROADCAST_ADDRESS_1 0x0013A200
+//#define BROADCAST_ADDRESS_2 0x40B317FA
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
@@ -23,7 +23,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 15000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 90000;
+const unsigned long STREAM_DELAY_START = 30000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -178,7 +178,7 @@ void setupThreads() {
 	heartbeat.onRun(broadcastHeartbeat);
 
 	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = true;
+	pathLoss.enabled = false;
 	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
 	pathLoss.onRun(sendPathPacket);
 

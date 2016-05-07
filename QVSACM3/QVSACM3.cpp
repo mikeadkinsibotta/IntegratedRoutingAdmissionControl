@@ -1,5 +1,5 @@
 // Do not remove the include below
-#include "QVSAC3M3.h"
+#include "QVSACM3.h"
 
 #define STATUS_LED 13
 #define ERROR_LED 12
@@ -23,7 +23,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 15000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
-const unsigned long STREAM_DELAY_START = 150000;
+const unsigned long STREAM_DELAY_START = 600000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -178,7 +178,7 @@ void setupThreads() {
 	heartbeat.onRun(broadcastHeartbeat);
 
 	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = true;
+	pathLoss.enabled = false;
 	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
 	pathLoss.onRun(sendPathPacket);
 
