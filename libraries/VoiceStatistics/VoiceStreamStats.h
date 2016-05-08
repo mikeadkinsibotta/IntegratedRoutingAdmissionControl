@@ -13,6 +13,8 @@
 class VoiceStreamStats {
 
 	private:
+		double rValueArray[8] = { 0 };
+		int rValueHead = 0;
 		XBeeAddress64 senderAddress;
 		XBeeAddress64 upStreamNeighborAddress;
 		double throughput;

@@ -56,14 +56,6 @@ double VoiceStreamStats::getThroughput() const {
 
 void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 
-	double timepoint = millis() / 1000.0;
-	double timeDiff = timepoint - timeStamp - timeDifference;
-	timeStamp = timepoint - timeDifference;
-
-	unsigned long totaldata = totalPacketsRecieved * payloadSize * 8;
-	double inKb = totaldata / 1000.0;
-	throughput = inKb / timeDiff;
-
 	if (totalPacketsRecieved == 0) {
 		numNoPacketReceived++;
 		voiceQuality = 0;
@@ -72,36 +64,68 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 		voiceQuality = (voiceQuality / totalPacketsRecieved);
 	}
 
-	senderAddress.printAddressASCII(&SerialUSB);
+	if (voiceQuality != 0.00) {
 
-	SerialUSB.print("   (");
-	SerialUSB.print(timeStamp);
-	SerialUSB.print(", ");
-	SerialUSB.print(voiceQuality);
-	SerialUSB.println(")");
+		if (rValueArray[7] == 0) {
+			rValueArray[rValueHead] = voiceQuality;
+			rValueHead++;
+//			SerialUSB.print("Not Maxed out");
+//			SerialUSB.println(rValueHead);
+		} else {
+//			SerialUSB.print("Maxed out: ");
+//			SerialUSB.println(rValueHead);
+			rValueArray[7] = 0;
+			for (int i = 6; i >= 0; --i) {
+				rValueArray[i + 1] = rValueArray[i];
+			}
+			rValueArray[0] = voiceQuality;
 
-	SerialUSB.print("Source Address: ");
-	senderAddress.printAddressASCII(&SerialUSB);
+			double timepoint = millis() / 1000.0;
+			double timeDiff = timepoint - timeStamp - timeDifference;
+			timeStamp = timepoint - timeDifference;
 
-	SerialUSB.print(" Timestamp: ");
-	SerialUSB.print(timeStamp);
+			unsigned long totaldata = totalPacketsRecieved * payloadSize * 8;
+			double inKb = totaldata / 1000.0;
+			throughput = inKb / timeDiff;
 
-	SerialUSB.print(" ThroughputRate: ");
-	SerialUSB.print(throughput);
-	SerialUSB.print(" kbps ");
+			double total = 0;
+			for (int i = 0; i < rValueHead; ++i) {
+				total += rValueArray[i];
+			}
 
-	SerialUSB.print(" TotalPacketsSent: ");
-	SerialUSB.print(totalPacketsSent);
+			double voiceQualityMovingAverage = total / rValueHead;
 
-	SerialUSB.print(" TotalPacketRecieved: ");
-	SerialUSB.print(totalPacketsRecieved);
+			senderAddress.printAddressASCII(&SerialUSB);
 
-	SerialUSB.print("  Compression Last Packet: ");
-	SerialUSB.print(codecSetting);
+			SerialUSB.print("   (");
+			SerialUSB.print(timeStamp);
+			SerialUSB.print(", ");
+			SerialUSB.print(voiceQualityMovingAverage);
+			SerialUSB.println(")");
 
-	SerialUSB.print(" Average R-Quality ");
-	SerialUSB.println(voiceQuality);
+			SerialUSB.print("Source Address: ");
+			senderAddress.printAddressASCII(&SerialUSB);
 
+			SerialUSB.print(" Timestamp: ");
+			SerialUSB.print(timeStamp);
+
+			SerialUSB.print(" ThroughputRate: ");
+			SerialUSB.print(throughput);
+			SerialUSB.print(" kbps ");
+
+			SerialUSB.print(" TotalPacketsSent: ");
+			SerialUSB.print(totalPacketsSent);
+
+			SerialUSB.print(" TotalPacketRecieved: ");
+			SerialUSB.print(totalPacketsRecieved);
+
+			SerialUSB.print("  Compression Last Packet: ");
+			SerialUSB.print(codecSetting);
+
+			SerialUSB.print(" Average Moving R-Quality ");
+			SerialUSB.println(voiceQualityMovingAverage);
+		}
+	}
 	voiceQuality = 0;
 
 	//Rematch expectedFrameId
