@@ -96,7 +96,8 @@ void VoiceStreamStatManager::sendPathPacket() {
 				dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff,
 				(dataSenderAddress.getLsb() >> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff,
 				dataSenderAddress.getLsb() & 0xff, dataLoss, totalPacketsSent, totalPacketsRecieved };
-		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), payload, sizeof(payload));
+		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), ACK_OPTION, payload, sizeof(payload),
+				DEFAULT_FRAME_ID);
 		xbee.send(tx);
 
 		if (setTimeDifference) {
@@ -105,7 +106,7 @@ void VoiceStreamStatManager::sendPathPacket() {
 		}
 		it->calculateThroughput(timeDifference);
 
-		if (it->getNumNoPacketReceived() >= 3) {
+		if (it->getNumNoPacketReceived() >= 4) {
 			SerialUSB.println("Stream Lost.  Removing stream sent by: ");
 			it->getSenderAddress().printAddressASCII(&SerialUSB);
 			SerialUSB.println();

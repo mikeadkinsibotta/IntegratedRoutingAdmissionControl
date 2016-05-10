@@ -22,7 +22,7 @@ const unsigned long REQUEST_STREAM = 3000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 15000;
-const unsigned long PATHLOSS_INTERVAL = 8000;
+const unsigned long PATHLOSS_INTERVAL = 4000;
 const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
@@ -140,7 +140,7 @@ void listenForResponses() {
 					voicePacketSender->handleDataPacket(response);
 				} else if (!strcmp(control, "PATH")) {
 					//path loss packet
-					//voicePacketSender->handlePathPacket(response);
+					voicePacketSender->handlePathPacket(response);
 				} else if (!strcmp(control, "BEAT")) {
 					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
 				} else if (!strcmp(control, "INIT")) {
@@ -158,8 +158,8 @@ void listenForResponses() {
 			xbee.getResponse().getTxStatusResponse(response);
 			uint8_t status = response.getStatus();
 			if (status != 0) {
-				SerialUSB.print("TX_STATUS_ERROR: ");
-				SerialUSB.println(status);
+//				SerialUSB.print("TX_STATUS_ERROR: ");
+//				SerialUSB.println(status);
 			}
 		}
 	}

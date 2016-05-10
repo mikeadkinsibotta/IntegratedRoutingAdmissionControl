@@ -127,7 +127,7 @@ void VoicePacketSender::generateVoicePacket() {
 	xbee.send(tx);
 	bool r = (random(100)) < (dupSetting * 100);
 	if (dupSetting != 0 && r) {
-		xbee.send(tx);
+		frameId--;
 	}
 	frameId++;
 
