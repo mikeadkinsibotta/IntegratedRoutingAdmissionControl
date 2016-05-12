@@ -97,11 +97,11 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 
 			senderAddress.printAddressASCII(&SerialUSB);
 
-			SerialUSB.print("   (");
+			SerialUSB.print("   ");
 			SerialUSB.print(timeStamp);
-			SerialUSB.print(", ");
+			SerialUSB.print("  ");
 			SerialUSB.print(voiceQualityMovingAverage);
-			SerialUSB.println(")");
+			SerialUSB.println("  ");
 
 			SerialUSB.print("Source Address: ");
 			senderAddress.printAddressASCII(&SerialUSB);
