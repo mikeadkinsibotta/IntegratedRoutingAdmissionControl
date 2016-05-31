@@ -170,8 +170,6 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 	//If not setup another request to forward it.
 	if (!myAddress.equals(packetDestination)) {
 		//need to forward to next hop
-		Serial.print("ForwardData");
-
 		voiceStreamStatManager->updateStreamsIntermediateNode(packetSource, previousHop);
 
 		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
@@ -259,12 +257,12 @@ void VoicePacketSender::updateDataRate(uint8_t dataLoss) {
 	SerialUSB.print("DataLoss: ");
 	SerialUSB.println(dataLoss);
 
-	if (dataLoss > 25) {
+	if (dataLoss >= 25) {
 		dataLoss = 24;
 	}
 
 	VoiceSetting * v = compressionTable.getCompressionTable();
-	VoiceSetting newSetting = *(v + dataLoss);
+	VoiceSetting newSetting = v[dataLoss];
 
 	dupSetting = newSetting.getDupRatio();
 	codecSetting = newSetting.getCompressionSetting();
