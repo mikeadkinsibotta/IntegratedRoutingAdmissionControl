@@ -23,7 +23,7 @@ const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 15000;
 const unsigned long PATHLOSS_INTERVAL = 4000;
-const unsigned long STREAM_DELAY_START = 60000;
+const unsigned long STREAM_DELAY_START = 50000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -124,7 +124,9 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 4.00) {
+			XBeeAddress64 senderAddress = response.getRemoteAddress64();
+
+			if (response.getRelativeDistance() < 4.00 && (senderAddress.equals(sinkAddress))) {
 
 				char control[5];
 
@@ -140,7 +142,7 @@ void listenForResponses() {
 					voicePacketSender->handleDataPacket(response);
 				} else if (!strcmp(control, "PATH")) {
 					//path loss packet
-					voicePacketSender->handlePathPacket(response);
+					//voicePacketSender->handlePathPacket(response);
 				} else if (!strcmp(control, "BEAT")) {
 					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
 				} else if (!strcmp(control, "INIT")) {
