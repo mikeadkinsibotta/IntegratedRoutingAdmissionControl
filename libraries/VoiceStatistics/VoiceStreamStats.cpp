@@ -66,7 +66,7 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 
 	if (voiceQuality != 0.00) {
 
-		if (rValueArray[7] == 0) {
+		if (rValueHead < 8) {
 			rValueArray[rValueHead] = voiceQuality;
 			rValueHead++;
 //			SerialUSB.print("Not Maxed out");
@@ -89,11 +89,11 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 			throughput = inKb / timeDiff;
 
 			double total = 0;
-			for (int i = 0; i < rValueHead; ++i) {
+			for (int i = 0; i < 8; ++i) {
 				total += rValueArray[i];
 			}
 
-			double voiceQualityMovingAverage = total / rValueHead;
+			double voiceQualityMovingAverage = total / 8;
 
 			senderAddress.printAddressASCII(&SerialUSB);
 
@@ -118,6 +118,9 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 
 			SerialUSB.print(" TotalPacketRecieved: ");
 			SerialUSB.print(totalPacketsRecieved);
+
+			SerialUSB.print("  CurrentPacketLoss: ");
+			SerialUSB.print(packetLoss);
 
 			SerialUSB.print("  Compression Last Packet: ");
 			SerialUSB.print(codecSetting);
@@ -160,47 +163,58 @@ void VoiceStreamStats::updateVoiceLoss(const uint8_t * dataPtr) {
 
 		uint8_t rounded = packetLRatio < 0 ? packetLRatio - 0.5 : packetLRatio + 0.5;
 
-		packetLoss = rounded;
+		if (packetLossHead < 8) {
+			packetLossArray[packetLossHead] = rounded;
+			packetLossHead++;
 
-		double x = 0;
-		double b = 0;
-		double X = 0;
-		double compression = 0;
+		} else {
+			packetLossArray[7] = 0;
+			for (int i = 6; i >= 0; --i) {
+				packetLossArray[i + 1] = packetLossArray[i];
+			}
+			packetLossArray[0] = rounded;
 
-		switch (codecSetting) {
+			double total = 0;
+			for (int i = 0; i < 8; ++i) {
+				total += packetLossArray[i];
+			}
 
-			case 5:
-				x = 0.16;
-				b = 8.78;
-				X = 8.21;
-				compression = 0.3125;
-				break;
+			packetLoss = total / 8;
 
-			case 4:
-				compression = .25;
-				x = 6.50;
-				b = 8.28;
-				X = 5.21;
-				break;
+			double alpha = 0;
+			double beta = 0;
+			double chi = 0;
 
-			case 3:
-				compression = 0.1875;
-				x = 18.58;
-				b = 6.08;
-				X = 4.15;
-				break;
-			case 2:
-				compression = 0.125;
-				x = 33.57;
-				b = 2.75;
-				X = 6.58;
-				break;
+			switch (codecSetting) {
 
+				case 5:
+					alpha = 0.16;
+					beta = 8.78;
+					chi = 8.21;
+					break;
+
+				case 4:
+					alpha = 6.50;
+					beta = 8.28;
+					chi = 5.21;
+					break;
+
+				case 3:
+					alpha = 18.58;
+					beta = 6.08;
+					chi = 4.15;
+					break;
+				case 2:
+					alpha = 33.57;
+					beta = 2.75;
+					chi = 6.58;
+					break;
+
+			}
+
+			double voiceLoss = alpha + (beta * (log(1 + (chi * packetLoss))));
+			voiceQuality += (94.2 - voiceLoss);
 		}
-
-		double voiceLoss = x + b * (log(1 + (X * packetLoss)));
-
-		voiceQuality += (94.2 - voiceLoss);
 	}
 }
 
