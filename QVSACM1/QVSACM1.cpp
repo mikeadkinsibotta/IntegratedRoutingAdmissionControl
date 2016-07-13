@@ -142,7 +142,7 @@ void listenForResponses() {
 					voicePacketSender->handleDataPacket(response);
 				} else if (!strcmp(control, "PATH")) {
 					//path loss packet
-					//voicePacketSender->handlePathPacket(response);
+					voicePacketSender->handlePathPacket(response);
 				} else if (!strcmp(control, "BEAT")) {
 					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
 				} else if (!strcmp(control, "INIT")) {
