@@ -17,12 +17,12 @@
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
-const uint8_t CODEC_SETTTING = 2;
+const uint8_t CODEC_SETTTING = 3;
 const unsigned long REQUEST_STREAM = 3000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 15000;
-const unsigned long PATHLOSS_INTERVAL = 4000;
+const unsigned long PATHLOSS_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 

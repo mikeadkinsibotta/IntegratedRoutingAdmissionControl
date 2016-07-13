@@ -114,22 +114,39 @@ void VoicePacketSender::generateVoicePacket() {
 
 	uint8_t combinedSize = 0;
 
-	uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb() >> 16)
-			& 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24) & 0xff,
-			(myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-			(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-					& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-					>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-			codecSetting };
-
-	Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
-
-	xbee.send(tx);
 	bool r = (random(100)) < (dupSetting * 100);
-	if (dupSetting != 0 && r) {
+	if (dupSetting != 0 && r && !justSentDup) {
 		frameId--;
+
+		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+				codecSetting };
+
+		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
+
+		xbee.send(tx);
+		frameId++;
+		justSentDup = true;
+	} else {
+
+		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+				codecSetting };
+
+		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
+
+		xbee.send(tx);
+		frameId++;
+		justSentDup = false;
 	}
-	frameId++;
 
 	if (frameId % 150 == 0) {
 		sendTracePacket();
@@ -170,6 +187,8 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 	//If not setup another request to forward it.
 	if (!myAddress.equals(packetDestination)) {
 		//need to forward to next hop
+		Serial.print("ForwardData");
+
 		voiceStreamStatManager->updateStreamsIntermediateNode(packetSource, previousHop);
 
 		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
