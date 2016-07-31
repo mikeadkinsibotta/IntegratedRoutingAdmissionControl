@@ -138,7 +138,7 @@ void listenForResponses() {
 			xbee.getResponse().getRx64Response(response);
 			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 4.00) {
+			if (response.getRelativeDistance() < 3.00) {
 
 				char control[5];
 
