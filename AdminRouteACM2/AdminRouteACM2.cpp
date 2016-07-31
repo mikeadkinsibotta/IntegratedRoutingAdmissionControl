@@ -21,7 +21,7 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long REQUEST_STREAM = 3000;
+const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 1000;
@@ -172,8 +172,8 @@ void listenForResponses() {
 			xbee.getResponse().getTxStatusResponse(response);
 			uint8_t status = response.getStatus();
 			if (status != 0) {
-				SerialUSB.print("TX_STATUS_ERROR: ");
-				SerialUSB.println(status);
+//				SerialUSB.print("TX_STATUS_ERROR: ");
+//				SerialUSB.println(status);
 			}
 		}
 	}
@@ -190,7 +190,6 @@ void setupThreads() {
 	heartbeat.enabled = true;
 	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
 	heartbeat.onRun(broadcastHeartbeat);
-
 	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	pathLoss.ThreadName = "Send Path Loss";

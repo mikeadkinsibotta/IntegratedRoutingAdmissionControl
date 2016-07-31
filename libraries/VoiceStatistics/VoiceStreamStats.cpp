@@ -94,7 +94,7 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 			}
 
 			double voiceQualityMovingAverage = total / 8;
-
+			SerialUSB.print("$");
 			senderAddress.printAddressASCII(&SerialUSB);
 
 			SerialUSB.print("   ");
