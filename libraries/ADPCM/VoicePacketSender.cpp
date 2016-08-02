@@ -160,6 +160,15 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	//check to see if the packet final destination is this node's address
 	//If not setup another request to forward it.
+
+	uint8_t * dataPtr = response.getData();
+
+	packetDestination.setMsb(
+			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+
+	packetDestination.setLsb(
+			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+
 	if (!myAddress.equals(packetDestination)) {
 
 		myNextHop = heartbeatProtocol->getNextHop().getAddress();
@@ -180,14 +189,6 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		packetSource.setLsb(
 				(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8)
 						+ dataPtr[12]);
-
-		packetDestination.setMsb(
-				(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8)
-						+ dataPtr[16]);
-
-		packetDestination.setLsb(
-				(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8)
-						+ dataPtr[20]);
 
 		previousHop.setMsb(
 				(uint32_t(response.getFrameData()[0]) << 24) + (uint32_t(response.getFrameData()[1]) << 16)
