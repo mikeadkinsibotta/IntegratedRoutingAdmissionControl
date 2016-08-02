@@ -37,6 +37,10 @@ class VoicePacketSender {
 		uint8_t frameId;
 		bool justSentDup = false;
 
+		XBeeAddress64 packetDestination;
+		XBeeAddress64 packetSource;
+		XBeeAddress64 previousHop;
+
 		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
 				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 		void updateDataRate(uint8_t dataLoss);
