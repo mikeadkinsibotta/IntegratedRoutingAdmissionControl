@@ -21,11 +21,13 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 3;
+const uint8_t TRACE_INTERVAL = 300;
 const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
-const unsigned long HEARTBEAT_INTERVAL = 1000;
+const unsigned long HEARTBEAT_INTERVAL = 10000;
 const unsigned long PATHLOSS_INTERVAL = 8000;
+const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
@@ -41,6 +43,7 @@ Thread sendInital = Thread();
 Thread responseThread = Thread();
 Thread pathLoss = Thread();
 Thread generateVoice = Thread();
+Thread calculateThroughput = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
@@ -59,8 +62,9 @@ void setup() {
 	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
 			xbee);
-	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, voiceStreamStatManager, myAddress,
-			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, &calculateThroughput,
+			voiceStreamStatManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
+			TRACE_INTERVAL);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
 			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
@@ -121,6 +125,10 @@ void broadcastHeartbeat() {
 
 void sendPathPacket() {
 	voiceStreamStatManager->sendPathPacket();
+}
+
+void runCalculateThroughput() {
+	voiceStreamStatManager->calculateThroughput();
 }
 
 void clearBuffer() {
@@ -211,9 +219,15 @@ void setupThreads() {
 	sendInital.setInterval(REQUEST_STREAM);
 	sendInital.onRun(sendInitPacket);
 
+	calculateThroughput.ThreadName = "Calculate Throughput";
+	calculateThroughput.enabled = false;
+	calculateThroughput.setInterval(CALCULATE_THROUGHPUT_INTERVAL);
+	calculateThroughput.onRun(runCalculateThroughput);
+
 	controller.add(&responseThread);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
+	controller.add(&calculateThroughput);
 	controller.add(&generateVoice);
 	controller.add(&heartbeat);
 }

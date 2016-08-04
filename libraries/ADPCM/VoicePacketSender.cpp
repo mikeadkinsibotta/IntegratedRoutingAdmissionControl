@@ -14,11 +14,13 @@ VoicePacketSender::VoicePacketSender() {
 	myAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
 	frameId = 0;
+	tracePacketInterval = 0;
 	myNextHop = XBeeAddress64();
 	heartbeatProtocol = 0;
 	xbee = XBee();
 	voiceStreamStatManager = 0;
 	pathLoss = 0;
+	calculateThroughput = 0;
 	injectionRate = 0;
 	payloadSize = 0;
 	compressionTable.buildCompressionLookUpTable();
@@ -26,9 +28,9 @@ VoicePacketSender::VoicePacketSender() {
 }
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-		VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-		const uint8_t payloadSize) {
+		Thread * calculateThroughput, VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize,
+		const uint8_t tracePacketInterval) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -40,6 +42,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	frameId = 0;
 	injectionRate = 0;
 	myNextHop = XBeeAddress64();
+	this->tracePacketInterval = tracePacketInterval;
 
 	//If I don't past the pointer, it just makes a copy of the heartbeat protocol during assignment,
 	//If I make changes to the heartbeat protocol outside the class the member variable does not pick up the changes.
@@ -48,6 +51,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 
 	this->xbee = xbee;
 	this->pathLoss = pathLoss;
+	this->calculateThroughput = calculateThroughput;
 
 	compressionTable.buildCompressionLookUpTable();
 
@@ -148,9 +152,9 @@ void VoicePacketSender::generateVoicePacket() {
 		justSentDup = false;
 	}
 
-	if (frameId % 150 == 0) {
-		sendTracePacket();
-	}
+//	if (frameId % tracePacketInterval == 0) {
+//		sendTracePacket();
+//	}
 
 }
 
@@ -199,6 +203,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 		voiceStreamStatManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
+		(*calculateThroughput).enabled = true;
 	}
 
 }

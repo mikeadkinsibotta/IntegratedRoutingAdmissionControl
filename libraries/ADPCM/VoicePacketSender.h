@@ -32,9 +32,11 @@ class VoicePacketSender {
 
 		Compression compressionTable;
 		Thread * pathLoss;
+		Thread * calculateThroughput;
 		float injectionRate;
 		uint8_t payloadSize;
 		uint8_t frameId;
+		uint8_t tracePacketInterval;
 		bool justSentDup = false;
 
 		XBeeAddress64 packetDestination;
@@ -49,9 +51,9 @@ class VoicePacketSender {
 	public:
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-				VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-				const uint8_t payloadSize);
+				Thread * calculateThroughput, VoiceStreamStatManager * voiceStreamStatManager,
+				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
+				const float dupSetting, const uint8_t payloadSize, const uint8_t tracePacketInterval);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
