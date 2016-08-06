@@ -77,9 +77,11 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 	float neighborhoodRate = 0;
 	uint8_t neighborhoodSize = 0;
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
-		if (abs(neighborhoodTable.at(i).getDataRate() - 0) > EPISLON) {
+
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		neighborhoodRate += it->second.getDataRate();
+		if (abs(it->second.getDataRate() - 0) > EPISLON) {
 			neighborhoodSize++;
 		}
 	}
@@ -142,10 +144,11 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 	bool found = false;
 
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
-			updateNeighbor(neighborhoodTable.at(i), heartbeatMessage);
-			if (neighborhoodTable.at(i).getAddress().equals(nextHop.getAddress())) {
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		if (it->first.equals(heartbeatMessage.getSenderAddress())) {
+			updateNeighbor(it->second, heartbeatMessage);
+			if (it->first.equals(nextHop.getAddress())) {
 				updateNeighbor(nextHop, heartbeatMessage);
 			}
 			found = true;
@@ -160,7 +163,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
-		neighborhoodTable.push_back(neighbor);
+		neighborhoodTable[neighbor.getAddress()] = neighbor;
 
 		if (DEBUG) {
 			printNeighborHoodTable();
@@ -169,31 +172,35 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 }
 
 bool HeartbeatProtocol::isNeighbor(const XBeeAddress64 &address) {
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		if (neighborhoodTable.at(i).getAddress().equals(address)) {
-			return true;
-		}
-	}
+	return neighborhoodTable.find(address) != neighborhoodTable.end();
 
-	return false;
+//	for (int i = 0; i < neighborhoodTable.size(); i++) {
+//		if (neighborhoodTable.at(i).getAddress().equals(address)) {
+//			return true;
+//		}
+//	}
+//
+//	return false;
 }
 
 void HeartbeatProtocol::purgeNeighborhoodTable() {
 
 	if (!neighborhoodTable.empty()) {
-		for (vector<Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();) {
-			if (it->timerExpired()) {
+		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+				) {
+			if (it->second.timerExpired()) {
 				SerialUSB.print("Neighbor: ");
-				it->getAddress().printAddressASCII(&SerialUSB);
+				it->first.printAddressASCII(&SerialUSB);
 				SerialUSB.println(" timer has expired and is purged.");
 				SerialUSB.print("Nexthop Address: ");
 				nextHop.getAddress().printAddressASCII(&SerialUSB);
 				SerialUSB.println();
-				if (it->getAddress().equals(nextHop.getAddress())) {
+				if (it->first.equals(nextHop.getAddress())) {
 					nextHop = Neighbor();
 					SerialUSB.println("NextHop Purged");
 				}
-				it = neighborhoodTable.erase(it);
+
+				neighborhoodTable.erase(it);
 
 				if (DEBUG) {
 					printNeighborHoodTable();
@@ -226,28 +233,29 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	nextHop.getAddress().printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
 
 		SerialUSB.print("NeighborAddress: ");
-		neighborhoodTable.at(i).getAddress().printAddressASCII(&SerialUSB);
+		it->first.printAddressASCII(&SerialUSB);
 		SerialUSB.print(", DataRate: ");
-		SerialUSB.print(neighborhoodTable.at(i).getDataRate());
+		SerialUSB.print(it->second.getDataRate());
 		SerialUSB.print(", SeqNum: ");
-		SerialUSB.print(neighborhoodTable.at(i).getSeqNum());
+		SerialUSB.print(it->second.getSeqNum());
 		SerialUSB.print(", QualityOfPath: ");
-		SerialUSB.print(neighborhoodTable.at(i).getQualityOfPath());
+		SerialUSB.print(it->second.getQualityOfPath());
 		SerialUSB.print(", NeighborhoodCapacity: ");
-		SerialUSB.print(neighborhoodTable.at(i).getNeighborhoodCapacity());
+		SerialUSB.print(it->second.getNeighborhoodCapacity());
 		SerialUSB.print(", RouteFlag: ");
-		SerialUSB.print(neighborhoodTable.at(i).isRouteFlag());
+		SerialUSB.print(it->second.isRouteFlag());
 		SerialUSB.print(", SinkAddress: ");
-		neighborhoodTable.at(i).getSinkAddress().printAddressASCII(&SerialUSB);
+		it->second.getSinkAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", NextHopAddress: ");
-		neighborhoodTable.at(i).getNextHop().printAddressASCII(&SerialUSB);
+		it->second.getNextHop().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RSSI: ");
-		SerialUSB.print(neighborhoodTable.at(i).getRssi());
+		SerialUSB.print(it->second.getRssi());
 		SerialUSB.print(", RelativeDistanceAvg: ");
-		SerialUSB.println(neighborhoodTable.at(i).getRelativeDistanceAvg(), 12);
+		SerialUSB.println(it->second.getRelativeDistanceAvg(), 12);
 
 	}
 	SerialUSB.println();
@@ -266,31 +274,30 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		 * - Pick neighbor with smallest quality of path
 		 * - If quality of path is the same, pick with shorter relative distance
 		 */
-		for (int i = 0; i < neighborhoodTable.size(); i++) {
+		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+				++it) {
 
 			if (manipulate) {
 
-				if (neighborhoodTable.at(i).isRouteFlag()
-						&& neighborhoodTable.at(i).getAddress().equals(manipulateAddress)) {
-					qualityOfPath = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+				if (it->second.isRouteFlag() && it->second.getAddress().equals(manipulateAddress)) {
+					qualityOfPath = neighborHoodSize + it->second.getQualityOfPath();
 					qualityOfPath = qop;
-					nextHop = neighborhoodTable.at(i);
+					nextHop = it->second;
 					routeFlag = true;
 					return;
 				}
-			} else if (neighborhoodTable.at(i).isRouteFlag()
-					&& !neighborhoodTable.at(i).getNextHop().equals(myAddress)) {
-				uint8_t path = neighborHoodSize + neighborhoodTable.at(i).getQualityOfPath();
+			} else if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
+				uint8_t path = neighborHoodSize + it->second.getQualityOfPath();
 
 				if (path < qop) {
 					qop = path;
-					neighbor = neighborhoodTable.at(i);
+					neighbor = it->second;
 
 				} else if (qop == path) {
 					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
-					double relativeDistanceNew = neighborhoodTable.at(i).getRelativeDistanceAvg();
+					double relativeDistanceNew = it->second.getRelativeDistanceAvg();
 					if (relativeDistanceCurrent > relativeDistanceNew) {
-						neighbor = neighborhoodTable.at(i);
+						neighbor = it->second;
 					}
 				}
 			}
@@ -349,11 +356,12 @@ void HeartbeatProtocol::buildSaturationTable() {
 
 }
 
-float HeartbeatProtocol::getLocalCapacity() const {
+float HeartbeatProtocol::getLocalCapacity() {
 
 	float localCapacity = MAX_FLT;
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		float neighborCapacity = neighborhoodTable.at(i).getNeighborhoodCapacity();
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		float neighborCapacity = it->second.getNeighborhoodCapacity();
 		if (neighborCapacity < localCapacity) {
 			localCapacity = neighborCapacity;
 		}

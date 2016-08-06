@@ -13,7 +13,7 @@
 #include "Neighbor.h"
 #include "HeartbeatMessage.h"
 #include <Saturation.h>
-#include <vector>
+#include <map>
 #include <set>
 #include <cfloat>
 
@@ -22,7 +22,7 @@ using namespace std;
 class HeartbeatProtocol {
 
 	private:
-		vector<Neighbor> neighborhoodTable;
+		std::map<XBeeAddress64, Neighbor> neighborhoodTable;
 		XBee xbee;
 		uint8_t seqNum;
 		XBeeAddress64 myAddress;
@@ -67,7 +67,7 @@ class HeartbeatProtocol {
 		void setTimeoutLength(unsigned long timeoutLength);
 		const XBee& getXbee() const;
 		void setXbee(const XBee& xbee);
-		float getLocalCapacity() const;
+		float getLocalCapacity();
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */
