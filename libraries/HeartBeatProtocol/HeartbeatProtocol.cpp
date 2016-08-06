@@ -104,15 +104,36 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	HeartbeatMessage message;
 
+	unsigned long time = micros();
 	message.transcribeHeartbeatPacket(response);
+	unsigned long diff = micros() - time;
+	SerialUSB.print("transcribeHeartbeatPacket  ");
+	SerialUSB.println(diff);
 
+	time = micros();
 	updateNeighborHoodTable(message);
+	diff = micros() - time;
+	SerialUSB.print("updateNeighborHoodTable  ");
+	SerialUSB.println(diff);
+
+	time = micros();
 	reCalculateNeighborhoodCapacity();
+	diff = micros() - time;
+	SerialUSB.print("reCalculateNeighborhoodCapacity  ");
+	SerialUSB.println(diff);
 
 	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+		time = micros();
 		noNeighborcalculatePathQualityNextHop();
+		diff = micros() - time;
+		SerialUSB.print("noNeighborcalculatePathQualityNextHop  ");
+		SerialUSB.println(diff);
 	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+		time = micros();
 		withNeighborcalculatePathQualityNextHop();
+		diff = micros() - time;
+		SerialUSB.print("withNeighborcalculatePathQualityNextHop  ");
+		SerialUSB.println(diff);
 	}
 
 }

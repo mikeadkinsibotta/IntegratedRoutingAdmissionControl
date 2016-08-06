@@ -21,12 +21,12 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 3;
-const uint8_t TRACE_INTERVAL = 300;
+const uint8_t TRACE_INTERVAL = 2000;
 const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
 const unsigned long REJECT_TIMEOUT_LENGTH = 100;
 const unsigned long HEARTBEAT_INTERVAL = 10000;
-const unsigned long PATHLOSS_INTERVAL = 8000;
+const unsigned long PATHLOSS_INTERVAL = 16000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
@@ -196,13 +196,13 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
+	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(200));
 	heartbeat.onRun(broadcastHeartbeat);
 	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	pathLoss.ThreadName = "Send Path Loss";
 	pathLoss.enabled = false;
-	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
+	pathLoss.setInterval(PATHLOSS_INTERVAL + random(200));
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";
