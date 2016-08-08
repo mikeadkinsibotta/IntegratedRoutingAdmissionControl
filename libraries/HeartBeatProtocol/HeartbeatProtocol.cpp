@@ -142,33 +142,27 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
-	bool found = false;
+	if (neighborhoodTable.find(heartbeatMessage.getSenderAddress()) == neighborhoodTable.end()) {
 
-	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
-			++it) {
-		if (it->first.equals(heartbeatMessage.getSenderAddress())) {
-			updateNeighbor(it->second, heartbeatMessage);
-			if (it->first.equals(nextHop.getAddress())) {
-				updateNeighbor(nextHop, heartbeatMessage);
-			}
-			found = true;
-			break;
+		Neighbor neighbor = neighborhoodTable[heartbeatMessage.getSenderAddress()];
+		updateNeighbor(neighbor, heartbeatMessage);
+
+		if (neighbor.getAddress().equals(nextHop.getAddress())) {
+			updateNeighbor(nextHop, heartbeatMessage);
 		}
-	}
-
-	if (!found) {
-		//Sets timestamp when constructor is called.
+	} else {
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getMyNextHop(),
 				heartbeatMessage.getDataRate(), heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
 		neighborhoodTable[neighbor.getAddress()] = neighbor;
-
-		if (DEBUG) {
-			printNeighborHoodTable();
-		}
 	}
+
+	if (DEBUG) {
+		printNeighborHoodTable();
+	}
+
 }
 
 bool HeartbeatProtocol::isNeighbor(const XBeeAddress64 &address) {
@@ -263,7 +257,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 
 void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
-	//Add 1 to include myself
+//Add 1 to include myself
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 	uint8_t qop = UINT8_MAX;
 	Neighbor neighbor;
@@ -304,7 +298,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		}
 	}
 
-	//Make sure route exists
+//Make sure route exists
 	if (qop != UINT8_MAX) {
 		qualityOfPath = qop;
 		nextHop = neighbor;
@@ -324,20 +318,20 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 //Add 1 to include myself
 
 //Neighbor is already selected.  Should I make some adjustments?
-	//SerialUSB.print("Should I adjust my nextHop neighbor?  ");
+//SerialUSB.print("Should I adjust my nextHop neighbor?  ");
 	unsigned long timeStamp = nextHop.getTimeStamp();
 	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
 	unsigned long diff = timeStamp - previousTimeStamp;
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
-	//SerialUSB.print("  Difference from last timeStamp:  ");
+//SerialUSB.print("  Difference from last timeStamp:  ");
 //
-	//SerialUSB.print(diff);
-	//SerialUSB.print(" seconds   ");
+//SerialUSB.print(diff);
+//SerialUSB.print(" seconds   ");
 
-	//SerialUSB.print("Difference distance: ");
-	//SerialUSB.print(distanceDiff);
+//SerialUSB.print("Difference distance: ");
+//SerialUSB.print(distanceDiff);
 
 	/*	if (abs(diff - 0) > EPISLON) {
 	 double speed = distanceDiff / diff;
