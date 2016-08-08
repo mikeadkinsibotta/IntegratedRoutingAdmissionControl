@@ -141,39 +141,34 @@ void listenForResponses() {
 	heartbeatProtocol->purgeNeighborhoodTable();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
-			Rx64Response response;
-			xbee.getResponse().getRx64Response(response);
-			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 3.00) {
+		Rx64Response response;
+		xbee.getResponse().getRx64Response(response);
+		uint8_t* data = response.getData();
 
-				char control[5];
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 3.00) {
 
-				for (int i = 0; i < 5; i++) {
-					control[i] = data[i];
-				}
-
-				if (!strcmp(control, "BEAT")) {
-					//routing data
+			switch (data[0]) {
+				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);
-				} else if (!strcmp(control, "DATA")) {
-					//voice data
+					break;
+				case 'D':
 					voicePacketSender->handleDataPacket(response);
-				} else if (!strcmp(control, "PATH")) {
-					//path loss packet
+					break;
+				case 'P':
 					voicePacketSender->handlePathPacket(response);
-				} else if (!strcmp(control, "RSTR")) {
-					//voicePacketSender->handleStreamRestart(response);
-				} else if (!strcmp(control, "INIT")) {
+					break;
+				case 'I':
 					admissionControl->handleInitPacket(response);
-				} else if (!strcmp(control, "REDJ")) {
+					break;
+				case 'R':
 					admissionControl->handleREDJPacket(response);
-				} else if (!strcmp(control, "GRNT")) {
+					break;
+				case 'G':
 					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
-				} else if (!strcmp(control, "TRCE")) {
+					break;
+				case 'T':
 					voicePacketSender->handleTracePacket(response);
-				}
 			}
 		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
 			TxStatusResponse response;
