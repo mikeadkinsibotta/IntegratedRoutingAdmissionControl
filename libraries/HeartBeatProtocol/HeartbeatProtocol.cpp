@@ -105,48 +105,23 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	HeartbeatMessage message;
-
-	unsigned long time = micros();
 	message.transcribeHeartbeatPacket(response);
-	unsigned long diff = micros() - time;
-	SerialUSB.print("transcribeHeartbeatPacket  ");
-	SerialUSB.println(diff);
 
-	time = micros();
 	updateNeighborHoodTable(message);
-	diff = micros() - time;
-	SerialUSB.print("updateNeighborHoodTable  ");
-	SerialUSB.println(diff);
-
-	time = micros();
 	reCalculateNeighborhoodCapacity();
-	diff = micros() - time;
-	SerialUSB.print("reCalculateNeighborhoodCapacity  ");
-	SerialUSB.println(diff);
 
 	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-		time = micros();
 		noNeighborcalculatePathQualityNextHop();
-		diff = micros() - time;
-		SerialUSB.print("noNeighborcalculatePathQualityNextHop  ");
-		SerialUSB.println(diff);
 	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-		time = micros();
 		withNeighborcalculatePathQualityNextHop();
-		diff = micros() - time;
-		SerialUSB.print("withNeighborcalculatePathQualityNextHop  ");
-		SerialUSB.println(diff);
 	}
-
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
-	if (neighborhoodTable.find(heartbeatMessage.getSenderAddress()) == neighborhoodTable.end()) {
-
+	if (neighborhoodTable.find(heartbeatMessage.getSenderAddress()) != neighborhoodTable.end()) {
 		Neighbor neighbor = neighborhoodTable[heartbeatMessage.getSenderAddress()];
 		updateNeighbor(neighbor, heartbeatMessage);
-
 		if (neighbor.getAddress().equals(nextHop.getAddress())) {
 			updateNeighbor(nextHop, heartbeatMessage);
 		}
@@ -156,7 +131,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
 				timeoutLength);
-		neighborhoodTable[neighbor.getAddress()] = neighbor;
+		neighborhoodTable.insert(pair<XBeeAddress64, Neighbor>(neighbor.getAddress(), neighbor));
 	}
 
 	if (DEBUG) {
@@ -273,7 +248,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 			if (manipulate) {
 
-				if (it->second.isRouteFlag() && it->second.getAddress().equals(manipulateAddress)) {
+				if (it->second.isRouteFlag() && it->first.equals(manipulateAddress)) {
 					qualityOfPath = neighborHoodSize + it->second.getQualityOfPath();
 					qualityOfPath = qop;
 					nextHop = it->second;
