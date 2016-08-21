@@ -152,9 +152,9 @@ void VoicePacketSender::generateVoicePacket() {
 		justSentDup = false;
 	}
 
-//	if (frameId % tracePacketInterval == 0) {
-//		sendTracePacket();
-//	}
+	if (frameId % tracePacketInterval == 0) {
+		sendTracePacket();
+	}
 
 }
 

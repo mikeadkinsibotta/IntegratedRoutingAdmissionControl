@@ -120,10 +120,10 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
 	if (neighborhoodTable.find(heartbeatMessage.getSenderAddress()) != neighborhoodTable.end()) {
-		Neighbor neighbor = neighborhoodTable[heartbeatMessage.getSenderAddress()];
+		Neighbor * neighbor = &neighborhoodTable[heartbeatMessage.getSenderAddress()];
 		updateNeighbor(neighbor, heartbeatMessage);
-		if (neighbor.getAddress().equals(nextHop.getAddress())) {
-			updateNeighbor(nextHop, heartbeatMessage);
+		if (neighbor->getAddress().equals(nextHop.getAddress())) {
+			updateNeighbor(&nextHop, heartbeatMessage);
 		}
 	} else {
 		Neighbor neighbor = Neighbor(heartbeatMessage.getSenderAddress(), heartbeatMessage.getMyNextHop(),
@@ -169,7 +169,7 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 					SerialUSB.println("NextHop Purged");
 				}
 
-				neighborhoodTable.erase(it);
+				neighborhoodTable.erase(it++);
 
 				if (DEBUG) {
 					printNeighborHoodTable();
@@ -346,17 +346,18 @@ float HeartbeatProtocol::getLocalCapacity() {
 	return localCapacity;
 }
 
-void HeartbeatProtocol::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
-	neighbor.setDataRate(heartbeatMessage.getDataRate());
-	neighbor.setNextHop(heartbeatMessage.getMyNextHop());
-	neighbor.setSeqNum(heartbeatMessage.getSeqNum());
-	neighbor.setQualityOfPath(heartbeatMessage.getQualityOfPath());
-	neighbor.setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
-	neighbor.setRouteFlag(heartbeatMessage.isRouteFlag());
-	neighbor.setSinkAddress(heartbeatMessage.getSinkAddress());
-	neighbor.addToRelativeDistance(heartbeatMessage.getRelativeDistance());
-	neighbor.setRssi(heartbeatMessage.getRssi());
-	neighbor.updateTimeStamp();
+void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage) {
+	neighbor->setDataRate(heartbeatMessage.getDataRate());
+	neighbor->setNextHop(heartbeatMessage.getMyNextHop());
+	neighbor->setSeqNum(heartbeatMessage.getSeqNum());
+	neighbor->setQualityOfPath(heartbeatMessage.getQualityOfPath());
+	neighbor->setNeighborhoodCapacity(heartbeatMessage.getNeighborhoodCapacity());
+	neighbor->setRouteFlag(heartbeatMessage.isRouteFlag());
+	neighbor->setSinkAddress(heartbeatMessage.getSinkAddress());
+	neighbor->addToRelativeDistance(heartbeatMessage.getRelativeDistance());
+	neighbor->setRssi(heartbeatMessage.getRssi());
+	neighbor->updateTimeStamp();
+
 }
 
 bool HeartbeatProtocol::isRouteFlag() const {

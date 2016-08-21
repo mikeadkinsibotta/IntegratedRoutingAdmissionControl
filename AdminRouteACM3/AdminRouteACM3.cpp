@@ -7,20 +7,20 @@
 #define VOICE_DATA_INTERVAL 2
 #define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
-#define SINK_ADDRESS_2 0x40B519CC
+#define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define MANIPULATE true
 #define MANIPULATE_ADDRESS_1 0x0013A200
-#define MANIPULATE_ADDRESS_2 0x40B31805
+#define MANIPULATE_ADDRESS_2 0x40B519FC
 #define PAYLOAD_SIZE 76
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 2;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
-const uint8_t CODEC_SETTTING = 3;
+const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
 const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
@@ -141,39 +141,34 @@ void listenForResponses() {
 	heartbeatProtocol->purgeNeighborhoodTable();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
-			Rx64Response response;
-			xbee.getResponse().getRx64Response(response);
-			uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 3.00) {
+		Rx64Response response;
+		xbee.getResponse().getRx64Response(response);
+		uint8_t* data = response.getData();
 
-				char control[5];
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 2.50) {
 
-				for (int i = 0; i < 5; i++) {
-					control[i] = data[i];
-				}
-
-				if (!strcmp(control, "BEAT")) {
-					//routing data
+			switch (data[0]) {
+				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);
-				} else if (!strcmp(control, "DATA")) {
-					//voice data
+					break;
+				case 'D':
 					voicePacketSender->handleDataPacket(response);
-				} else if (!strcmp(control, "PATH")) {
-					//path loss packet
+					break;
+				case 'P':
 					voicePacketSender->handlePathPacket(response);
-				} else if (!strcmp(control, "RSTR")) {
-					//voicePacketSender->handleStreamRestart(response);
-				} else if (!strcmp(control, "INIT")) {
+					break;
+				case 'I':
 					admissionControl->handleInitPacket(response);
-				} else if (!strcmp(control, "REDJ")) {
+					break;
+				case 'R':
 					admissionControl->handleREDJPacket(response);
-				} else if (!strcmp(control, "GRNT")) {
+					break;
+				case 'G':
 					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
-				} else if (!strcmp(control, "TRCE")) {
+					break;
+				case 'T':
 					voicePacketSender->handleTracePacket(response);
-				}
 			}
 		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
 			TxStatusResponse response;
@@ -196,13 +191,13 @@ void setupThreads() {
 
 	heartbeat.ThreadName = "Broadcast Heartbeat";
 	heartbeat.enabled = true;
-	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
+	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(200));
 	heartbeat.onRun(broadcastHeartbeat);
 	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	pathLoss.ThreadName = "Send Path Loss";
 	pathLoss.enabled = false;
-	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
+	pathLoss.setInterval(PATHLOSS_INTERVAL + random(200));
 	pathLoss.onRun(sendPathPacket);
 
 	generateVoice.ThreadName = "Send Voice Data";

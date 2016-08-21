@@ -40,7 +40,7 @@ class HeartbeatProtocol {
 
 		void buildSaturationTable();
 		void reCalculateNeighborhoodCapacity();
-		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& message);
+		void updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& message);
 		void noNeighborcalculatePathQualityNextHop();
 		void withNeighborcalculatePathQualityNextHop();
 

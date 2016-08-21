@@ -7,7 +7,7 @@
 #define VOICE_DATA_INTERVAL 2
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
-#define SINK_ADDRESS_2 0x40B519CC
+#define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define MANIPULATE false
@@ -17,10 +17,10 @@
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 2;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
-const uint8_t CODEC_SETTTING = 3;
+const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
 const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 300;
@@ -146,7 +146,7 @@ void listenForResponses() {
 		xbee.getResponse().getRx64Response(response);
 		uint8_t* data = response.getData();
 
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 3.00) {
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 2.50) {
 
 			switch (data[0]) {
 				case 'B':
