@@ -214,8 +214,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		potentialStream.setOnPath(true);
 		xbee.send(tx);
 
-	} else {
-		//node affected but node on path
+	} else if (!myAddress.equals(sinkAddress)) {
+		//node affected but not node on path and not sink node.
 		potentialStream.getRejcTimer().startTimer();
 
 	}
@@ -265,7 +265,7 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 		}
 
 	} else {
-		/*SerialUSB.println("Active Voice");*/
+		SerialUSB.println("Received GRNT.  Stop sending init messages! Starting sending this mother!");
 		initThreadActive = false;
 		voicePacketSender->resetFrameID();
 		voiceThreadActive = true;

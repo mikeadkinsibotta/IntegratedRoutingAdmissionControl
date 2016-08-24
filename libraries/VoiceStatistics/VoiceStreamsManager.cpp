@@ -25,17 +25,22 @@ VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee, const uint8_t payload
 	timeDifference = 0;
 }
 
-bool VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
+void VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
 	int i = 0;
-	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
+	bool found = false;
+	while (i < streams.size()) {
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
 			streams.at(i).printRouteEnd();
-			streams.erase(it);
-			return true;
+			found = true;
+			break;
 		}
 		++i;
 	}
-	return false;
+
+	if (found) {
+		SerialUSB.println("Stream now erased");
+		streams.erase(streams.begin() + i);
+	}
 }
 
 void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,

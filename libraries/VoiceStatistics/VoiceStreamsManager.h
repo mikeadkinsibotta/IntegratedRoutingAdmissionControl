@@ -34,7 +34,7 @@ class VoiceStreamStatManager {
 		void updateStreamsIntermediateNode(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop);
 		void getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop);
 
-		bool removeStream(const XBeeAddress64& packetSource);
+		void removeStream(const XBeeAddress64& packetSource);
 		const vector<VoiceStreamStats> & getStreams() const;
 		void setStreams(const vector<VoiceStreamStats>& streams);
 		void sendPathPacket();
