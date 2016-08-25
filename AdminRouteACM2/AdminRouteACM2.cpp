@@ -147,7 +147,7 @@ void listenForResponses() {
 		uint8_t* data = response.getData();
 
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 1.00) {
-			0
+
 			switch (data[0]) {
 				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);
