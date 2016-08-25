@@ -38,7 +38,6 @@ void VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
 	}
 
 	if (found) {
-		SerialUSB.println("Stream now erased");
 		streams.erase(streams.begin() + i);
 	}
 }
@@ -57,7 +56,7 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 	}
 
 	if (!found) {
-		/*SerialUSB.println("New Stream");*/
+		SerialUSB.println("Received data packet, a new voice stream has started!");
 		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		stream.updateVoiceLoss(dataPtr);
 		streams.push_back(stream);
@@ -80,7 +79,7 @@ void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& 
 	}
 
 	if (!found) {
-		//SerialUSB.println("New Stream");
+		SerialUSB.println("Add New Stream 1");
 		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		streams.push_back(stream);
 	}
@@ -135,14 +134,6 @@ void VoiceStreamStatManager::calculateThroughput() {
 		}
 		it->calculateThroughput(timeDifference);
 	}
-}
-
-const vector<VoiceStreamStats> & VoiceStreamStatManager::getStreams() const {
-	return streams;
-}
-
-void VoiceStreamStatManager::setStreams(const vector<VoiceStreamStats>& streams) {
-	this->streams = streams;
 }
 
 uint8_t VoiceStreamStatManager::getPayloadSize() const {

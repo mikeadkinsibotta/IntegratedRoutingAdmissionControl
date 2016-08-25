@@ -123,6 +123,7 @@ void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 
 void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop) {
 
+	SerialUSB.println("Sending GRNT");
 	uint8_t payload[] = { 'G', 'R', 'N', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
 			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
 			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
@@ -157,11 +158,9 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	//remove any old streams
 	voiceStreamStatManager->removeStream(senderAddress);
 
-	PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
-			rejcTimeoutLength, dataRate);
-
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 		//sink node
+		SerialUSB.println("Recieved INT");
 		SerialUSB.print("Receiving request for new stream via: ");
 		receivedAddress.printAddressASCII(&SerialUSB);
 		SerialUSB.print("  Sender Address: ");
@@ -169,9 +168,12 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		SerialUSB.print("  Potential Data Rate: ");
 		SerialUSB.println(dataRate);
 
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
 		potentialStream.setOnPath(true);
+		addPotentialStream(potentialStream, dataRate);
 
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
@@ -209,18 +211,23 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		payloadBroadCast[24] = injectionRateP[3];
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
+		xbee.send(tx);
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
 
 		potentialStream.getRejcTimer().startTimer();
 		potentialStream.setOnPath(true);
-		xbee.send(tx);
+
+		addPotentialStream(potentialStream, dataRate);
 
 	} else if (!myAddress.equals(sinkAddress)) {
 		//node affected but not node on path and not sink node.
+		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
+				rejcTimeoutLength, dataRate);
 		potentialStream.getRejcTimer().startTimer();
-
+		addPotentialStream(potentialStream, dataRate);
 	}
 
-	addPotentialStream(potentialStream, dataRate);
 }
 
 void AdmissionControl::handleREDJPacket(Rx64Response &response) {

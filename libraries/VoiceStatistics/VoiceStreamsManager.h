@@ -35,8 +35,6 @@ class VoiceStreamStatManager {
 		void getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop);
 
 		void removeStream(const XBeeAddress64& packetSource);
-		const vector<VoiceStreamStats> & getStreams() const;
-		void setStreams(const vector<VoiceStreamStats>& streams);
 		void sendPathPacket();
 		void calculateThroughput();
 		uint8_t getPayloadSize() const;
