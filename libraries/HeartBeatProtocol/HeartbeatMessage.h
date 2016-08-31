@@ -31,9 +31,9 @@ class HeartbeatMessage {
 	public:
 		HeartbeatMessage();
 
-		HeartbeatMessage(const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop, const uint8_t seqNum,
-				const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
-				const bool routeFlag);
+		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
+				const XBeeAddress64& myNextHop, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
+				const float neighborhoodCapacity, const bool routeFlag);
 
 		void generateBeatMessage(uint8_t payload[]);
 		void transcribeHeartbeatPacket(const Rx64Response& response);

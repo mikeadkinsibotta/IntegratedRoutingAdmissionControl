@@ -21,7 +21,7 @@ Neighbor::Neighbor() {
 
 }
 
-Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float neighborDataRate, uint8_t seqNum,
+Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float dataRate, uint8_t seqNum,
 		float qualityOfPath, float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress,
 		double relativeDistance, double rssi, unsigned long timeoutLength) {
 

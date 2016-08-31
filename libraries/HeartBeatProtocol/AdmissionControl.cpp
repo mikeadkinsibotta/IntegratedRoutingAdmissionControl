@@ -217,7 +217,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 		potentialStream.getRejcTimer().startTimer();
 		potentialStream.setOnPath(true);
-
 		addPotentialStream(potentialStream, dataRate);
 
 	} else if (!myAddress.equals(sinkAddress)) {

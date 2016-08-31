@@ -53,8 +53,8 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 		printNeighborHoodTable();
 	}
 
-	HeartbeatMessage message = HeartbeatMessage(sinkAddress, nextHop.getAddress(), seqNum, dataRate, qualityOfPath,
-			neighborhoodCapacity, routeFlag);
+	HeartbeatMessage message = HeartbeatMessage(myAddress, sinkAddress, nextHop.getAddress(), seqNum, dataRate,
+			qualityOfPath, neighborhoodCapacity, routeFlag);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 

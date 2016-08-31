@@ -19,11 +19,11 @@ HeartbeatMessage::HeartbeatMessage() {
 	rssi = 0;
 }
 
-HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& sinkAddress, const XBeeAddress64& myNextHop,
-		const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath, const float neighborhoodCapacity,
-		const bool routeFlag) {
+HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
+		const XBeeAddress64& myNextHop, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
+		const float neighborhoodCapacity, const bool routeFlag) {
 
-	this->senderAddress = XBeeAddress64();
+	this->senderAddress = senderAddress;
 	this->sinkAddress = sinkAddress;
 	this->myNextHop = myNextHop;
 	this->relativeDistance = 0.0;
