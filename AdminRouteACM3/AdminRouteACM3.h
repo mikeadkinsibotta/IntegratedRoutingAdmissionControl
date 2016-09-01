@@ -20,6 +20,8 @@ void broadcastHeartbeat();
 void sendVoicePacket();
 void sendInitPacket();
 void sendPathPacket();
+void runCalculateThroughput();
+void runInitialRestart();
 void arduinoSetup();
 void clearBuffer();
 void setupThreads();

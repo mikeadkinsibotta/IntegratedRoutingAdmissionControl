@@ -29,7 +29,9 @@ const unsigned long HEARTBEAT_INTERVAL = 10000;
 const unsigned long PATHLOSS_INTERVAL = 16000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
+const unsigned long INIT_MESSAGE_RESTART = 10000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
+bool NEXT_TIME = false;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -44,6 +46,7 @@ Thread responseThread = Thread();
 Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 Thread calculateThroughput = Thread();
+Thread initialRestart = Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
@@ -111,9 +114,23 @@ void sendVoicePacket() {
 	if (nextHop.equals(Neighbor())) {
 		SerialUSB.println("Lost NextHop");
 		generateVoice.enabled = false;
-		sendInital.enabled = true;
+		initialRestart.enabled = true;
 	} else {
 		voicePacketSender->generateVoicePacket();
+	}
+}
+
+void runInitialRestart() {
+
+	if (NEXT_TIME) {
+		SerialUSB.println("Countdown complete");
+		sendInital.enabled = true;
+		NEXT_TIME = false;
+		initialRestart.enabled = false;
+
+	} else {
+		SerialUSB.println("Starting 8 second countdown");
+		NEXT_TIME = true;
 	}
 }
 
@@ -219,10 +236,16 @@ void setupThreads() {
 	calculateThroughput.setInterval(CALCULATE_THROUGHPUT_INTERVAL);
 	calculateThroughput.onRun(runCalculateThroughput);
 
+	initialRestart.ThreadName = "Start initial restart";
+	initialRestart.enabled = false;
+	initialRestart.setInterval(INIT_MESSAGE_RESTART);
+	initialRestart.onRun(runInitialRestart);
+
 	controller.add(&responseThread);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
 	controller.add(&calculateThroughput);
 	controller.add(&generateVoice);
 	controller.add(&heartbeat);
+	controller.add(&initialRestart);
 }
