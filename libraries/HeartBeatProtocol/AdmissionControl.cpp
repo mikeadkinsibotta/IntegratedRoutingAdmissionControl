@@ -160,7 +160,6 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 		//sink node
-		SerialUSB.println("Recieved INT");
 		SerialUSB.print("Receiving request for new stream via: ");
 		receivedAddress.printAddressASCII(&SerialUSB);
 		SerialUSB.print("  Sender Address: ");

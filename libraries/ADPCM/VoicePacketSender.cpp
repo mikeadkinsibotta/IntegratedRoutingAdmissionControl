@@ -201,8 +201,6 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 				(uint32_t(response.getFrameData()[4]) << 24) + (uint32_t(response.getFrameData()[5]) << 16)
 						+ (uint16_t(response.getFrameData()[6]) << 8) + response.getFrameData()[7]);
 
-		SerialUSB.println("Received Data Packet");
-
 		voiceStreamStatManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
 		(*calculateThroughput).enabled = true;
