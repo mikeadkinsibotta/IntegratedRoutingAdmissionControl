@@ -37,7 +37,7 @@ XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
 VoicePacketSender * voicePacketSender;
 AdmissionControl * admissionControl;
-VoiceStreamStatManager * voiceStreamStatManager;
+VoiceStreamManager * voiceStreamManager;
 
 ThreadController controller = ThreadController();
 Thread heartbeat = Thread();
@@ -62,13 +62,13 @@ void setup() {
 	myAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
-	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
+	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
 			xbee);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, &calculateThroughput,
-			voiceStreamStatManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
+			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
 			TRACE_INTERVAL);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamStatManager,
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamManager,
 			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
 
@@ -141,11 +141,11 @@ void broadcastHeartbeat() {
 }
 
 void sendPathPacket() {
-	voiceStreamStatManager->sendPathPacket();
+	voiceStreamManager->sendPathPacket();
 }
 
 void runCalculateThroughput() {
-	voiceStreamStatManager->calculateThroughput();
+	voiceStreamManager->calculateThroughput();
 }
 
 void clearBuffer() {

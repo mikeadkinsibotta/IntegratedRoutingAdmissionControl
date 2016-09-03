@@ -7,25 +7,25 @@
  *      Author: mike
  */
 
-VoiceStreamStatManager::VoiceStreamStatManager() {
+VoiceStreamManager::VoiceStreamManager() {
 	xbee = XBee();
 	payloadSize = 0;
 	timeDifference = 0;
 }
 
-VoiceStreamStatManager::VoiceStreamStatManager(const uint8_t payloadSize) {
+VoiceStreamManager::VoiceStreamManager(const uint8_t payloadSize) {
 	xbee = XBee();
 	this->payloadSize = payloadSize;
 	timeDifference = 0;
 }
 
-VoiceStreamStatManager::VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize) {
+VoiceStreamManager::VoiceStreamManager(XBee& xbee, const uint8_t payloadSize) {
 	this->xbee = xbee;
 	this->payloadSize = payloadSize;
 	timeDifference = 0;
 }
 
-void VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
+void VoiceStreamManager::removeStream(const XBeeAddress64& packetSource) {
 	int i = 0;
 	bool found = false;
 	while (i < streams.size()) {
@@ -43,7 +43,7 @@ void VoiceStreamStatManager::removeStream(const XBeeAddress64& packetSource) {
 	}
 }
 
-void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
+void VoiceStreamManager::updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
 		const uint8_t * dataPtr) {
 
 	bool found = false;
@@ -65,7 +65,7 @@ void VoiceStreamStatManager::updateVoiceLoss(const XBeeAddress64& packetSource, 
 
 }
 
-void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& packetSource,
+void VoiceStreamManager::updateStreamsIntermediateNode(const XBeeAddress64& packetSource,
 		const XBeeAddress64& previousHop) {
 
 	bool found = false;
@@ -87,7 +87,7 @@ void VoiceStreamStatManager::updateStreamsIntermediateNode(const XBeeAddress64& 
 
 }
 
-void VoiceStreamStatManager::sendPathPacket() {
+void VoiceStreamManager::sendPathPacket() {
 
 	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
@@ -117,7 +117,7 @@ void VoiceStreamStatManager::sendPathPacket() {
 	}
 }
 
-void VoiceStreamStatManager::getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop) {
+void VoiceStreamManager::getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop) {
 
 	for (int i = 0; i < streams.size(); i++) {
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
@@ -127,7 +127,7 @@ void VoiceStreamStatManager::getStreamPreviousHop(const XBeeAddress64& packetSou
 	}
 }
 
-void VoiceStreamStatManager::calculateThroughput() {
+void VoiceStreamManager::calculateThroughput() {
 	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
 		if (setTimeDifference) {
 			timeDifference = (millis() / 1000.0);
@@ -137,6 +137,6 @@ void VoiceStreamStatManager::calculateThroughput() {
 	}
 }
 
-uint8_t VoiceStreamStatManager::getPayloadSize() const {
+uint8_t VoiceStreamManager::getPayloadSize() const {
 	return payloadSize;
 }

@@ -25,7 +25,7 @@ class VoicePacketSender {
 		ADPCM admcpm;
 		XBee xbee;
 		HeartbeatProtocol * heartbeatProtocol;
-		VoiceStreamStatManager * voiceStreamStatManager;
+		VoiceStreamManager * voiceStreamManager;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
@@ -51,7 +51,7 @@ class VoicePacketSender {
 	public:
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-				Thread * calculateThroughput, VoiceStreamStatManager * voiceStreamStatManager,
+				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager,
 				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
 				const float dupSetting, const uint8_t payloadSize, const uint8_t tracePacketInterval);
 		void generateVoicePacket();

@@ -24,7 +24,7 @@ class AdmissionControl {
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		HeartbeatProtocol * heartbeatProtocol;
-		VoiceStreamStatManager * voiceStreamStatManager;
+		VoiceStreamManager * voiceStreamManager;
 		VoicePacketSender * voicePacketSender;
 		unsigned long grantTimeoutLength;
 		unsigned long rejcTimeoutLength;
@@ -33,7 +33,7 @@ class AdmissionControl {
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-				HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
+				HeartbeatProtocol * heartbeatProtocol, VoiceStreamManager * voiceStreamManager,
 				VoicePacketSender * voicePacketSender, const unsigned long grantTimeoutLength,
 				const unsigned long rejcTimeoutLength);
 

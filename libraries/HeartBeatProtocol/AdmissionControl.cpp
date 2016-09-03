@@ -8,7 +8,7 @@
 
 AdmissionControl::AdmissionControl() {
 	heartbeatProtocol = 0;
-	voiceStreamStatManager = 0;
+	voiceStreamManager = 0;
 	voicePacketSender = 0;
 	grantTimeoutLength = 0;
 	rejcTimeoutLength = 0;
@@ -16,13 +16,13 @@ AdmissionControl::AdmissionControl() {
 }
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-		HeartbeatProtocol * heartbeatProtocol, VoiceStreamStatManager * voiceStreamStatManager,
+		HeartbeatProtocol * heartbeatProtocol, VoiceStreamManager * voiceStreamManager,
 		VoicePacketSender * voicePacketSender, const unsigned long grantTimeoutLength,
 		const unsigned long rejcTimeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
-	this->voiceStreamStatManager = voiceStreamStatManager;
+	this->voiceStreamManager = voiceStreamManager;
 	this->voicePacketSender = voicePacketSender;
 	this->xbee = xbee;
 	this->grantTimeoutLength = grantTimeoutLength;
@@ -156,7 +156,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	float dataRate = *dataRateP;
 
 	//remove any old streams
-	voiceStreamStatManager->removeStream(senderAddress);
+	voiceStreamManager->removeStream(senderAddress);
 
 	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
 		//sink node

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-class VoiceStreamStatManager {
+class VoiceStreamManager {
 
 	private:
 		vector<VoiceStreamStats> streams;
@@ -24,9 +24,9 @@ class VoiceStreamStatManager {
 		bool setTimeDifference = true;
 
 	public:
-		VoiceStreamStatManager();
-		VoiceStreamStatManager(const uint8_t payloadSize);
-		VoiceStreamStatManager(XBee& xbee, const uint8_t payloadSize);
+		VoiceStreamManager();
+		VoiceStreamManager(const uint8_t payloadSize);
+		VoiceStreamManager(XBee& xbee, const uint8_t payloadSize);
 
 		//void calcuateThroughput(const XBeeAddress64& packetSource);
 		void updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
