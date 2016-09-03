@@ -265,6 +265,16 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 				} else if (qop == path) {
 					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
 					double relativeDistanceNew = it->second.getRelativeDistanceAvg();
+
+//					SerialUSB.print("NeighborCurrent:");
+//					neighbor.getAddress().printAddressASCII(&SerialUSB);
+//					SerialUSB.print("   relativeDistanceCurrent:  ");
+//					SerialUSB.print(relativeDistanceCurrent);
+//					SerialUSB.print("   NeighborNew: ");
+//					it->first.printAddressASCII(&SerialUSB);
+//					SerialUSB.print("   relativeDistanceNew:  ");
+//					SerialUSB.println(relativeDistanceNew);
+
 					if (relativeDistanceCurrent > relativeDistanceNew) {
 						neighbor = it->second;
 					}
@@ -299,6 +309,22 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	unsigned long diff = timeStamp - previousTimeStamp;
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
+
+	//TODO check for paths with better qob and check for paths with fewer hops.
+	SerialUSB.println("Checking neighbors for better path...");
+
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+
+		//check if neighbor has a path
+		if (it->second.isRouteFlag()) {
+			SerialUSB.print("Neighbor: ");
+			it->first.printAddressASCII(&SerialUSB);
+			SerialUSB.println(" has route");
+
+		}
+
+	}
 
 //SerialUSB.print("  Difference from last timeStamp:  ");
 //

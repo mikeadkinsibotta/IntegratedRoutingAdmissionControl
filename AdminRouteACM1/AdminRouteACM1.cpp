@@ -5,7 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
-#define SENDER true
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -164,7 +164,7 @@ void listenForResponses() {
 		xbee.getResponse().getRx64Response(response);
 		uint8_t* data = response.getData();
 
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 2.50) {
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 1.00) {
 
 			switch (data[0]) {
 				case 'B':
