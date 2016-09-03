@@ -120,19 +120,19 @@ void sendVoicePacket() {
 	}
 }
 
-void runInitialRestart() {
-
-	if (NEXT_TIME) {
-		SerialUSB.println("Countdown complete");
-		sendInital.enabled = true;
-		NEXT_TIME = false;
-		initialRestart.enabled = false;
-
-	} else {
-		SerialUSB.println("Starting 8 second countdown");
-		NEXT_TIME = true;
-	}
-}
+//void runInitialRestart() {
+//
+//	if (NEXT_TIME) {
+//		SerialUSB.println("Countdown complete");
+//		sendInital.enabled = true;
+//		NEXT_TIME = false;
+//		initialRestart.enabled = false;
+//
+//	} else {
+//		SerialUSB.println("Starting 8 second countdown");
+//		NEXT_TIME = true;
+//	}
+//}
 
 void broadcastHeartbeat() {
 	if (millis() > 10000) {
@@ -236,10 +236,10 @@ void setupThreads() {
 	calculateThroughput.setInterval(CALCULATE_THROUGHPUT_INTERVAL);
 	calculateThroughput.onRun(runCalculateThroughput);
 
-	initialRestart.ThreadName = "Start initial restart";
-	initialRestart.enabled = false;
-	initialRestart.setInterval(INIT_MESSAGE_RESTART);
-	initialRestart.onRun(runInitialRestart);
+//	initialRestart.ThreadName = "Start initial restart";
+//	initialRestart.enabled = false;
+//	initialRestart.setInterval(INIT_MESSAGE_RESTART);
+//	initialRestart.onRun(runInitialRestart);
 
 	controller.add(&responseThread);
 	controller.add(&sendInital);
@@ -247,5 +247,5 @@ void setupThreads() {
 	controller.add(&calculateThroughput);
 	controller.add(&generateVoice);
 	controller.add(&heartbeat);
-	controller.add(&initialRestart);
+	//controller.add(&initialRestart);
 }
