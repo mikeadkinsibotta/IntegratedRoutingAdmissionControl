@@ -23,6 +23,7 @@ void sendPathPacket();
 void arduinoSetup();
 void clearBuffer();
 void setupThreads();
+void debugHeartbeat();
 
 //Do not add code below this line
 #endif /* _AdminRoute1_H_ */

@@ -25,10 +25,11 @@ const uint8_t TRACE_INTERVAL = 2000;
 const unsigned long REQUEST_STREAM = 1000;
 const unsigned long GRANT_TIMEOUT_LENGTH = 100;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
-const unsigned long HEARTBEAT_INTERVAL = 10000;
+const unsigned long HEARTBEAT_INTERVAL = 500;
 const unsigned long PATHLOSS_INTERVAL = 16000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
+const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -44,6 +45,7 @@ Thread responseThread = Thread();
 Thread pathLoss = Thread();
 Thread generateVoice = Thread();
 Thread calculateThroughput = Thread();
+Thread * debugHeartbeatTable = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
@@ -121,6 +123,10 @@ void broadcastHeartbeat() {
 	if (millis() > 10000) {
 		heartbeatProtocol->broadcastHeartBeat();
 	}
+}
+
+void debugHeartbeat() {
+	heartbeatProtocol->printNeighborHoodTable();
 }
 
 void sendPathPacket() {
@@ -219,10 +225,16 @@ void setupThreads() {
 	calculateThroughput.setInterval(CALCULATE_THROUGHPUT_INTERVAL);
 	calculateThroughput.onRun(runCalculateThroughput);
 
+	(*debugHeartbeatTable).ThreadName = "Debug Heartbeat";
+	(*debugHeartbeatTable).enabled = false;
+	(*debugHeartbeatTable).setInterval(DEBUG_HEARTBEAT_TABLE);
+	(*debugHeartbeatTable).onRun(debugHeartbeat);
+
 	controller.add(&responseThread);
 	controller.add(&sendInital);
 	controller.add(&pathLoss);
 	controller.add(&calculateThroughput);
 	controller.add(&generateVoice);
 	controller.add(&heartbeat);
+	controller.add(debugHeartbeatTable);
 }
