@@ -265,16 +265,6 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 				} else if (qop == path) {
 					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
 					double relativeDistanceNew = it->second.getRelativeDistanceAvg();
-
-//					SerialUSB.print("NeighborCurrent:");
-//					neighbor.getAddress().printAddressASCII(&SerialUSB);
-//					SerialUSB.print("   relativeDistanceCurrent:  ");
-//					SerialUSB.print(relativeDistanceCurrent);
-//					SerialUSB.print("   NeighborNew: ");
-//					it->first.printAddressASCII(&SerialUSB);
-//					SerialUSB.print("   relativeDistanceNew:  ");
-//					SerialUSB.println(relativeDistanceNew);
-
 					if (relativeDistanceCurrent > relativeDistanceNew) {
 						neighbor = it->second;
 					}
