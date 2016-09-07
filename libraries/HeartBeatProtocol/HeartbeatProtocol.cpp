@@ -250,7 +250,6 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 				if (it->second.isRouteFlag() && it->first.equals(manipulateAddress)) {
 					qualityOfPath = neighborHoodSize + it->second.getQualityOfPath();
-					qualityOfPath = qop;
 					nextHop = it->second;
 					routeFlag = true;
 					return;
@@ -290,7 +289,12 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
-//Add 1 to include myself
+//TODO
+	/*Quality of path is not union as described in proposal.  If we have
+	 * a path in which two nodes both affect the same neighbor node we count
+	 * that neighborn node twice.  We don't union.  Union would eliminate duplicate nodes and only count
+	 * the neighbor once.
+	 */
 
 //Neighbor is already selected.  Should I make some adjustments?
 //SerialUSB.print("Should I adjust my nextHop neighbor?  ");
@@ -300,20 +304,41 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
+	//Check quality of path
+	//Add 1 to include myself
+	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
+
+	//Get qop for nextHop
+	uint8_t nextHopQop = nextHop.getQualityOfPath();
+
+	//Update my own quality of path
+	uint8_t currentQop = neighborHoodSize + nextHopQop;
+
 	//TODO check for paths with better qob and check for paths with fewer hops.
 	SerialUSB.println("Checking neighbors for better path...");
 
-	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
-			++it) {
+	//Don't make any changes if manipulate flag is on.
+	if (!manipulate) {
 
-		//check if neighbor has a path
-		if (it->second.isRouteFlag()) {
-			SerialUSB.print("Neighbor: ");
-			it->first.printAddressASCII(&SerialUSB);
-			SerialUSB.println(" has route");
+		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+				++it) {
 
+			//check if neighbor has a path first
+			if (it->second.isRouteFlag()) {
+				SerialUSB.print("Neighbor: ");
+				it->first.printAddressASCII(&SerialUSB);
+				SerialUSB.println(" has route");
+
+				//check if this route has lower qop
+				//if it has a lower qop switch
+				uint8_t qopForThisPath = neighborHoodSize + it->second.getQualityOfPath();
+				if (qualityOfPath > qopForThisPath) {
+					nextHop = it->second;
+				} else if (qualityOfPath == qopForThisPath) {
+
+				}
+			}
 		}
-
 	}
 
 //SerialUSB.print("  Difference from last timeStamp:  ");
