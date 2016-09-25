@@ -25,6 +25,7 @@ class Neighbor {
 		float neighborhoodCapacity;
 		float packetLoss;
 		uint8_t seqNum;
+		uint8_t hopsToSink;
 		uint8_t qualityOfPath;
 		bool routeFlag;
 		deque<double> relativeDistanceQueue;
@@ -38,7 +39,7 @@ class Neighbor {
 		Neighbor();
 		Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float dataRate, uint8_t seqNum,
 				float qualityOfPath, float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress,
-				double relativeDistance, double rssi, unsigned long timeoutLength);
+				double relativeDistance, double rssi, unsigned long timeoutLength, const uint8_t hopsToSink);
 
 		const XBeeAddress64& getAddress() const;
 		void setAddress(const XBeeAddress64& address);
@@ -70,6 +71,8 @@ class Neighbor {
 		void setRssi(double rssi);
 		const XBeeAddress64& getNextHop() const;
 		void setNextHop(const XBeeAddress64& nextHop);
+		uint8_t getHopsToSink() const;
+		void setHopsToSink(uint8_t hopsToSink);
 };
 
 #endif

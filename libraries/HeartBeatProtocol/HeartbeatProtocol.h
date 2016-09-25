@@ -36,6 +36,7 @@ class HeartbeatProtocol {
 		float dataRate;
 		float neighborhoodCapacity;
 		Saturation satT[4];
+		uint8_t hopsToSink;
 		unsigned long timeoutLength;
 
 		void buildSaturationTable();

@@ -10,7 +10,7 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define DEBUG false
 
-const uint8_t HEARTBEAT_PAYLOAD_SIZE = 32;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 33;
 const float MAX_FLT = 9999.0;
 const float EPISLON = 0.001;
 
@@ -23,6 +23,10 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	timeoutLength = 0;
 	buildSaturationTable();
 	nextHop = Neighbor();
+	hopsToSink = 0;
+	SerialUSB.print(", Initial HopsToSink: ");
+	SerialUSB.println(hopsToSink);
+
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
@@ -40,11 +44,17 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
 	nextHop = Neighbor();
+	hopsToSink = 0;
+
+	SerialUSB.print(", Initial HopsToSink: ");
+	SerialUSB.println(hopsToSink);
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
 	}
 	buildSaturationTable();
+	SerialUSB.print("HopsToSink1: ");
+	SerialUSB.println(hopsToSink);
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
@@ -53,8 +63,11 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 		printNeighborHoodTable();
 	}
 
+	SerialUSB.print("HopsToSink2: ");
+	SerialUSB.println(hopsToSink);
+
 	HeartbeatMessage message = HeartbeatMessage(myAddress, sinkAddress, nextHop.getAddress(), seqNum, dataRate,
-			qualityOfPath, neighborhoodCapacity, routeFlag);
+			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 
@@ -104,6 +117,9 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
+	SerialUSB.print("HopsToSink3: ");
+	SerialUSB.println(hopsToSink);
+
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);
 
@@ -130,7 +146,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getDataRate(), heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
-				timeoutLength);
+				timeoutLength, heartbeatMessage.getHopsToSink());
 		neighborhoodTable.insert(pair<XBeeAddress64, Neighbor>(neighbor.getAddress(), neighbor));
 	}
 
@@ -142,14 +158,6 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 
 bool HeartbeatProtocol::isNeighbor(const XBeeAddress64 &address) {
 	return neighborhoodTable.find(address) != neighborhoodTable.end();
-
-//	for (int i = 0; i < neighborhoodTable.size(); i++) {
-//		if (neighborhoodTable.at(i).getAddress().equals(address)) {
-//			return true;
-//		}
-//	}
-//
-//	return false;
 }
 
 void HeartbeatProtocol::purgeNeighborhoodTable() {
@@ -190,6 +198,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.print(dataRate);
 	SerialUSB.print(", SeqNum: ");
 	SerialUSB.print(seqNum);
+	SerialUSB.print(", HopsToSink: ");
+	SerialUSB.print(hopsToSink);
 	SerialUSB.print(", QualityOfPath: ");
 	SerialUSB.print(qualityOfPath);
 	SerialUSB.print(", NeighborhoodCapacity: ");
@@ -211,6 +221,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(it->second.getDataRate());
 		SerialUSB.print(", SeqNum: ");
 		SerialUSB.print(it->second.getSeqNum());
+		SerialUSB.print(", HopsToSink: ");
+		SerialUSB.print(it->second.getHopsToSink());
 		SerialUSB.print(", QualityOfPath: ");
 		SerialUSB.print(it->second.getQualityOfPath());
 		SerialUSB.print(", NeighborhoodCapacity: ");
@@ -289,10 +301,10 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
-//TODO
+	//TODO
 	/*Quality of path is not union as described in proposal.  If we have
 	 * a path in which two nodes both affect the same neighbor node we count
-	 * that neighborn node twice.  We don't union.  Union would eliminate duplicate nodes and only count
+	 * that neighbor node twice.  We don't union.  Union would eliminate duplicate nodes and only count
 	 * the neighbor once.
 	 */
 
@@ -398,6 +410,7 @@ void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessa
 	neighbor->addToRelativeDistance(heartbeatMessage.getRelativeDistance());
 	neighbor->setRssi(heartbeatMessage.getRssi());
 	neighbor->updateTimeStamp();
+	neighbor->setHopsToSink(heartbeatMessage.getHopsToSink());
 
 }
 
