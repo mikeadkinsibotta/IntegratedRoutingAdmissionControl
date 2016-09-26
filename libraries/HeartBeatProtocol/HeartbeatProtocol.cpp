@@ -110,6 +110,10 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);
 
+	if (message.getSenderAddress().equals(nextHop.getAddress())) {
+		hopsToSink = message.getHopsToSink() + 1;
+	}
+
 	updateNeighborHoodTable(message);
 	reCalculateNeighborhoodCapacity();
 
