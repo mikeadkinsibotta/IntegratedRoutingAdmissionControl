@@ -24,8 +24,6 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	buildSaturationTable();
 	nextHop = Neighbor();
 	hopsToSink = 0;
-	SerialUSB.print(", Initial HopsToSink: ");
-	SerialUSB.println(hopsToSink);
 
 }
 
@@ -46,15 +44,10 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	nextHop = Neighbor();
 	hopsToSink = 0;
 
-	SerialUSB.print(", Initial HopsToSink: ");
-	SerialUSB.println(hopsToSink);
-
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
 	}
 	buildSaturationTable();
-	SerialUSB.print("HopsToSink1: ");
-	SerialUSB.println(hopsToSink);
 }
 
 void HeartbeatProtocol::broadcastHeartBeat() {
@@ -62,9 +55,6 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 	if (DEBUG) {
 		printNeighborHoodTable();
 	}
-
-	SerialUSB.print("HopsToSink2: ");
-	SerialUSB.println(hopsToSink);
 
 	HeartbeatMessage message = HeartbeatMessage(myAddress, sinkAddress, nextHop.getAddress(), seqNum, dataRate,
 			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink);
@@ -116,9 +106,6 @@ void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
 }
 
 void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
-
-	SerialUSB.print("HopsToSink3: ");
-	SerialUSB.println(hopsToSink);
 
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);

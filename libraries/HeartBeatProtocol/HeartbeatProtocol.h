@@ -35,7 +35,7 @@ class HeartbeatProtocol {
 		uint8_t qualityOfPath;
 		float dataRate;
 		float neighborhoodCapacity;
-		Saturation satT[4];
+		Saturation satT[5];
 		uint8_t hopsToSink;
 		unsigned long timeoutLength;
 
