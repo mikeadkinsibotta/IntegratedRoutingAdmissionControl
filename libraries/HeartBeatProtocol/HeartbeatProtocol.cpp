@@ -24,7 +24,6 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	buildSaturationTable();
 	nextHop = Neighbor();
 	hopsToSink = 0;
-
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
