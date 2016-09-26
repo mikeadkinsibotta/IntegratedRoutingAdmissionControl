@@ -333,11 +333,12 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
 				//check if this route has lower qop
 				//if it has a lower qop switch
+				//if the qop is the same pick the neighbor with the lower number of hops
 				uint8_t qopForThisPath = neighborHoodSize + it->second.getQualityOfPath();
 				if (qualityOfPath > qopForThisPath) {
 					nextHop = it->second;
-				} else if (qualityOfPath == qopForThisPath) {
-
+				} else if (qualityOfPath == qopForThisPath && it->second.getHopsToSink() < hopsToSink) {
+					nextHop = it->second;
 				}
 			}
 		}
