@@ -317,7 +317,7 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	uint8_t currentQop = neighborHoodSize + nextHopQop;
 
 	//TODO check for paths with better qob and check for paths with fewer hops.
-	SerialUSB.println("Checking neighbors for better path...");
+	//SerialUSB.println("Checking neighbors for better path...");
 
 	//Don't make any changes if manipulate flag is on.
 	if (!manipulate) {
@@ -327,9 +327,9 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
 			//check if neighbor has a path first
 			if (it->second.isRouteFlag()) {
-				SerialUSB.print("Neighbor: ");
-				it->first.printAddressASCII(&SerialUSB);
-				SerialUSB.println(" has route");
+				//SerialUSB.print("Neighbor: ");
+				//it->first.printAddressASCII(&SerialUSB);
+				//SerialUSB.println(" has route");
 
 				//check if this route has lower qop
 				//if it has a lower qop switch
@@ -337,7 +337,7 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 				uint8_t qopForThisPath = neighborHoodSize + it->second.getQualityOfPath();
 				if (qualityOfPath > qopForThisPath) {
 					nextHop = it->second;
-				} else if (qualityOfPath == qopForThisPath && it->second.getHopsToSink() < hopsToSink) {
+				} else if (qualityOfPath == qopForThisPath && nextHop.getHopsToSink() > it->second.getHopsToSink()) {
 					nextHop = it->second;
 				}
 			}
