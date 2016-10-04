@@ -39,12 +39,12 @@ AdmissionControl * admissionControl;
 VoiceStreamManager * voiceStreamManager;
 
 ThreadController controller = ThreadController();
-Thread heartbeat = Thread();
-Thread sendInital = Thread();
-Thread responseThread = Thread();
-Thread pathLoss = Thread();
-Thread generateVoice = Thread();
-Thread calculateThroughput = Thread();
+Thread * heartbeat = new Thread();
+Thread * sendInital = new Thread();
+Thread * responseThread = new Thread();
+Thread * pathLoss = new Thread();
+Thread * generateVoice = new Thread();
+Thread * calculateThroughput = new Thread();
 Thread * debugHeartbeatTable = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
@@ -64,7 +64,7 @@ void setup() {
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
 			xbee);
-	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, &pathLoss, &calculateThroughput,
+	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
 			TRACE_INTERVAL);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamManager,
@@ -112,8 +112,8 @@ void sendVoicePacket() {
 	Neighbor nextHop = heartbeatProtocol->getNextHop();
 	if (nextHop.equals(Neighbor())) {
 		SerialUSB.println("Lost NextHop");
-		generateVoice.enabled = false;
-		sendInital.enabled = true;
+		(*generateVoice).enabled = false;
+		(*sendInital).enabled = true;
 	} else {
 		voicePacketSender->generateVoicePacket();
 	}
@@ -171,7 +171,7 @@ void listenForResponses() {
 					admissionControl->handleREDJPacket(response);
 					break;
 				case 'G':
-					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
+					admissionControl->handleGRANTPacket(response, (*sendInital).enabled, (*generateVoice).enabled);
 					break;
 				case 'T':
 					voicePacketSender->handleTracePacket(response);
@@ -190,51 +190,51 @@ void listenForResponses() {
 
 void setupThreads() {
 
-	responseThread.ThreadName = "Packet Listener";
-	responseThread.enabled = true;
-	responseThread.setInterval(1);
-	responseThread.onRun(listenForResponses);
+	(*responseThread).ThreadName = "Packet Listener";
+	(*responseThread).enabled = true;
+	(*responseThread).setInterval(1);
+	(*responseThread).onRun(listenForResponses);
 
-	heartbeat.ThreadName = "Broadcast Heartbeat";
-	heartbeat.enabled = true;
-	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(200));
-	heartbeat.onRun(broadcastHeartbeat);
-	heartbeatProtocol->setTimeoutLength((heartbeat.getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
+	(*heartbeat).ThreadName = "Broadcast Heartbeat";
+	(*heartbeat).enabled = true;
+	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
+	(*heartbeat).onRun(broadcastHeartbeat);
+	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
-	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = false;
-	pathLoss.setInterval(PATHLOSS_INTERVAL + random(200));
-	pathLoss.onRun(sendPathPacket);
+	(*pathLoss).ThreadName = "Send Path Loss";
+	(*pathLoss).enabled = false;
+	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
+	(*pathLoss).onRun(sendPathPacket);
 
-	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = false;
-	generateVoice.setInterval(VOICE_DATA_INTERVAL);
-	generateVoice.onRun(sendVoicePacket);
+	(*generateVoice).ThreadName = "Send Voice Data";
+	(*generateVoice).enabled = false;
+	(*generateVoice).setInterval(VOICE_DATA_INTERVAL);
+	(*generateVoice).onRun(sendVoicePacket);
 
-	sendInital.ThreadName = "Send Voice Data";
+	(*sendInital).ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendInital.enabled = true;
+		(*sendInital).enabled = true;
 	} else {
-		sendInital.enabled = false;
+		(*sendInital).enabled = false;
 	}
-	sendInital.setInterval(REQUEST_STREAM);
-	sendInital.onRun(sendInitPacket);
+	(*sendInital).setInterval(REQUEST_STREAM);
+	(*sendInital).onRun(sendInitPacket);
 
-	calculateThroughput.ThreadName = "Calculate Throughput";
-	calculateThroughput.enabled = false;
-	calculateThroughput.setInterval(CALCULATE_THROUGHPUT_INTERVAL);
-	calculateThroughput.onRun(runCalculateThroughput);
+	(*calculateThroughput).ThreadName = "Calculate Throughput";
+	(*calculateThroughput).enabled = false;
+	(*calculateThroughput).setInterval(CALCULATE_THROUGHPUT_INTERVAL);
+	(*calculateThroughput).onRun(runCalculateThroughput);
 
 	(*debugHeartbeatTable).ThreadName = "Debug Heartbeat";
 	(*debugHeartbeatTable).enabled = false;
 	(*debugHeartbeatTable).setInterval(DEBUG_HEARTBEAT_TABLE);
 	(*debugHeartbeatTable).onRun(debugHeartbeat);
 
-	controller.add(&responseThread);
-	controller.add(&sendInital);
-	controller.add(&pathLoss);
-	controller.add(&calculateThroughput);
-	controller.add(&generateVoice);
-	controller.add(&heartbeat);
+	controller.add(responseThread);
+	controller.add(sendInital);
+	controller.add(pathLoss);
+	controller.add(calculateThroughput);
+	controller.add(generateVoice);
+	controller.add(heartbeat);
 	controller.add(debugHeartbeatTable);
 }
