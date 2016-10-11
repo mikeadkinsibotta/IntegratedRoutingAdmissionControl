@@ -344,20 +344,18 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 		}
 	}
 
-//SerialUSB.print("  Difference from last timeStamp:  ");
+//	SerialUSB.print("  Difference from last timeStamp:  ");
+//	SerialUSB.print(diff);
+//	SerialUSB.print(" seconds   ");
+//	SerialUSB.print("Difference distance: ");
+//	SerialUSB.print(distanceDiff);
 //
-//SerialUSB.print(diff);
-//SerialUSB.print(" seconds   ");
-
-//SerialUSB.print("Difference distance: ");
-//SerialUSB.print(distanceDiff);
-
-	/*	if (abs(diff - 0) > EPISLON) {
-	 double speed = distanceDiff / diff;
-	 SerialUSB.print("   Speed: ");
-	 SerialUSB.print(speed, 12);
-	 SerialUSB.println(" mps");
-	 }*/
+//	if (abs(diff - 0) > EPISLON) {
+//		double speed = distanceDiff / diff;
+//		SerialUSB.print("   Speed: ");
+//		SerialUSB.print(speed, 12);
+//		SerialUSB.println(" mps");
+//	}
 }
 
 void HeartbeatProtocol::buildSaturationTable() {

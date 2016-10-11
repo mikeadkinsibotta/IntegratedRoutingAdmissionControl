@@ -17,7 +17,7 @@
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 2;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
@@ -30,6 +30,7 @@ const unsigned long PATHLOSS_INTERVAL = 16000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
+const float DISTANCE_THRESHOLD = 0.95;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -152,7 +153,7 @@ void listenForResponses() {
 		xbee.getResponse().getRx64Response(response);
 		uint8_t* data = response.getData();
 
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < 0.90) {
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < DISTANCE_THRESHOLD) {
 
 			switch (data[0]) {
 				case 'B':
