@@ -41,10 +41,12 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->neighborhoodCapacity = MAX_FLT;
 	timeoutLength = 0;
 	nextHop = Neighbor();
+	digitalWrite(13, HIGH);
 	hopsToSink = 0;
 
 	if (myAddress.equals(sinkAddress)) {
 		routeFlag = true;
+		digitalWrite(13, LOW);
 	}
 	buildSaturationTable();
 }
@@ -164,7 +166,9 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 				SerialUSB.println();
 				if (it->first.equals(nextHop.getAddress())) {
 					nextHop = Neighbor();
+					routeFlag = false;
 					SerialUSB.println("NextHop Purged");
+					digitalWrite(13, HIGH);
 				}
 
 				neighborhoodTable.erase(it++);
@@ -226,7 +230,7 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		SerialUSB.print(", RSSI: ");
 		SerialUSB.print(it->second.getRssi());
 		SerialUSB.print(", RelativeDistanceAvg: ");
-		SerialUSB.println(it->second.getRelativeDistanceAvg(), 12);
+		SerialUSB.println(it->second.getRelativeDistanceAvg(), 4);
 
 	}
 	SerialUSB.println();
@@ -240,6 +244,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 	Neighbor neighbor;
 
 	if (nextHop.equals(Neighbor())) {
+		digitalWrite(13, HIGH);
 		SerialUSB.println("I need a nextHop!");
 		/*If no neighbor is currently selected:
 		 * - Pick neighbor with smallest quality of path
@@ -254,6 +259,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 					qualityOfPath = neighborHoodSize + it->second.getQualityOfPath();
 					nextHop = it->second;
 					routeFlag = true;
+					digitalWrite(13, LOW);
 					return;
 				}
 			} else if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
@@ -279,12 +285,14 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		qualityOfPath = qop;
 		nextHop = neighbor;
 		routeFlag = true;
+		digitalWrite(13, LOW);
 
 	} else {
 		//reset path if path does not exist
 		qualityOfPath = 0;
 		nextHop = Neighbor();
 		routeFlag = false;
+		digitalWrite(13, HIGH);
 	}
 
 }
