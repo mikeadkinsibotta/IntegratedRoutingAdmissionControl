@@ -22,15 +22,15 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
-const unsigned long REQUEST_STREAM = 1000;
-const unsigned long GRANT_TIMEOUT_LENGTH = 100;
+const unsigned long REQUEST_STREAM = 100;
+const unsigned long GRANT_TIMEOUT_LENGTH = 50;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
-const unsigned long HEARTBEAT_INTERVAL = 1000;
+const unsigned long HEARTBEAT_INTERVAL = 500;
 const unsigned long PATHLOSS_INTERVAL = 16000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 1.00;
+const float DISTANCE_THRESHOLD = 2.40;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
@@ -111,11 +111,7 @@ void sendInitPacket() {
 
 void sendVoicePacket() {
 	Neighbor nextHop = heartbeatProtocol->getNextHop();
-	if (nextHop.equals(Neighbor())) {
-		SerialUSB.println("Lost NextHop");
-		(*generateVoice).enabled = false;
-		(*sendInital).enabled = true;
-	} else {
+	if (!nextHop.equals(Neighbor())) {
 		voicePacketSender->generateVoicePacket();
 	}
 }

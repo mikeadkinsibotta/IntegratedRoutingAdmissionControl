@@ -161,10 +161,11 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 				SerialUSB.print("Neighbor: ");
 				it->first.printAddressASCII(&SerialUSB);
 				SerialUSB.println(" timer has expired and is purged.");
-				SerialUSB.print("Nexthop Address: ");
-				nextHop.getAddress().printAddressASCII(&SerialUSB);
-				SerialUSB.println();
+
 				if (it->first.equals(nextHop.getAddress())) {
+					SerialUSB.print("Nexthop Address: ");
+					nextHop.getAddress().printAddressASCII(&SerialUSB);
+					SerialUSB.println();
 					nextHop = Neighbor();
 					routeFlag = false;
 					SerialUSB.println("NextHop Purged");
