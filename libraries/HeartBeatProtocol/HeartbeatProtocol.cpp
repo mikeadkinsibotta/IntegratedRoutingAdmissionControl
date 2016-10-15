@@ -271,15 +271,18 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 				}
 			} else if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
 				uint8_t path = neighborHoodSize + it->second.getQualityOfPath();
-
+				bool isgeneratingData = it->second.isGenerateData();
 				if (path < qop) {
 					qop = path;
-					neighbor = it->second;
+					if (neighbor.equals(Neighbor()) || !isgeneratingData) {
+						neighbor = it->second;
+					}
 
 				} else if (qop == path) {
 					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
 					double relativeDistanceNew = it->second.getRelativeDistanceAvg();
-					if (relativeDistanceCurrent > relativeDistanceNew) {
+					if (relativeDistanceCurrent > relativeDistanceNew
+							&& (neighbor.equals(Neighbor()) || !isgeneratingData)) {
 						neighbor = it->second;
 					}
 				}
@@ -341,7 +344,8 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 				++it) {
 
 			//check if neighbor has a path first
-			if (it->second.isRouteFlag()) {
+			//make sure that this next hop is also not generating data
+			if (it->second.isRouteFlag() && (!it->second.isGenerateData() && nextHop.isGenerateData())) {
 				//SerialUSB.print("Neighbor: ");
 				//it->first.printAddressASCII(&SerialUSB);
 				//SerialUSB.println(" has route");

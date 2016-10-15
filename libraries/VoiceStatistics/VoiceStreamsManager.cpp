@@ -74,6 +74,7 @@ void VoiceStreamManager::updateStreamsIntermediateNode(const XBeeAddress64& pack
 		//SerialUSB.println("Old Stream");
 
 		if (streams.at(i).getSenderAddress().equals(packetSource)) {
+			streams.at(i).setUpStreamNeighborAddress(previousHop);
 			found = true;
 			break;
 		}
@@ -91,6 +92,7 @@ void VoiceStreamManager::sendPathPacket() {
 
 	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
+		SerialUSB.println("Sending Path packet");
 		const XBeeAddress64 &dataSenderAddress = it->getSenderAddress();
 		const uint8_t dataLoss = it->getPacketLoss();
 		const uint8_t totalPacketsSent = it->getTotalPacketsSent();
