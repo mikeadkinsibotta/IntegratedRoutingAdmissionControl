@@ -19,6 +19,7 @@ Neighbor::Neighbor() {
 	timeoutLength = 0;
 	previousRelativeDistance = 0;
 	hopsToSink = 0;
+	generateData = 0;
 
 }
 
