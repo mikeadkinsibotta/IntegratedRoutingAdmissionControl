@@ -168,13 +168,13 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	uint8_t * dataPtr = response.getData();
 
+	previousHop = response.getRemoteAddress64();
+
 	packetDestination.setMsb(
 			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
 
 	packetDestination.setLsb(
 			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
-
-	previousHop = response.getRemoteAddress64();
 
 	packetSource.setMsb(
 			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
