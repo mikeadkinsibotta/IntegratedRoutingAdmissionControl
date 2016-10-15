@@ -28,13 +28,15 @@ class HeartbeatMessage {
 		float neighborhoodCapacity;
 		bool routeFlag;
 		uint8_t hopsToSink;
+		bool generateData;
 
 	public:
 		HeartbeatMessage();
 
 		HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
 				const XBeeAddress64& myNextHop, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
-				const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink);
+				const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink,
+				const bool generateData);
 
 		void generateBeatMessage(uint8_t payload[]);
 		void transcribeHeartbeatPacket(const Rx64Response& response);
@@ -69,6 +71,7 @@ class HeartbeatMessage {
 		void setMyNextHop(const XBeeAddress64& myNextHop);
 		uint8_t getHopsToSink() const;
 		void setHopsToSink(uint8_t hopsToSink);
+		bool isGenerateData() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATMESSAGE_H_ */

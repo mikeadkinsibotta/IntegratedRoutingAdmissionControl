@@ -10,7 +10,7 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define DEBUG false
 
-const uint8_t HEARTBEAT_PAYLOAD_SIZE = 33;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 34;
 const float MAX_FLT = 9999.0;
 const float EPISLON = 0.001;
 
@@ -27,11 +27,12 @@ HeartbeatProtocol::HeartbeatProtocol() {
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
-		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAdress, XBee& xbee) {
+		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
+		const bool generateData) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
-	this->sinkAddress = sinkAdress;
+	this->sinkAddress = sinkAddress;
 	this->routeFlag = false;
 	this->broadcastAddress = broadcastAddress;
 	this->manipulateAddress = manipulateAddress;
@@ -39,6 +40,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->qualityOfPath = 0;
 	this->dataRate = 0;
 	this->neighborhoodCapacity = MAX_FLT;
+	this->generateData = generateData;
 	timeoutLength = 0;
 	nextHop = Neighbor();
 	digitalWrite(13, HIGH);
@@ -58,7 +60,7 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 	}
 
 	HeartbeatMessage message = HeartbeatMessage(myAddress, sinkAddress, nextHop.getAddress(), seqNum, dataRate,
-			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink);
+			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink, generateData);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 
@@ -138,7 +140,7 @@ void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbea
 				heartbeatMessage.getDataRate(), heartbeatMessage.getSeqNum(), heartbeatMessage.getQualityOfPath(),
 				heartbeatMessage.getNeighborhoodCapacity(), heartbeatMessage.isRouteFlag(),
 				heartbeatMessage.getSinkAddress(), heartbeatMessage.getRelativeDistance(), heartbeatMessage.getRssi(),
-				timeoutLength, heartbeatMessage.getHopsToSink());
+				timeoutLength, heartbeatMessage.getHopsToSink(), heartbeatMessage.isGenerateData());
 		neighborhoodTable.insert(pair<XBeeAddress64, Neighbor>(neighbor.getAddress(), neighbor));
 	}
 
@@ -201,6 +203,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 	SerialUSB.print(neighborhoodCapacity);
 	SerialUSB.print(", RouteFlag: ");
 	SerialUSB.print(routeFlag);
+	SerialUSB.print(", GenerateData: ");
+	SerialUSB.print(generateData);
 	SerialUSB.print(", SinkAddress: ");
 	sinkAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(", NextHopAddress: ");
@@ -230,6 +234,8 @@ void HeartbeatProtocol::printNeighborHoodTable() {
 		it->second.getNextHop().printAddressASCII(&SerialUSB);
 		SerialUSB.print(", RSSI: ");
 		SerialUSB.print(it->second.getRssi());
+		SerialUSB.print(", GenerateData: ");
+		SerialUSB.print(it->second.isGenerateData());
 		SerialUSB.print(", RelativeDistanceAvg: ");
 		SerialUSB.println(it->second.getRelativeDistanceAvg(), 4);
 
@@ -409,6 +415,7 @@ void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessa
 	neighbor->setRssi(heartbeatMessage.getRssi());
 	neighbor->updateTimeStamp();
 	neighbor->setHopsToSink(heartbeatMessage.getHopsToSink());
+	neighbor->setGenerateData(heartbeatMessage.isGenerateData());
 
 }
 

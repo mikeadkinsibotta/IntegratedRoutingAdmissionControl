@@ -64,7 +64,7 @@ void setup() {
 
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
-			xbee);
+			xbee, SENDER);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
 			TRACE_INTERVAL);

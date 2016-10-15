@@ -64,7 +64,7 @@ void setup() {
 
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
-			xbee);
+			xbee, SENDER);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
 			TRACE_INTERVAL);
@@ -199,7 +199,7 @@ void setupThreads() {
 	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	(*pathLoss).ThreadName = "Send Path Loss";
-	(*pathLoss).enabled = true;
+	(*pathLoss).enabled = false;
 	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
 	(*pathLoss).onRun(sendPathPacket);
 
@@ -223,7 +223,7 @@ void setupThreads() {
 	(*calculateThroughput).onRun(runCalculateThroughput);
 
 	(*debugHeartbeatTable).ThreadName = "Debug Heartbeat";
-	(*debugHeartbeatTable).enabled = false;
+	(*debugHeartbeatTable).enabled = true;
 	(*debugHeartbeatTable).setInterval(DEBUG_HEARTBEAT_TABLE);
 	(*debugHeartbeatTable).onRun(debugHeartbeat);
 

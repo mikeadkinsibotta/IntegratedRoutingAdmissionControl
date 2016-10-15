@@ -18,11 +18,12 @@ HeartbeatMessage::HeartbeatMessage() {
 	routeFlag = false;
 	rssi = 0;
 	hopsToSink = 0;
+	generateData = false;
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
 		const XBeeAddress64& myNextHop, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
-		const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink) {
+		const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink, const bool generateData) {
 
 	this->senderAddress = senderAddress;
 	this->sinkAddress = sinkAddress;
@@ -34,6 +35,7 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBe
 	this->neighborhoodCapacity = neighborhoodCapacity;
 	this->routeFlag = routeFlag;
 	this->hopsToSink = hopsToSink;
+	this->generateData = generateData;
 	rssi = 0;
 
 }
@@ -60,6 +62,8 @@ void HeartbeatMessage::printMessage() {
 	SerialUSB.print(hopsToSink);
 	SerialUSB.print(", RSSI: ");
 	SerialUSB.print(rssi);
+	SerialUSB.print(", GenerateData: ");
+	SerialUSB.print(generateData);
 	SerialUSB.print(", RouteFlag: ");
 	SerialUSB.print(routeFlag);
 	SerialUSB.println('>');
@@ -98,14 +102,15 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 	payload[22] = qualityOfPath;
 	payload[23] = routeFlag;
 	payload[24] = hopsToSink;
-	payload[25] = dataRateP[0];
-	payload[26] = dataRateP[1];
-	payload[27] = dataRateP[2];
-	payload[28] = dataRateP[3];
-	payload[29] = neighborhoodCapacityP[0];
-	payload[30] = neighborhoodCapacityP[1];
-	payload[31] = neighborhoodCapacityP[2];
-	payload[32] = neighborhoodCapacityP[3];
+	payload[25] = generateData;
+	payload[26] = dataRateP[0];
+	payload[27] = dataRateP[1];
+	payload[28] = dataRateP[2];
+	payload[29] = dataRateP[3];
+	payload[30] = neighborhoodCapacityP[0];
+	payload[31] = neighborhoodCapacityP[1];
+	payload[32] = neighborhoodCapacityP[2];
+	payload[33] = neighborhoodCapacityP[3];
 }
 
 void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
@@ -133,11 +138,12 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	qualityOfPath = dataPtr[17];
 	routeFlag = dataPtr[18];
 	hopsToSink = dataPtr[19];
+	generateData = dataPtr[20];
 
-	float * dataRateP = (float*) (dataPtr + 20);
+	float * dataRateP = (float*) (dataPtr + 21);
 	dataRate = *dataRateP;
 
-	dataRateP = (float*) (dataPtr + 24);
+	dataRateP = (float*) (dataPtr + 25);
 	neighborhoodCapacity = *dataRateP;
 
 }
@@ -228,4 +234,8 @@ uint8_t HeartbeatMessage::getHopsToSink() const {
 
 void HeartbeatMessage::setHopsToSink(uint8_t hopsToSink) {
 	this->hopsToSink = hopsToSink;
+}
+
+bool HeartbeatMessage::isGenerateData() const {
+	return generateData;
 }

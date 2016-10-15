@@ -24,7 +24,8 @@ Neighbor::Neighbor() {
 
 Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float dataRate, uint8_t seqNum,
 		float qualityOfPath, float neighborhoodCapacity, bool routeFlag, const XBeeAddress64& sinkAddress,
-		double relativeDistance, double rssi, unsigned long timeoutLength, const uint8_t hopsToSink) {
+		double relativeDistance, double rssi, unsigned long timeoutLength, const uint8_t hopsToSink,
+		const bool generateData) {
 
 	this->address = address;
 	this->nextHop = nextHop;
@@ -37,6 +38,7 @@ Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, f
 	this->sinkAddress = sinkAddress;
 	this->rssi = rssi;
 	this->packetLoss = 0;
+	this->generateData = generateData;
 	addToRelativeDistance(relativeDistance);
 	timeStamp = millis();
 	previousTimeStamp = timeStamp;
@@ -195,4 +197,12 @@ uint8_t Neighbor::getHopsToSink() const {
 
 void Neighbor::setHopsToSink(const uint8_t hopsToSink) {
 	this->hopsToSink = hopsToSink;
+}
+
+bool Neighbor::isGenerateData() const {
+	return generateData;
+}
+
+void Neighbor::setGenerateData(bool generateData) {
+	this->generateData = generateData;
 }

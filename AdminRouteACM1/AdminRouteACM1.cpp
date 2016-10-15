@@ -5,7 +5,7 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define VOICE_DATA_INTERVAL 2
-#define SENDER false
+#define SENDER true
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
@@ -64,7 +64,7 @@ void setup() {
 
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
-			xbee);
+			xbee, SENDER);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
 			TRACE_INTERVAL);
@@ -199,7 +199,7 @@ void setupThreads() {
 	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
 	(*pathLoss).ThreadName = "Send Path Loss";
-	(*pathLoss).enabled = true;
+	(*pathLoss).enabled = false;
 	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
 	(*pathLoss).onRun(sendPathPacket);
 
