@@ -221,8 +221,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	uint8_t dataLoss = dataPtr[13];
-	uint8_t totalPacketSent = dataPtr[14];
-	uint8_t totalPacketReceived = dataPtr[15];
 
 	if (!myAddress.equals(packetSource)) {
 

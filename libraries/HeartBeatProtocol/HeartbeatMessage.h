@@ -41,34 +41,16 @@ class HeartbeatMessage {
 		void generateBeatMessage(uint8_t payload[]);
 		void transcribeHeartbeatPacket(const Rx64Response& response);
 		void printMessage();
-
 		const XBeeAddress64& getSenderAddress() const;
-		void setSenderAddress(const XBeeAddress64& senderAddress);
-
 		const XBeeAddress64& getSinkAddress() const;
-		void setSinkAddress(const XBeeAddress64& sinkAddress);
-
 		uint8_t getSeqNum() const;
-		void setSeqNum(uint8_t seqNum);
-
 		float getDataRate() const;
-		void setDataRate(float dataRate);
-
 		uint8_t getQualityOfPath() const;
-		void setQualityOfPath(uint8_t qualityOfPath);
-
 		float getNeighborhoodCapacity() const;
-		void setNeighborhoodCapacity(float neighborhoodCapacity);
-
 		bool isRouteFlag() const;
-		void setRouteFlag(bool routeFlag);
-
 		double getRelativeDistance() const;
-		void setRelativeDistance(double relativeDistance);
 		double getRssi() const;
-		void setRssi(double rssi);
 		const XBeeAddress64& getMyNextHop() const;
-		void setMyNextHop(const XBeeAddress64& myNextHop);
 		uint8_t getHopsToSink() const;
 		void setHopsToSink(uint8_t hopsToSink);
 		bool isGenerateData() const;

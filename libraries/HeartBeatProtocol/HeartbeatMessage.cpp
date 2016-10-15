@@ -152,88 +152,44 @@ const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
 	return senderAddress;
 }
 
-void HeartbeatMessage::setSenderAddress(const XBeeAddress64& senderAddress) {
-	this->senderAddress = senderAddress;
-}
-
 const XBeeAddress64& HeartbeatMessage::getSinkAddress() const {
 	return sinkAddress;
-}
-
-void HeartbeatMessage::setSinkAddress(const XBeeAddress64& sinkAddress) {
-	this->sinkAddress = sinkAddress;
 }
 
 uint8_t HeartbeatMessage::getSeqNum() const {
 	return seqNum;
 }
 
-void HeartbeatMessage::setSeqNum(uint8_t seqNum) {
-	this->seqNum = seqNum;
-}
-
 float HeartbeatMessage::getDataRate() const {
 	return dataRate;
-}
-
-void HeartbeatMessage::setDataRate(float dataRate) {
-	this->dataRate = dataRate;
 }
 
 float HeartbeatMessage::getNeighborhoodCapacity() const {
 	return neighborhoodCapacity;
 }
 
-void HeartbeatMessage::setNeighborhoodCapacity(float neighborhoodCapacity) {
-	this->neighborhoodCapacity = neighborhoodCapacity;
-}
-
 uint8_t HeartbeatMessage::getQualityOfPath() const {
 	return qualityOfPath;
-}
-
-void HeartbeatMessage::setQualityOfPath(uint8_t qualityOfPath) {
-	this->qualityOfPath = qualityOfPath;
 }
 
 bool HeartbeatMessage::isRouteFlag() const {
 	return routeFlag;
 }
 
-void HeartbeatMessage::setRouteFlag(bool routeFlag) {
-	this->routeFlag = routeFlag;
-}
-
 double HeartbeatMessage::getRelativeDistance() const {
 	return relativeDistance;
-}
-
-void HeartbeatMessage::setRelativeDistance(double relativeDistance) {
-	this->relativeDistance = relativeDistance;
 }
 
 double HeartbeatMessage::getRssi() const {
 	return rssi;
 }
 
-void HeartbeatMessage::setRssi(double rssi) {
-	this->rssi = rssi;
-}
-
 const XBeeAddress64& HeartbeatMessage::getMyNextHop() const {
 	return myNextHop;
 }
 
-void HeartbeatMessage::setMyNextHop(const XBeeAddress64& myNextHop) {
-	this->myNextHop = myNextHop;
-}
-
 uint8_t HeartbeatMessage::getHopsToSink() const {
 	return hopsToSink;
-}
-
-void HeartbeatMessage::setHopsToSink(uint8_t hopsToSink) {
-	this->hopsToSink = hopsToSink;
 }
 
 bool HeartbeatMessage::isGenerateData() const {

@@ -14,6 +14,7 @@
 #define MANIPULATE_ADDRESS_1 0x00000000
 #define MANIPULATE_ADDRESS_2 0x0000FFFF
 #define PAYLOAD_SIZE 76
+#define DEBUG_HEARTBEAT true
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
@@ -198,11 +199,13 @@ void setupThreads() {
 	(*heartbeat).onRun(broadcastHeartbeat);
 	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
 
+	//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";
 	(*pathLoss).enabled = false;
 	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
 	(*pathLoss).onRun(sendPathPacket);
 
+	//Set to true after being admitted by admission control
 	(*generateVoice).ThreadName = "Send Voice Data";
 	(*generateVoice).enabled = false;
 	(*generateVoice).setInterval(VOICE_DATA_INTERVAL);
@@ -217,13 +220,14 @@ void setupThreads() {
 	(*sendInital).setInterval(REQUEST_STREAM);
 	(*sendInital).onRun(sendInitPacket);
 
+	//Set to true after receiving first data packet
 	(*calculateThroughput).ThreadName = "Calculate Throughput";
 	(*calculateThroughput).enabled = false;
 	(*calculateThroughput).setInterval(CALCULATE_THROUGHPUT_INTERVAL);
 	(*calculateThroughput).onRun(runCalculateThroughput);
 
 	(*debugHeartbeatTable).ThreadName = "Debug Heartbeat";
-	(*debugHeartbeatTable).enabled = true;
+	(*debugHeartbeatTable).enabled = DEBUG_HEARTBEAT;
 	(*debugHeartbeatTable).setInterval(DEBUG_HEARTBEAT_TABLE);
 	(*debugHeartbeatTable).onRun(debugHeartbeat);
 
