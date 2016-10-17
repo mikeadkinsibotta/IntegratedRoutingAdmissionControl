@@ -12,9 +12,10 @@
 #include "XBee.h"
 #include "Neighbor.h"
 #include "HeartbeatMessage.h"
+#include "NextHopSwitch.h"
 #include <Saturation.h>
 #include <map>
-#include <set>
+#include <vector>
 #include <cfloat>
 
 using namespace std;
@@ -23,6 +24,7 @@ class HeartbeatProtocol {
 
 	private:
 		std::map<XBeeAddress64, Neighbor> neighborhoodTable;
+		vector<double> nextHopSwitchList;
 		XBee xbee;
 		uint8_t seqNum;
 		XBeeAddress64 myAddress;
@@ -45,6 +47,7 @@ class HeartbeatProtocol {
 		void updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& message);
 		void noNeighborcalculatePathQualityNextHop();
 		void withNeighborcalculatePathQualityNextHop();
+		void manipulateRoute();
 
 	public:
 		HeartbeatProtocol();
@@ -71,6 +74,8 @@ class HeartbeatProtocol {
 		const XBee& getXbee() const;
 		void setXbee(const XBee& xbee);
 		float getLocalCapacity();
+		void sendEndMessage();
+		void handleEndPacket(const Rx64Response &response);
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

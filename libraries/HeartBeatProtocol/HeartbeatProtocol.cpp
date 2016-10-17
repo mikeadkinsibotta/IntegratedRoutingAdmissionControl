@@ -120,7 +120,9 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	updateNeighborHoodTable(message);
 	reCalculateNeighborhoodCapacity();
 
-	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+	if (manipulate) {
+		manipulateRoute();
+	} else if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
 		noNeighborcalculatePathQualityNextHop();
 	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
 		withNeighborcalculatePathQualityNextHop();
@@ -249,67 +251,100 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 	uint8_t qop = UINT8_MAX;
 	Neighbor neighbor;
+	std::vector < Neighbor > filterTable;
+	std::vector < Neighbor > generateTable;
+	std::vector < Neighbor > noGenerateTable;
 
-	if (nextHop.equals(Neighbor())) {
-		digitalWrite(13, HIGH);
-		SerialUSB.println("I need a nextHop!");
-		/*If no neighbor is currently selected:
-		 * - Pick neighbor with smallest quality of path
-		 * - If quality of path is the same, pick with shorter relative distance
-		 */
-		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
-				++it) {
-
-			if (manipulate) {
-
-				if (it->second.isRouteFlag() && it->first.equals(manipulateAddress)) {
-					qualityOfPath = neighborHoodSize + it->second.getQualityOfPath();
-					nextHop = it->second;
-					routeFlag = true;
-					digitalWrite(13, LOW);
-					return;
-				}
-			} else if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
-				uint8_t path = neighborHoodSize + it->second.getQualityOfPath();
-				bool isgeneratingData = it->second.isGenerateData();
-				if (path < qop) {
-					qop = path;
-					if (neighbor.equals(Neighbor()) || !isgeneratingData) {
-						neighbor = it->second;
-					}
-
-				} else if (qop == path) {
-					double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
-					double relativeDistanceNew = it->second.getRelativeDistanceAvg();
-					if (relativeDistanceCurrent > relativeDistanceNew
-							&& (neighbor.equals(Neighbor()) || !isgeneratingData)) {
-						neighbor = it->second;
-					}
-				}
-			}
+	digitalWrite(13, HIGH);
+	SerialUSB.println("I need a nextHop!");
+	/* If no neighbor is currently selected:
+	 * - Pick neighbor with smallest quality of path
+	 * - If quality of path is the same, pick with shorter relative distance
+	 */
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
+			filterTable.push_back(it->second);
 		}
 	}
 
-//Make sure route exists
-	if (qop != UINT8_MAX) {
-		qualityOfPath = qop;
-		nextHop = neighbor;
-		routeFlag = true;
-		digitalWrite(13, LOW);
+	//check if any neighbors have routes
+	if (filterTable.size() > 0) {
 
-	} else {
-		//reset path if path does not exist
-		qualityOfPath = 0;
-		nextHop = Neighbor();
-		routeFlag = false;
-		digitalWrite(13, HIGH);
+		for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
+			if (it->isGenerateData()) {
+				generateTable.push_back(*it);
+			} else {
+				noGenerateTable.push_back(*it);
+			}
+		}
+
+		//Avoid generating data neighbors if possible
+		if (noGenerateTable.size() > 0) {
+			filterTable = generateTable;
+		} else {
+			filterTable = noGenerateTable;
+		}
+
+		for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
+			uint8_t path = neighborHoodSize + it->getQualityOfPath();
+			if (path < qop) {
+				qop = path;
+				if (neighbor.equals(Neighbor())) {
+					neighbor = *it;
+				}
+
+			} else if (qop == path && nextHop.getHopsToSink() > it->getHopsToSink()) {
+				double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
+				double relativeDistanceNew = it->getRelativeDistanceAvg();
+				if (relativeDistanceCurrent > relativeDistanceNew) {
+					neighbor = *it;
+				}
+			}
+		}
+
+		//Make sure route exists
+		if (qop != UINT8_MAX) {
+			qualityOfPath = qop;
+			nextHop = neighbor;
+			double timepoint = millis() / 1000.0;
+			SerialUSB.print("Nexthop switch1: ");
+			SerialUSB.println(timepoint);
+			nextHopSwitchList.push_back(timepoint);
+			routeFlag = true;
+			digitalWrite(13, LOW);
+
+		} else {
+			//reset path if path does not exist
+			qualityOfPath = 0;
+			nextHop = Neighbor();
+			double timepoint = millis() / 1000.0;
+			SerialUSB.print("Nexthop switch2: ");
+			SerialUSB.println(timepoint);
+			nextHopSwitchList.push_back(timepoint);
+			routeFlag = false;
+			digitalWrite(13, HIGH);
+		}
 	}
+}
 
+void HeartbeatProtocol::manipulateRoute() {
+
+	if (neighborhoodTable.find(manipulateAddress) != neighborhoodTable.end()) {
+		Neighbor neighbor = neighborhoodTable[manipulateAddress];
+		if (neighbor.isRouteFlag()) {
+			uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
+			qualityOfPath = neighborHoodSize + neighbor.getQualityOfPath();
+			nextHop = neighbor;
+			routeFlag = true;
+			digitalWrite(13, LOW);
+		}
+	}
 }
 
 void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
-	//TODO
+//TODO
 	/*Quality of path is not union as described in proposal.  If we have
 	 * a path in which two nodes both affect the same neighbor node we count
 	 * that neighbor node twice.  We don't union.  Union would eliminate duplicate nodes and only count
@@ -324,20 +359,20 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 	diff = diff / 1000.0;
 	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
 
-	//Check quality of path
-	//Add 1 to include myself
+//Check quality of path
+//Add 1 to include myself
 	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 
-	//Get qop for nextHop
+//Get qop for nextHop
 	uint8_t nextHopQop = nextHop.getQualityOfPath();
 
-	//Update my own quality of path
+//Update my own quality of path
 	uint8_t currentQop = neighborHoodSize + nextHopQop;
 
-	//TODO check for paths with better qob and check for paths with fewer hops.
-	//SerialUSB.println("Checking neighbors for better path...");
+//TODO check for paths with better qob and check for paths with fewer hops.
+//SerialUSB.println("Checking neighbors for better path...");
 
-	//Don't make any changes if manipulate flag is on.
+//Don't make any changes if manipulate flag is on.
 	if (!manipulate) {
 
 		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
@@ -356,8 +391,16 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 				uint8_t qopForThisPath = neighborHoodSize + it->second.getQualityOfPath();
 				if (qualityOfPath > qopForThisPath) {
 					nextHop = it->second;
+					double timepoint = millis() / 1000.0;
+					SerialUSB.print("Nexthop switch: ");
+					SerialUSB.println(timepoint);
+					nextHopSwitchList.push_back(timepoint);
 				} else if (qualityOfPath == qopForThisPath && nextHop.getHopsToSink() > it->second.getHopsToSink()) {
 					nextHop = it->second;
+					double timepoint = millis() / 1000.0;
+					SerialUSB.print("Nexthop switch: ");
+					SerialUSB.println(timepoint);
+					nextHopSwitchList.push_back(timepoint);
 				}
 			}
 		}
@@ -405,6 +448,115 @@ float HeartbeatProtocol::getLocalCapacity() {
 //	SerialUSB.print("Local Capacity: ");
 //	SerialUSB.println(localCapacity);
 	return localCapacity;
+}
+
+void HeartbeatProtocol::sendEndMessage() {
+	SerialUSB.println("Sending End Message");
+
+	int length = nextHopSwitchList.size();
+
+	uint8_t * payload = (uint8_t*) malloc(22 + sizeof(length * 8));
+	payload[0] = 'E';
+	payload[1] = 'N';
+	payload[2] = 'D';
+	payload[3] = 'M';
+	payload[4] = '\0';
+	payload[5] = (myAddress.getMsb() >> 24) & 0xff;
+	payload[6] = (myAddress.getMsb() >> 16) & 0xff;
+	payload[7] = (myAddress.getMsb() >> 8) & 0xff;
+	payload[8] = myAddress.getMsb() & 0xff;
+	payload[9] = (myAddress.getLsb() >> 24) & 0xff;
+	payload[10] = (myAddress.getLsb() >> 16) & 0xff;
+	payload[11] = (myAddress.getLsb() >> 8) & 0xff;
+	payload[12] = myAddress.getLsb() & 0xff;
+	payload[13] = (sinkAddress.getMsb() >> 24) & 0xff;
+	payload[14] = (sinkAddress.getMsb() >> 16) & 0xff;
+	payload[15] = (sinkAddress.getMsb() >> 8) & 0xff;
+	payload[16] = sinkAddress.getMsb() & 0xff;
+	payload[17] = (sinkAddress.getLsb() >> 24) & 0xff;
+	payload[18] = (sinkAddress.getLsb() >> 16) & 0xff;
+	payload[19] = (sinkAddress.getLsb() >> 8) & 0xff;
+	payload[20] = sinkAddress.getLsb() & 0xff;
+	payload[21] = length;
+
+	int index = 0;
+
+	SerialUSB.print("Num End Points: ");
+	SerialUSB.println(length);
+
+	for (uint8_t i = 22; i < 22 + (length * 8); i += 8) {
+		SerialUSB.print("TimePoint:  ");
+		double timePoint = nextHopSwitchList.at(index);
+		SerialUSB.println(timePoint);
+		const uint8_t * timeP = (uint8_t *) &timePoint;
+		payload[i] = timeP[0];
+		payload[i + 1] = timeP[1];
+		payload[i + 2] = timeP[2];
+		payload[i + 3] = timeP[3];
+		payload[i + 4] = timeP[4];
+		payload[i + 5] = timeP[5];
+		payload[i + 6] = timeP[6];
+		payload[i + 7] = timeP[7];
+		index++;
+	}
+
+	Tx64Request tx = Tx64Request(nextHop.getAddress(), payload, sizeof(payload));
+	xbee.send(tx);
+
+}
+
+void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
+
+//Extract the packet's final destination
+
+//check to see if the packet final destination is this node's address
+//If not setup another request to forward it.
+
+	uint8_t * dataPtr = response.getData();
+
+	XBeeAddress64 packetDestination;
+	XBeeAddress64 packetSource;
+
+	packetSource.setMsb(
+			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+
+	packetSource.setLsb(
+			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+
+	packetDestination.setMsb(
+			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+
+	packetDestination.setLsb(
+			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+
+	if (!myAddress.equals(packetDestination)) {
+
+		//need to forward to next hop
+		Tx64Request tx = Tx64Request(nextHop.getAddress(), response.getData(), response.getDataLength());
+		xbee.send(tx);
+
+	} else {
+		uint8_t length = dataPtr[21];
+		vector<double> timePoints;
+		dataPtr = response.getData() + 22;
+		SerialUSB.print("End Packet From: ");
+		packetSource.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  ");
+		SerialUSB.print("Timepoints: ");
+
+		for (uint8_t i = 22; i < length * 8; i += 8) {
+
+			double * dataRateP = (double*) (dataPtr + i);
+			double dataRate = *dataRateP;
+			SerialUSB.print(dataRate);
+			SerialUSB.print(",  ");
+
+		}
+
+		SerialUSB.println();
+
+	}
+
 }
 
 void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage) {

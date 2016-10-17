@@ -10,7 +10,7 @@
 #define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
-#define MANIPULATE false
+#define MANIPULATE true
 #define MANIPULATE_ADDRESS_1 0x0013A200
 #define MANIPULATE_ADDRESS_2 0x4102FC76
 #define PAYLOAD_SIZE 76
@@ -23,6 +23,7 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
+const uint8_t END_TIME = 40;
 const unsigned long REQUEST_STREAM = 100;
 const unsigned long GRANT_TIMEOUT_LENGTH = 50;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
@@ -111,6 +112,14 @@ void sendInitPacket() {
 }
 
 void sendVoicePacket() {
+
+	double timepoint = millis() / 1000.0;
+	if (timepoint > END_TIME) {
+		//kill Sender
+		heartbeatProtocol->sendEndMessage();
+		controller.clear();
+	}
+
 	Neighbor nextHop = heartbeatProtocol->getNextHop();
 	if (!nextHop.equals(Neighbor())) {
 		voicePacketSender->generateVoicePacket();
@@ -153,6 +162,9 @@ void listenForResponses() {
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < DISTANCE_THRESHOLD) {
 
 			switch (data[0]) {
+				case 'E':
+					heartbeatProtocol->handleEndPacket(response);
+					break;
 				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);
 					break;
