@@ -72,11 +72,11 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 	seqNum++;
 
-	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-		noNeighborcalculatePathQualityNextHop();
-	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-		withNeighborcalculatePathQualityNextHop();
-	}
+//	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+//		noNeighborcalculatePathQualityNextHop();
+//	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+//		withNeighborcalculatePathQualityNextHop();
+//	}
 
 }
 
@@ -332,11 +332,15 @@ void HeartbeatProtocol::manipulateRoute() {
 
 	if (neighborhoodTable.find(manipulateAddress) != neighborhoodTable.end()) {
 		Neighbor neighbor = neighborhoodTable[manipulateAddress];
-		if (neighbor.isRouteFlag()) {
+		if (neighbor.isRouteFlag() && !neighbor.equals(nextHop)) {
 			uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
 			qualityOfPath = neighborHoodSize + neighbor.getQualityOfPath();
 			nextHop = neighbor;
 			routeFlag = true;
+			double timepoint = millis() / 1000.0;
+			SerialUSB.print("Nexthop switch: ");
+			SerialUSB.println(timepoint);
+			nextHopSwitchList.push_back(timepoint);
 			digitalWrite(13, LOW);
 		}
 	}
@@ -453,9 +457,9 @@ float HeartbeatProtocol::getLocalCapacity() {
 void HeartbeatProtocol::sendEndMessage() {
 	SerialUSB.println("Sending End Message");
 
-	int length = nextHopSwitchList.size();
+	uint8_t length = nextHopSwitchList.size();
 
-	uint8_t * payload = (uint8_t*) malloc(22 + sizeof(length * 8));
+	uint8_t * payload = (uint8_t*) malloc(22 + (length * 8));
 	payload[0] = 'E';
 	payload[1] = 'N';
 	payload[2] = 'D';
@@ -484,7 +488,7 @@ void HeartbeatProtocol::sendEndMessage() {
 	SerialUSB.print("Num End Points: ");
 	SerialUSB.println(length);
 
-	for (uint8_t i = 22; i < 22 + (length * 8); i += 8) {
+	for (uint8_t i = 22; i < 22 + (length * 8);) {
 		SerialUSB.print("TimePoint:  ");
 		double timePoint = nextHopSwitchList.at(index);
 		SerialUSB.println(timePoint);
@@ -498,11 +502,12 @@ void HeartbeatProtocol::sendEndMessage() {
 		payload[i + 6] = timeP[6];
 		payload[i + 7] = timeP[7];
 		index++;
+		i += 8;
 	}
 
-	Tx64Request tx = Tx64Request(nextHop.getAddress(), payload, sizeof(payload));
+	Tx64Request tx = Tx64Request(nextHop.getAddress(), payload, 22 + (length * 8));
 	xbee.send(tx);
-
+	free(payload);
 }
 
 void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
@@ -514,8 +519,7 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 
 	uint8_t * dataPtr = response.getData();
 
-	XBeeAddress64 packetDestination;
-	XBeeAddress64 packetSource;
+	XBeeAddress64 packetDestination, packetSource;
 
 	packetSource.setMsb(
 			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
@@ -536,21 +540,19 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 		xbee.send(tx);
 
 	} else {
-		uint8_t length = dataPtr[21];
-		vector<double> timePoints;
-		dataPtr = response.getData() + 22;
-		SerialUSB.print("End Packet From: ");
+		SerialUSB.print("End Message From: ");
 		packetSource.printAddressASCII(&SerialUSB);
 		SerialUSB.print("  ");
 		SerialUSB.print("Timepoints: ");
 
-		for (uint8_t i = 22; i < length * 8; i += 8) {
+		uint8_t length = dataPtr[21];
+		double timepoint;
 
-			double * dataRateP = (double*) (dataPtr + i);
-			double dataRate = *dataRateP;
-			SerialUSB.print(dataRate);
+		for (uint8_t i = 22; i < 22 + (length * 8);) {
+			memcpy(&timepoint, response.getData() + i, sizeof(double));
+			SerialUSB.print(timepoint);
 			SerialUSB.print(",  ");
-
+			i += 8;
 		}
 
 		SerialUSB.println();

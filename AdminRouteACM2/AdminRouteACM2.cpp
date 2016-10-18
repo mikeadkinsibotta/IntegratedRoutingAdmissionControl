@@ -23,8 +23,8 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
-const uint8_t END_TIME = 100;
-const unsigned long REQUEST_STREAM = 100;
+const uint8_t END_TIME = 30;
+const unsigned long REQUEST_STREAM = 200;
 const unsigned long GRANT_TIMEOUT_LENGTH = 50;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
 const unsigned long HEARTBEAT_INTERVAL = 500;
@@ -164,6 +164,7 @@ void listenForResponses() {
 			switch (data[0]) {
 				case 'E':
 					heartbeatProtocol->handleEndPacket(response);
+					controller.clear();
 					break;
 				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);

@@ -176,7 +176,12 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	} else if (nextHop.equals(myAddress)) {
 		//on path node
-
+		SerialUSB.print("Receiving on path request for new stream via: ");
+		receivedAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Sender Address: ");
+		senderAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Potential Data Rate: ");
+		SerialUSB.println(dataRate);
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
@@ -220,6 +225,12 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	} else if (!myAddress.equals(sinkAddress)) {
 		//node affected but not node on path and not sink node.
+		SerialUSB.print("Receiving not on path request for new stream via: ");
+		receivedAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Sender Address: ");
+		senderAddress.printAddressASCII(&SerialUSB);
+		SerialUSB.print("  Potential Data Rate: ");
+		SerialUSB.println(dataRate);
 		PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
 				rejcTimeoutLength, dataRate);
 		potentialStream.getRejcTimer().startTimer();
