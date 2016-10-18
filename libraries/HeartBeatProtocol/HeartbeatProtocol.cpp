@@ -465,22 +465,7 @@ void HeartbeatProtocol::sendEndMessage() {
 	payload[2] = 'D';
 	payload[3] = 'M';
 	payload[4] = '\0';
-//	payload[5] = (myAddress.getMsb() >> 24) & 0xff;
-//	payload[6] = (myAddress.getMsb() >> 16) & 0xff;
-//	payload[7] = (myAddress.getMsb() >> 8) & 0xff;
-//	payload[8] = myAddress.getMsb() & 0xff;
-//	payload[9] = (myAddress.getLsb() >> 24) & 0xff;
-//	payload[10] = (myAddress.getLsb() >> 16) & 0xff;
-//	payload[11] = (myAddress.getLsb() >> 8) & 0xff;
-//	payload[12] = myAddress.getLsb() & 0xff;
-//	payload[13] = (sinkAddress.getMsb() >> 24) & 0xff;
-//	payload[14] = (sinkAddress.getMsb() >> 16) & 0xff;
-//	payload[15] = (sinkAddress.getMsb() >> 8) & 0xff;
-//	payload[16] = sinkAddress.getMsb() & 0xff;
-//	payload[17] = (sinkAddress.getLsb() >> 24) & 0xff;
-//	payload[18] = (sinkAddress.getLsb() >> 16) & 0xff;
-//	payload[19] = (sinkAddress.getLsb() >> 8) & 0xff;
-//	payload[20] = sinkAddress.getLsb() & 0xff;
+
 	payload[21] = length;
 
 	HeartbeatMessage::addAddressToMessage(payload, myAddress, 5);
@@ -527,18 +512,6 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 
 	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
 	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
-
-//	packetSource.setMsb(
-//			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
-//
-//	packetSource.setLsb(
-//			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
-
-//	packetDestination.setMsb(
-//			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
-//
-//	packetDestination.setLsb(
-//			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
 
 	if (!myAddress.equals(packetDestination)) {
 

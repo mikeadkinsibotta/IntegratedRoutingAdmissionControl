@@ -25,11 +25,6 @@ void TraceMessage::transcribeMessage(const Rx64Response& response) {
 	for (int i = 0; i < addressListLength; i++) {
 		XBeeAddress64 address;
 		HeartbeatMessage::setAddress(dataPtr, address, 0);
-//		address.setMsb(
-//				(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
-//
-//		address.setLsb(
-//				(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
 
 		addresses.push_back(address);
 
