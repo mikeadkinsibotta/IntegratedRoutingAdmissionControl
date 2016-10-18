@@ -12,7 +12,6 @@
 #include "XBee.h"
 #include "Neighbor.h"
 #include "HeartbeatMessage.h"
-#include "NextHopSwitch.h"
 #include <Saturation.h>
 #include <map>
 #include <vector>
