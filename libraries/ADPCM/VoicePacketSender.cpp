@@ -123,13 +123,25 @@ void VoicePacketSender::generateVoicePacket() {
 	if (dupSetting != 0 && r && !justSentDup) {
 		frameId--;
 
-		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-				codecSetting };
+		uint8_t destination[100];
+
+		destination[0] = 'D';
+		destination[1] = 'A';
+		destination[2] = 'T';
+		destination[3] = 'A';
+		destination[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		destination[21] = frameId;
+		destination[22] = codecSetting;
+
+//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -137,14 +149,24 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 		justSentDup = true;
 	} else {
-
-		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-				codecSetting };
+		uint8_t destination[100];
+		destination[0] = 'D';
+		destination[1] = 'A';
+		destination[2] = 'T';
+		destination[3] = 'A';
+		destination[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		destination[21] = frameId;
+		destination[22] = codecSetting;
+//
+//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -223,27 +245,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 		updateDataRate(dataLoss);
 
 	}
-}
-
-uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetSource,
-		const XBeeAddress64& packetDestination, const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize,
-		const uint8_t frameId) {
-
-	uint8_t destination[] = { 'D', 'A', 'T', 'A', '\0', (packetSource.getMsb() >> 24) & 0xff, (packetSource.getMsb()
-			>> 16) & 0xff, (packetSource.getMsb() >> 8) & 0xff, packetSource.getMsb() & 0xff, (packetSource.getLsb()
-			>> 24) & 0xff, (packetSource.getLsb() >> 16) & 0xff, (packetSource.getLsb() >> 8) & 0xff,
-			packetSource.getLsb() & 0xff, (packetDestination.getMsb() >> 24) & 0xff, (packetDestination.getMsb() >> 16)
-					& 0xff, (packetDestination.getMsb() >> 8) & 0xff, packetDestination.getMsb() & 0xff,
-			(packetDestination.getLsb() >> 24) & 0xff, (packetDestination.getLsb() >> 16) & 0xff,
-			(packetDestination.getLsb() >> 8) & 0xff, packetDestination.getLsb() & 0xff, frameId, codecSetting };
-
-	uint8_t* result = (uint8_t*) malloc(sizeof(destination) + sizePayload);
-	resultSize = sizeof(destination) + sizePayload;
-	memcpy(result, destination, sizeof(destination));
-	memcpy(result + sizeof(destination), payload, sizePayload);
-
-	return result;
-
 }
 
 void VoicePacketSender::updateDataRate(uint8_t dataLoss) {

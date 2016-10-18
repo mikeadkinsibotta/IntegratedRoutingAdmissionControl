@@ -57,6 +57,7 @@ class HeartbeatMessage {
 		static void addAddressToMessage(uint8_t payload[], const XBeeAddress64& address, const uint8_t i);
 		static void addFloat(uint8_t payload[], const uint8_t * num, const uint8_t i);
 		static void setAddress(const uint8_t * dataPtr, XBeeAddress64& address, const uint8_t i);
+
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATMESSAGE_H_ */

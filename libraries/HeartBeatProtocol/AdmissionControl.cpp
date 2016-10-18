@@ -93,10 +93,15 @@ void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 	XBeeAddress64 nextHop = heartbeatProtocol->getNextHop().getAddress();
 	if (!nextHop.equals(XBeeAddress64())) {
 
-		uint8_t payload[] = { 'R', 'E', 'D', 'J', '\0', (senderAddress.getMsb() >> 24) & 0xff, (senderAddress.getMsb()
-				>> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-				(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb()
-						>> 8) & 0xff, senderAddress.getLsb() & 0xff };
+		uint8_t payload[13];
+
+		payload[0] = 'R';
+		payload[1] = 'E';
+		payload[2] = 'D';
+		payload[3] = 'J';
+		payload[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(payload, senderAddress, 5);
+
 		Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), DEFAULT_FRAME_ID);
 		xbee.send(tx);
 	} else {
@@ -108,10 +113,16 @@ void AdmissionControl::sendREDJPacket(const XBeeAddress64 &senderAddress) {
 void AdmissionControl::sendGRANTPacket(const XBeeAddress64 &senderAddress, const XBeeAddress64 &nextHop) {
 
 	SerialUSB.println("Sending GRNT");
-	uint8_t payload[] = { 'G', 'R', 'N', 'T', '\0', (senderAddress.getMsb() >> 24) & 0xff,
-			(senderAddress.getMsb() >> 16) & 0xff, (senderAddress.getMsb() >> 8) & 0xff, senderAddress.getMsb() & 0xff,
-			(senderAddress.getLsb() >> 24) & 0xff, (senderAddress.getLsb() >> 16) & 0xff, (senderAddress.getLsb() >> 8)
-					& 0xff, senderAddress.getLsb() & 0xff };
+
+	uint8_t payload[13];
+
+	payload[0] = 'G';
+	payload[1] = 'R';
+	payload[2] = 'N';
+	payload[3] = 'T';
+	payload[4] = '\0';
+	HeartbeatMessage::addAddressToMessage(payload, senderAddress, 5);
+
 	Tx64Request tx = Tx64Request(nextHop, ACK_OPTION, payload, sizeof(payload), DEFAULT_FRAME_ID);
 	xbee.send(tx);
 

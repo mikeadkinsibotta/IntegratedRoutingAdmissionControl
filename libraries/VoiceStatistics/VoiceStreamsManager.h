@@ -11,6 +11,7 @@
 #include <vector>
 #include "VoiceStreamStats.h"
 #include "XBee.h"
+#include "HeartbeatMessage.h"
 
 using namespace std;
 

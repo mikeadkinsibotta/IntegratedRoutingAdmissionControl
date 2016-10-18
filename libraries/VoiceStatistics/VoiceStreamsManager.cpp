@@ -98,11 +98,18 @@ void VoiceStreamManager::sendPathPacket() {
 		const uint8_t totalPacketsSent = it->getTotalPacketsSent();
 		const uint8_t totalPacketsRecieved = it->getTotalPacketsRecieved();
 
-		uint8_t payload[] = { 'P', 'A', 'T', 'H', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
-				(dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
-				dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff,
-				(dataSenderAddress.getLsb() >> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff,
-				dataSenderAddress.getLsb() & 0xff, dataLoss, totalPacketsSent, totalPacketsRecieved };
+		uint8_t payload[16];
+
+		payload[0] = 'P';
+		payload[1] = 'A';
+		payload[2] = 'T';
+		payload[3] = 'H';
+		payload[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(payload, dataSenderAddress, 5);
+		payload[13] = dataLoss;
+		payload[14] = totalPacketsSent;
+		payload[15] = totalPacketsRecieved;
+
 		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), ACK_OPTION, payload, sizeof(payload),
 				DEFAULT_FRAME_ID);
 		xbee.send(tx);
@@ -142,3 +149,4 @@ void VoiceStreamManager::calculateThroughput() {
 uint8_t VoiceStreamManager::getPayloadSize() const {
 	return payloadSize;
 }
+;

@@ -43,17 +43,15 @@ class VoicePacketSender {
 		XBeeAddress64 packetSource;
 		XBeeAddress64 previousHop;
 
-		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
-				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
 		void updateDataRate(uint8_t dataLoss);
 		void sendTracePacket();
 
 	public:
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
-				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager,
-				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
-				const float dupSetting, const uint8_t payloadSize, const uint8_t tracePacketInterval);
+				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
+				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+				const uint8_t payloadSize, const uint8_t tracePacketInterval);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
