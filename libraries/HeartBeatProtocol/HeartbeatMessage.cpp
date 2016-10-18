@@ -161,17 +161,20 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	relativeDistance = response.getRelativeDistance();
 	rssi = response.getRssi() * -1.0;
 
-	sinkAddress.setMsb(
-			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
+	setAddress(dataPtr, sinkAddress, 0);
+	setAddress(dataPtr, myNextHop, 8);
 
-	sinkAddress.setLsb(
-			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
-
-	myNextHop.setMsb(
-			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
-
-	myNextHop.setLsb(
-			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
+//	sinkAddress.setMsb(
+//			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
+//
+//	sinkAddress.setLsb(
+//			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
+//
+//	myNextHop.setMsb(
+//			(uint32_t(dataPtr[8]) << 24) + (uint32_t(dataPtr[9]) << 16) + (uint16_t(dataPtr[10]) << 8) + dataPtr[11]);
+//
+//	myNextHop.setLsb(
+//			(uint32_t(dataPtr[12]) << 24) + (uint32_t(dataPtr[13]) << 16) + (uint16_t(dataPtr[14]) << 8) + dataPtr[15]);
 
 	seqNum = dataPtr[16];
 	qualityOfPath = dataPtr[17];
