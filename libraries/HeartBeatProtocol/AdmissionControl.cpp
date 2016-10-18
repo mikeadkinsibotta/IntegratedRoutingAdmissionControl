@@ -77,26 +77,30 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 		payloadBroadCast[2] = 'I';
 		payloadBroadCast[3] = 'T';
 		payloadBroadCast[4] = '\0';
-		payloadBroadCast[5] = (myAddress.getMsb() >> 24) & 0xff;
-		payloadBroadCast[6] = (myAddress.getMsb() >> 16) & 0xff;
-		payloadBroadCast[7] = (myAddress.getMsb() >> 8) & 0xff;
-		payloadBroadCast[8] = myAddress.getMsb() & 0xff;
-		payloadBroadCast[9] = (myAddress.getLsb() >> 24) & 0xff;
-		payloadBroadCast[10] = (myAddress.getLsb() >> 16) & 0xff;
-		payloadBroadCast[11] = (myAddress.getLsb() >> 8) & 0xff;
-		payloadBroadCast[12] = myAddress.getLsb() & 0xff;
-		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
-		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
-		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
-		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
-		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
-		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
-		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
-		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
-		payloadBroadCast[21] = injectionRateP[0];
-		payloadBroadCast[22] = injectionRateP[1];
-		payloadBroadCast[23] = injectionRateP[2];
-		payloadBroadCast[24] = injectionRateP[3];
+//		payloadBroadCast[5] = (myAddress.getMsb() >> 24) & 0xff;
+//		payloadBroadCast[6] = (myAddress.getMsb() >> 16) & 0xff;
+//		payloadBroadCast[7] = (myAddress.getMsb() >> 8) & 0xff;
+//		payloadBroadCast[8] = myAddress.getMsb() & 0xff;
+//		payloadBroadCast[9] = (myAddress.getLsb() >> 24) & 0xff;
+//		payloadBroadCast[10] = (myAddress.getLsb() >> 16) & 0xff;
+//		payloadBroadCast[11] = (myAddress.getLsb() >> 8) & 0xff;
+//		payloadBroadCast[12] = myAddress.getLsb() & 0xff;
+//		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
+//		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
+//		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
+//		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
+//		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
+//		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
+//		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
+//		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+//		payloadBroadCast[21] = injectionRateP[0];
+//		payloadBroadCast[22] = injectionRateP[1];
+//		payloadBroadCast[23] = injectionRateP[2];
+//		payloadBroadCast[24] = injectionRateP[3];
+
+		HeartbeatMessage::addAddressToMessage(payloadBroadCast, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(payloadBroadCast, myNextHop, 13);
+		HeartbeatMessage::addFloat(payloadBroadCast, injectionRateP, 21);
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 		// send the command
@@ -140,17 +144,20 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	XBeeAddress64 senderAddress;
 	XBeeAddress64 nextHop;
 	uint8_t* dataPtr = response.getData();
-	senderAddress.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+//	senderAddress.setMsb(
+//			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+//
+//	senderAddress.setLsb(
+//			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
-	senderAddress.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+	HeartbeatMessage::setAddress(dataPtr, senderAddress, 5);
+	HeartbeatMessage::setAddress(dataPtr, nextHop, 13);
 
-	nextHop.setMsb(
-			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
-
-	nextHop.setLsb(
-			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
+//	nextHop.setMsb(
+//			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
+//
+//	nextHop.setLsb(
+//			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
@@ -193,26 +200,30 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		payloadBroadCast[2] = 'I';
 		payloadBroadCast[3] = 'T';
 		payloadBroadCast[4] = '\0';
-		payloadBroadCast[5] = (senderAddress.getMsb() >> 24) & 0xff;
-		payloadBroadCast[6] = (senderAddress.getMsb() >> 16) & 0xff;
-		payloadBroadCast[7] = (senderAddress.getMsb() >> 8) & 0xff;
-		payloadBroadCast[8] = senderAddress.getMsb() & 0xff;
-		payloadBroadCast[9] = (senderAddress.getLsb() >> 24) & 0xff;
-		payloadBroadCast[10] = (senderAddress.getLsb() >> 16) & 0xff;
-		payloadBroadCast[11] = (senderAddress.getLsb() >> 8) & 0xff;
-		payloadBroadCast[12] = senderAddress.getLsb() & 0xff;
-		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
-		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
-		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
-		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
-		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
-		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
-		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
-		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
-		payloadBroadCast[21] = injectionRateP[0];
-		payloadBroadCast[22] = injectionRateP[1];
-		payloadBroadCast[23] = injectionRateP[2];
-		payloadBroadCast[24] = injectionRateP[3];
+//		payloadBroadCast[5] = (senderAddress.getMsb() >> 24) & 0xff;
+//		payloadBroadCast[6] = (senderAddress.getMsb() >> 16) & 0xff;
+//		payloadBroadCast[7] = (senderAddress.getMsb() >> 8) & 0xff;
+//		payloadBroadCast[8] = senderAddress.getMsb() & 0xff;
+//		payloadBroadCast[9] = (senderAddress.getLsb() >> 24) & 0xff;
+//		payloadBroadCast[10] = (senderAddress.getLsb() >> 16) & 0xff;
+//		payloadBroadCast[11] = (senderAddress.getLsb() >> 8) & 0xff;
+//		payloadBroadCast[12] = senderAddress.getLsb() & 0xff;
+//		payloadBroadCast[13] = (myNextHop.getMsb() >> 24) & 0xff;
+//		payloadBroadCast[14] = (myNextHop.getMsb() >> 16) & 0xff;
+//		payloadBroadCast[15] = (myNextHop.getMsb() >> 8) & 0xff;
+//		payloadBroadCast[16] = myNextHop.getMsb() & 0xff;
+//		payloadBroadCast[17] = (myNextHop.getLsb() >> 24) & 0xff;
+//		payloadBroadCast[18] = (myNextHop.getLsb() >> 16) & 0xff;
+//		payloadBroadCast[19] = (myNextHop.getLsb() >> 8) & 0xff;
+//		payloadBroadCast[20] = myNextHop.getLsb() & 0xff;
+//		payloadBroadCast[21] = injectionRateP[0];
+//		payloadBroadCast[22] = injectionRateP[1];
+//		payloadBroadCast[23] = injectionRateP[2];
+//		payloadBroadCast[24] = injectionRateP[3];
+
+		HeartbeatMessage::addAddressToMessage(payloadBroadCast, senderAddress, 5);
+		HeartbeatMessage::addAddressToMessage(payloadBroadCast, myNextHop, 13);
+		HeartbeatMessage::addFloat(payloadBroadCast, injectionRateP, 21);
 
 		Tx64Request tx = Tx64Request(heartbeatAddress, payloadBroadCast, sizeof(payloadBroadCast));
 		xbee.send(tx);
@@ -244,11 +255,13 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 	XBeeAddress64 senderAddress;
 	uint8_t * dataPtr = response.getData();
 
-	senderAddress.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+	HeartbeatMessage::setAddress(dataPtr, senderAddress, 5);
 
-	senderAddress.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+//	senderAddress.setMsb(
+//			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+//
+//	senderAddress.setLsb(
+//			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	if (myAddress.equals(sinkAddress)) {
 		removePotentialStream(senderAddress);
@@ -264,11 +277,13 @@ void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& ini
 	uint8_t * dataPtr = response.getData();
 	XBeeAddress64 previousHop = response.getRemoteAddress64();
 
-	sourceAddress.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+	HeartbeatMessage::setAddress(dataPtr, sourceAddress, 5);
 
-	sourceAddress.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+//	sourceAddress.setMsb(
+//			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
+//
+//	sourceAddress.setLsb(
+//			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
 
 	if (!myAddress.equals(sourceAddress)) {
 		for (int i = 0; i < potentialStreams.size(); i++) {

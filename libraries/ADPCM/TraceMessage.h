@@ -10,7 +10,7 @@
 
 #include <vector>
 #include "XBee.h"
-
+#include "HeartbeatMessage.h"
 using namespace std;
 
 class TraceMessage {
