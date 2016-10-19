@@ -34,6 +34,7 @@ const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
 const float DISTANCE_THRESHOLD = 6.40;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
+bool endMessageSent = false;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -113,13 +114,6 @@ void sendInitPacket() {
 
 void sendVoicePacket() {
 
-	double timepoint = millis() / 1000.0;
-	if (timepoint > END_TIME) {
-		//kill Sender
-		heartbeatProtocol->sendEndMessage();
-		controller.enabled = false;
-	}
-
 	Neighbor nextHop = heartbeatProtocol->getNextHop();
 	if (!nextHop.equals(Neighbor())) {
 		voicePacketSender->generateVoicePacket();
@@ -129,6 +123,20 @@ void sendVoicePacket() {
 void broadcastHeartbeat() {
 	if (millis() > 10000) {
 		heartbeatProtocol->broadcastHeartBeat();
+	}
+	double timepoint = millis() / 1000.0;
+	if (timepoint > END_TIME && !endMessageSent) {
+
+		//kill Sender
+		if (!myAddress.equals(sinkAddress)) {
+			heartbeatProtocol->sendEndMessage();
+		}
+		controller.remove(sendInital);
+		controller.remove(pathLoss);
+		controller.remove(calculateThroughput);
+		controller.remove(generateVoice);
+		controller.remove(debugHeartbeatTable);
+		endMessageSent = true;
 	}
 }
 
@@ -164,7 +172,6 @@ void listenForResponses() {
 			switch (data[0]) {
 				case 'E':
 					heartbeatProtocol->handleEndPacket(response);
-					controller.clear();
 					break;
 				case 'B':
 					heartbeatProtocol->receiveHeartBeat(response);

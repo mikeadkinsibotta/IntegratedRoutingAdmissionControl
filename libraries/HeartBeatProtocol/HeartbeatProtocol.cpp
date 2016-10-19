@@ -458,45 +458,36 @@ void HeartbeatProtocol::sendEndMessage() {
 	SerialUSB.println("Sending End Message");
 
 	uint8_t length = nextHopSwitchList.size();
-
-	uint8_t * payload = (uint8_t*) malloc(22 + (length * 8));
-	payload[0] = 'E';
-	payload[1] = 'N';
-	payload[2] = 'D';
-	payload[3] = 'M';
-	payload[4] = '\0';
-
-	payload[21] = length;
-
-	HeartbeatMessage::addAddressToMessage(payload, myAddress, 5);
-	HeartbeatMessage::addAddressToMessage(payload, sinkAddress, 13);
-
-	int index = 0;
-
 	SerialUSB.print("Num End Points: ");
 	SerialUSB.println(length);
-
-	for (uint8_t i = 22; i < 22 + (length * 8);) {
+	for (int k = 0; k < length; ++k) {
+		double timePoint = nextHopSwitchList.at(k);
 		SerialUSB.print("TimePoint:  ");
-		double timePoint = nextHopSwitchList.at(index);
 		SerialUSB.println(timePoint);
+
+		uint8_t payload[29];
+		payload[0] = 'E';
+		payload[1] = 'N';
+		payload[2] = 'D';
+		payload[3] = 'M';
+		payload[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(payload, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(payload, sinkAddress, 13);
+
 		const uint8_t * timeP = reinterpret_cast<uint8_t*>(&timePoint);
 
-		payload[i] = timeP[0];
-		payload[i + 1] = timeP[1];
-		payload[i + 2] = timeP[2];
-		payload[i + 3] = timeP[3];
-		payload[i + 4] = timeP[4];
-		payload[i + 5] = timeP[5];
-		payload[i + 6] = timeP[6];
-		payload[i + 7] = timeP[7];
-		index++;
-		i += 8;
-	}
+		payload[21] = timeP[0];
+		payload[22] = timeP[1];
+		payload[23] = timeP[2];
+		payload[24] = timeP[3];
+		payload[25] = timeP[4];
+		payload[26] = timeP[5];
+		payload[27] = timeP[6];
+		payload[28] = timeP[7];
 
-	Tx64Request tx = Tx64Request(nextHop.getAddress(), payload, 22 + (length * 8));
-	xbee.send(tx);
-	free(payload);
+		Tx64Request tx = Tx64Request(nextHop.getAddress(), payload, 29);
+		xbee.send(tx);
+	}
 }
 
 void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
@@ -520,25 +511,15 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 		xbee.send(tx);
 
 	} else {
+		double timepoint;
+		memcpy(&timepoint, response.getData() + 21, sizeof(double));
+
 		SerialUSB.print("End Message From: ");
 		packetSource.printAddressASCII(&SerialUSB);
 		SerialUSB.print("  ");
-		SerialUSB.print("Timepoints: ");
-
-		uint8_t length = dataPtr[21];
-		double timepoint;
-
-		for (uint8_t i = 22; i < 22 + (length * 8);) {
-			memcpy(&timepoint, response.getData() + i, sizeof(double));
-			SerialUSB.print(timepoint);
-			SerialUSB.print(",  ");
-			i += 8;
-		}
-
-		SerialUSB.println();
-
+		SerialUSB.print("Timepoint: ");
+		SerialUSB.println(timepoint);
 	}
-
 }
 
 void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage) {
