@@ -22,6 +22,7 @@ class PotentialStream {
 		bool onPath;
 
 	public:
+		PotentialStream();
 		PotentialStream(const XBeeAddress64& sourceAddress, const XBeeAddress64& upStreamNeighbor,
 				const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength,
 				const float increasedDataRate);

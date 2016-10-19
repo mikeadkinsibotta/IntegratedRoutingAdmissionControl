@@ -13,13 +13,13 @@
 #include <VoiceStreamsManager.h>
 #include <VoicePacketSender.h>
 #include <Thread.h>
-#include <vector>
+#include <map>
 
 using namespace std;
 
 class AdmissionControl {
 	private:
-		vector<PotentialStream> potentialStreams;
+		std::map<XBeeAddress64, PotentialStream> potentialStreams;
 		XBee xbee;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
