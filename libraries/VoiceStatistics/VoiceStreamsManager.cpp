@@ -26,77 +26,63 @@ VoiceStreamManager::VoiceStreamManager(XBee& xbee, const uint8_t payloadSize) {
 }
 
 void VoiceStreamManager::removeStream(const XBeeAddress64& packetSource) {
-	int i = 0;
-	bool found = false;
-	while (i < streams.size()) {
-		if (streams.at(i).getSenderAddress().equals(packetSource)) {
-			streams.at(i).printRouteEnd();
-			found = true;
-			break;
-		}
-		++i;
+//	int i = 0;
+//	bool found = false;
+
+	if (streams.find(packetSource) != streams.end()) {
+		streams[packetSource].printRouteEnd();
+		streams.erase(packetSource);
 	}
 
-	if (found) {
-		SerialUSB.println("Stream now erased");
-		streams.erase(streams.begin() + i);
-	}
+//	while (i < streams.size()) {
+//		if (streams.at(i).getSenderAddress().equals(packetSource)) {
+//			streams.at(i).printRouteEnd();
+//			found = true;
+//			break;
+//		}
+//		++i;
+//	}
+//
+//	if (found) {
+//		SerialUSB.println("Stream now erased");
+//		streams.erase(streams.begin() + i);
+//	}
 }
 
 void VoiceStreamManager::updateVoiceLoss(const XBeeAddress64& packetSource, const XBeeAddress64& previousHop,
 		const uint8_t * dataPtr) {
 
-	bool found = false;
+	if (streams.find(packetSource) != streams.end()) {
+		streams[packetSource].updateVoiceLoss(dataPtr);
 
-	for (int i = 0; i < streams.size(); i++) {
-		if (streams.at(i).getSenderAddress().equals(packetSource)) {
-			streams.at(i).updateVoiceLoss(dataPtr);
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
-		/*SerialUSB.println("New Stream");*/
+	} else {
 		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
 		stream.updateVoiceLoss(dataPtr);
-		streams.push_back(stream);
+		streams.insert(pair<XBeeAddress64, VoiceStreamStats>(packetSource, stream));
 	}
-
 }
 
 void VoiceStreamManager::updateStreamsIntermediateNode(const XBeeAddress64& packetSource,
 		const XBeeAddress64& previousHop) {
 
-	bool found = false;
-
-	for (int i = 0; i < streams.size(); i++) {
-		//SerialUSB.println("Old Stream");
-
-		if (streams.at(i).getSenderAddress().equals(packetSource)) {
-			streams.at(i).setUpStreamNeighborAddress(previousHop);
-			found = true;
-			break;
-		}
-	}
-
-	if (!found) {
+	if (streams.find(packetSource) != streams.end()) {
+		streams[packetSource].setUpStreamNeighborAddress(previousHop);
+	} else {
 		//SerialUSB.println("New Stream");
 		VoiceStreamStats stream = VoiceStreamStats(packetSource, previousHop, 76);
-		streams.push_back(stream);
+		streams.insert(pair<XBeeAddress64, VoiceStreamStats>(packetSource, stream));
 	}
-
 }
 
 void VoiceStreamManager::sendPathPacket() {
 
-	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
+	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
 		SerialUSB.println("Sending Path packet");
-		const XBeeAddress64 &dataSenderAddress = it->getSenderAddress();
-		const uint8_t dataLoss = it->getPacketLoss();
-		const uint8_t totalPacketsSent = it->getTotalPacketsSent();
-		const uint8_t totalPacketsRecieved = it->getTotalPacketsRecieved();
+		const XBeeAddress64 &dataSenderAddress = it->second.getSenderAddress();
+		const uint8_t dataLoss = it->second.getPacketLoss();
+		const uint8_t totalPacketsSent = it->second.getTotalPacketsSent();
+		const uint8_t totalPacketsRecieved = it->second.getTotalPacketsRecieved();
 
 		uint8_t payload[16];
 
@@ -110,39 +96,35 @@ void VoiceStreamManager::sendPathPacket() {
 		payload[14] = totalPacketsSent;
 		payload[15] = totalPacketsRecieved;
 
-		Tx64Request tx = Tx64Request(it->getUpStreamNeighborAddress(), ACK_OPTION, payload, sizeof(payload),
+		Tx64Request tx = Tx64Request(it->second.getUpStreamNeighborAddress(), ACK_OPTION, payload, sizeof(payload),
 				DEFAULT_FRAME_ID);
 		xbee.send(tx);
 
-		if (it->getNumNoPacketReceived() >= 4) {
+		if (it->second.getNumNoPacketReceived() >= 4) {
 			SerialUSB.println("Stream Lost.  Removing stream sent by: ");
-			it->getSenderAddress().printAddressASCII(&SerialUSB);
+			it->second.getSenderAddress().printAddressASCII(&SerialUSB);
 			SerialUSB.println();
-			it = streams.erase(it);
+			streams.erase(it++);
 		} else {
 			it++;
 		}
-
 	}
 }
 
 void VoiceStreamManager::getStreamPreviousHop(const XBeeAddress64& packetSource, XBeeAddress64& previousHop) {
 
-	for (int i = 0; i < streams.size(); i++) {
-		if (streams.at(i).getSenderAddress().equals(packetSource)) {
-			previousHop = streams.at(i).getUpStreamNeighborAddress();
-			break;
-		}
+	if (streams.find(packetSource) != streams.end()) {
+		previousHop = streams[packetSource].getUpStreamNeighborAddress();
 	}
 }
 
 void VoiceStreamManager::calculateThroughput() {
-	for (vector<VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
+	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
 		if (setTimeDifference) {
 			timeDifference = (millis() / 1000.0);
 			setTimeDifference = false;
 		}
-		it->calculateThroughput(timeDifference);
+		it->second.calculateThroughput(timeDifference);
 	}
 }
 

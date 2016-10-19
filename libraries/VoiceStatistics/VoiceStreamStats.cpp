@@ -6,6 +6,23 @@
  *  Created on: Nov 25, 2015
  *      Author: mike
  */
+VoiceStreamStats::VoiceStreamStats() {
+	this->upStreamNeighborAddress = XBeeAddress64();
+	this->senderAddress = XBeeAddress64();
+	this->payloadSize = 0;
+	throughput = 0;
+	totalPacketsRecieved = 0;
+	expectedFrameId = 1;
+	packetLoss = 0;
+	receivedFrame = 0;
+	intervalStartFrame = 1;
+	totalPacketsSent = 0;
+	timeStamp = (millis() / 1000.0);
+	voiceQuality = 0;
+	duplicateFrame = 0;
+	codecSetting = 2;
+	numNoPacketReceived = 0;
+}
 
 VoiceStreamStats::VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress,
 		const uint8_t payloadSize) {

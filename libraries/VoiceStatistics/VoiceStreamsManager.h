@@ -12,13 +12,14 @@
 #include "VoiceStreamStats.h"
 #include "XBee.h"
 #include "HeartbeatMessage.h"
+#include <map>
 
 using namespace std;
 
 class VoiceStreamManager {
 
 	private:
-		vector<VoiceStreamStats> streams;
+		std::map<XBeeAddress64, VoiceStreamStats> streams;
 		XBee xbee;
 		uint8_t payloadSize;
 		double timeDifference;

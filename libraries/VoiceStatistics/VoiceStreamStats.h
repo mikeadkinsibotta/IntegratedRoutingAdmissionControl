@@ -34,6 +34,7 @@ class VoiceStreamStats {
 		uint8_t numNoPacketReceived;
 
 	public:
+		VoiceStreamStats();
 		VoiceStreamStats(const XBeeAddress64& senderAddress, const uint8_t payloadSize);
 		VoiceStreamStats(const XBeeAddress64& senderAddress, const XBeeAddress64& upStreamNeighborAddress,
 				const uint8_t payloadSize);
