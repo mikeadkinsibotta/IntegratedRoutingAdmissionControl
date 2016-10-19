@@ -4,7 +4,6 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B317F6
@@ -13,7 +12,6 @@
 #define MANIPULATE true
 #define MANIPULATE_ADDRESS_1 0x0013A200
 #define MANIPULATE_ADDRESS_2 0x4102FC32
-#define PAYLOAD_SIZE 76
 #define DEBUG_HEARTBEAT false
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
@@ -24,6 +22,8 @@ const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
 const uint8_t END_TIME = 30;
+const uint8_t PAYLOAD_SIZE = 76;
+const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 200;
 const unsigned long GRANT_TIMEOUT_LENGTH = 50;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
