@@ -35,6 +35,7 @@ void AdmissionControl::checkTimers() {
 	for (std::map<XBeeAddress64, PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end();
 			++it) {
 		XBeeAddress64 sourceAddress = it->first;
+
 		if (it->second.getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
 			//Only sink should send grant message when timer expires
 			XBeeAddress64 nextHop = it->second.getUpStreamNeighbor();
@@ -142,6 +143,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 
 	float * dataRateP = (float*) (dataPtr + 21);
 	float dataRate = *dataRateP;
+	SerialUSB.println("Potential Streams3: ");
+	printPotentialStreams();
 
 	//remove any old streams
 	voiceStreamManager->removeStream(senderAddress);
@@ -160,6 +163,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
 		potentialStream.setOnPath(true);
+		SerialUSB.println("Potential Streams2: ");
+		printPotentialStreams();
 		addPotentialStream(potentialStream, dataRate);
 
 	} else if (nextHop.equals(myAddress)) {
@@ -228,6 +233,8 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 
 void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& initThreadActive,
 		bool& voiceThreadActive) {
+	SerialUSB.println("Potential Streams1: ");
+	printPotentialStreams();
 	XBeeAddress64 sourceAddress;
 	uint8_t * dataPtr = response.getData();
 	XBeeAddress64 previousHop = response.getRemoteAddress64();
@@ -264,6 +271,8 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 		 potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
 		 SerialUSB.println();*/
 		potentialStreams.erase(packetSource);
+		SerialUSB.println("Potential Streams7: ");
+		printPotentialStreams();
 		return true;
 	}
 	return false;
@@ -272,31 +281,43 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 void AdmissionControl::addPotentialStream(PotentialStream& potentialStream, float const addDataRate) {
 
 	const XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
+	SerialUSB.println("Potential Streams4: ");
+	printPotentialStreams();
 
 	if (potentialStreams.find(potentialStream.getSourceAddress()) != potentialStreams.end()) {
+		SerialUSB.println("Potential Streams3: ");
+		printPotentialStreams();
+
 		potentialStreams[sourceAddress].increaseDataRate(addDataRate);
 		if (potentialStream.isOnPath()) {
+			SerialUSB.println("Potential Streams5: ");
+			printPotentialStreams();
 			potentialStream.increaseDataRate(potentialStreams[sourceAddress].getIncreasedDataRate());
 			potentialStreams[sourceAddress] = potentialStream;
 		}
 	} else {
+		SerialUSB.println("Potential Streams6: ");
+		printPotentialStreams();
+
 		potentialStreams.insert(pair<XBeeAddress64, PotentialStream>(sourceAddress, potentialStream));
 	}
 }
 
-void AdmissionControl::printPotentialStreams() const {
+void AdmissionControl::printPotentialStreams() {
 	SerialUSB.println("Potential Streams: ");
-	for (int i = 0; i < potentialStreams.size(); i++) {
-		/*	SerialUSB.print("    ");
-		 potentialStreams.at(i).printPotentialStream();*/
+	for (std::map<XBeeAddress64, PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end();
+			++it) {
+		SerialUSB.print("    ");
+		it->second.printPotentialStream();
 	}
 }
 
-bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) const {
+bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream) {
 	float neighborhoodCapacity = heartbeatProtocol->getLocalCapacity();
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
-
+	SerialUSB.println("Potential Streams6: ");
+	printPotentialStreams();
 	SerialUSB.print("Potential Stream: ");
 	sourceAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(" Potential Data Rate: ");

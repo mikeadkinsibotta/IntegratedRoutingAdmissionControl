@@ -29,7 +29,7 @@ class AdmissionControl {
 		unsigned long grantTimeoutLength;
 		unsigned long rejcTimeoutLength;
 		void addPotentialStream(PotentialStream& potentialStream, const float addDataRate);
-		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
+		bool checkLocalCapacity(const PotentialStream& potentialStream);
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
@@ -46,7 +46,7 @@ class AdmissionControl {
 		void handleGRANTPacket(const Rx64Response &response, bool& initThreadActive, bool& voiceThreadActive);
 		void checkTimers();
 		bool removePotentialStream(const XBeeAddress64& packetSource);
-		void printPotentialStreams() const;
+		void printPotentialStreams();
 
 };
 
