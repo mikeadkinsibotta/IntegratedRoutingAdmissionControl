@@ -31,29 +31,34 @@ AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAdd
 }
 
 void AdmissionControl::checkTimers() {
+	if (!potentialStreams.empty()) {
+		for (std::map<XBeeAddress64, PotentialStream>::iterator it = potentialStreams.begin();
+				it != potentialStreams.end();) {
+			XBeeAddress64 sourceAddress = it->first;
 
-	for (std::map<XBeeAddress64, PotentialStream>::iterator it = potentialStreams.begin(); it != potentialStreams.end();
-			++it) {
-		XBeeAddress64 sourceAddress = it->first;
+			if (it->second.getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
+				//Only sink should send grant message when timer expires
+				XBeeAddress64 nextHop = it->second.getUpStreamNeighbor();
+				sendGRANTPacket(sourceAddress, nextHop);
+				potentialStreams.erase(it++);
+			} else if (it->second.getRejcTimer().timeoutTimer()) {
+				//Wait for all init messages then send rejc if violate local capacity
+				//SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
+				bool rejected = checkLocalCapacity(it->second);
+				if (rejected) {
+					SerialUSB.println("Sending Reject Packet...");
+					sendREDJPacket(it->first);
+				}
 
-		if (it->second.getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
-			//Only sink should send grant message when timer expires
-			XBeeAddress64 nextHop = it->second.getUpStreamNeighbor();
-			sendGRANTPacket(sourceAddress, nextHop);
-			removePotentialStream(sourceAddress);
-		} else if (it->second.getRejcTimer().timeoutTimer()) {
-			//Wait for all init messages then send rejc if violate local capacity
-			//SerialUSB.println("REJC Timer Expired. Check Local Capacity...");
-			bool rejected = checkLocalCapacity(it->second);
-			if (rejected) {
-				SerialUSB.println("Sending Reject Packet...");
-				sendREDJPacket(it->first);
-			}
-
-			//OnPath will be receiving a GRNT packet.  Potential Stream will be removed when forwarding
-			//GRNT packet.
-			if (!it->second.isOnPath()) {
-				removePotentialStream(sourceAddress);
+				//OnPath will be receiving a GRNT packet.  Potential Stream will be removed when forwarding
+				//GRNT packet.
+				if (!it->second.isOnPath()) {
+					potentialStreams.erase(it++);
+				} else {
+					++it;
+				}
+			} else {
+				++it;
 			}
 		}
 	}
@@ -67,8 +72,9 @@ void AdmissionControl::sendInitPacket(const uint8_t codecSetting, const float du
 		SerialUSB.println("Sending Init");
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
+
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
-		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+		const uint8_t * injectionRateP = reinterpret_cast<uint8_t*>(&injectionRate);
 
 		SerialUSB.print("Injection Rate: ");
 		SerialUSB.println(injectionRate);
@@ -141,10 +147,8 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	HeartbeatMessage::setAddress(dataPtr, senderAddress, 5);
 	HeartbeatMessage::setAddress(dataPtr, nextHop, 13);
 
-	float * dataRateP = (float*) (dataPtr + 21);
-	float dataRate = *dataRateP;
-	SerialUSB.println("Potential Streams3: ");
-	printPotentialStreams();
+	float dataRate;
+	memcpy(&dataRate, dataPtr + 21, sizeof(float));
 
 	//remove any old streams
 	voiceStreamManager->removeStream(senderAddress);
@@ -163,8 +167,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		//Start Grant Timer
 		potentialStream.getGrantTimer().startTimer();
 		potentialStream.setOnPath(true);
-		SerialUSB.println("Potential Streams2: ");
-		printPotentialStreams();
+
 		addPotentialStream(potentialStream, dataRate);
 
 	} else if (nextHop.equals(myAddress)) {
@@ -178,7 +181,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		XBeeAddress64 heartbeatAddress = heartbeatProtocol->getBroadcastAddress();
 		XBeeAddress64 myNextHop = heartbeatProtocol->getNextHop().getAddress();
 
-		uint8_t * injectionRateP = (uint8_t *) &dataRate;
+		const uint8_t * injectionRateP = reinterpret_cast<uint8_t*>(&dataRate);
 
 		uint8_t payloadBroadCast[25];
 		payloadBroadCast[0] = 'I';
@@ -233,8 +236,6 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 
 void AdmissionControl::handleGRANTPacket(const Rx64Response &response, bool& initThreadActive,
 		bool& voiceThreadActive) {
-	SerialUSB.println("Potential Streams1: ");
-	printPotentialStreams();
 	XBeeAddress64 sourceAddress;
 	uint8_t * dataPtr = response.getData();
 	XBeeAddress64 previousHop = response.getRemoteAddress64();
@@ -271,8 +272,6 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 		 potentialStreams.at(i).getSourceAddress().printAddressASCII(&SerialUSB);
 		 SerialUSB.println();*/
 		potentialStreams.erase(packetSource);
-		SerialUSB.println("Potential Streams7: ");
-		printPotentialStreams();
 		return true;
 	}
 	return false;
@@ -281,24 +280,15 @@ bool AdmissionControl::removePotentialStream(const XBeeAddress64& packetSource) 
 void AdmissionControl::addPotentialStream(PotentialStream& potentialStream, float const addDataRate) {
 
 	const XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
-	SerialUSB.println("Potential Streams4: ");
-	printPotentialStreams();
 
 	if (potentialStreams.find(potentialStream.getSourceAddress()) != potentialStreams.end()) {
-		SerialUSB.println("Potential Streams3: ");
-		printPotentialStreams();
 
 		potentialStreams[sourceAddress].increaseDataRate(addDataRate);
 		if (potentialStream.isOnPath()) {
-			SerialUSB.println("Potential Streams5: ");
-			printPotentialStreams();
 			potentialStream.increaseDataRate(potentialStreams[sourceAddress].getIncreasedDataRate());
 			potentialStreams[sourceAddress] = potentialStream;
 		}
 	} else {
-		SerialUSB.println("Potential Streams6: ");
-		printPotentialStreams();
-
 		potentialStreams.insert(pair<XBeeAddress64, PotentialStream>(sourceAddress, potentialStream));
 	}
 }
@@ -316,8 +306,7 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	float neighborhoodCapacity = heartbeatProtocol->getLocalCapacity();
 	float potentialDataRate = potentialStream.getIncreasedDataRate();
 	XBeeAddress64 sourceAddress = potentialStream.getSourceAddress();
-	SerialUSB.println("Potential Streams6: ");
-	printPotentialStreams();
+
 	SerialUSB.print("Potential Stream: ");
 	sourceAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.print(" Potential Data Rate: ");
