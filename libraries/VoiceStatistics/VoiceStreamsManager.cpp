@@ -78,7 +78,6 @@ void VoiceStreamManager::sendPathPacket() {
 
 	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
-		SerialUSB.println("Sending Path packet");
 		const XBeeAddress64 &dataSenderAddress = it->second.getSenderAddress();
 		const uint8_t dataLoss = it->second.getPacketLoss();
 		const uint8_t totalPacketsSent = it->second.getTotalPacketsSent();

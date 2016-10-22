@@ -309,16 +309,8 @@ void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 
 		for (int j = 0; j < traceMessage.getAddressListLength(); ++j) {
 
-			HeartbeatMessage::addAddressToMessage(traceMessagePayLoad, traceMessage.getAddresses()[i], i);
+			HeartbeatMessage::addAddressToMessage(traceMessagePayLoad, traceMessage.getAddresses()[j], i);
 
-//			traceMessagePayLoad[i] = (traceMessage.getAddresses().at(j).getMsb() >> 24) & 0xff;
-//			traceMessagePayLoad[i + 1] = (traceMessage.getAddresses().at(j).getMsb() >> 16) & 0xff;
-//			traceMessagePayLoad[i + 2] = (traceMessage.getAddresses().at(j).getMsb() >> 8) & 0xff;
-//			traceMessagePayLoad[i + 3] = traceMessage.getAddresses().at(j).getMsb() & 0xff;
-//			traceMessagePayLoad[i + 4] = (traceMessage.getAddresses().at(j).getLsb() >> 24) & 0xff;
-//			traceMessagePayLoad[i + 5] = (traceMessage.getAddresses().at(j).getLsb() >> 16) & 0xff;
-//			traceMessagePayLoad[i + 6] = (traceMessage.getAddresses().at(j).getLsb() >> 8) & 0xff;
-//			traceMessagePayLoad[i + 7] = traceMessage.getAddresses().at(j).getLsb() & 0xff;
 			i += 8;
 		}
 
