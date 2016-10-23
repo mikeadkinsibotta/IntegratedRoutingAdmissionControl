@@ -502,7 +502,7 @@ void XBee::readPacket(bool debug) {
 
 		b = read();
 		if (debug)
-			_serial->print((char) b);
+			SerialUSB.print((char) b);
 
 		if (_pos > 0 && b == START_BYTE && ATAP == 2) {
 			// new packet start before previous packeted completed -- discard previous packet and start over
@@ -514,7 +514,7 @@ void XBee::readPacket(bool debug) {
 			if (available()) {
 				b = read();
 				if (debug)
-					_serial->print((char) b);
+					SerialUSB.print((char) b);
 
 				b = 0x20 ^ b;
 			} else {
