@@ -5,7 +5,6 @@
  *      Author: mike
  */
 #include <VoicePacketSender.h>
-#include "TraceMessage.h"
 
 VoicePacketSender::VoicePacketSender() {
 	codecSetting = 2;
@@ -120,10 +119,12 @@ void VoicePacketSender::generateVoicePacket() {
 	uint8_t combinedSize = 0;
 
 	bool r = (random(100)) < (dupSetting * 100);
+
+	uint8_t destination[100];
+	memset(destination, 0, sizeof(destination));
+
 	if (dupSetting != 0 && r && !justSentDup) {
 		frameId--;
-
-		uint8_t destination[100];
 
 		destination[0] = 'D';
 		destination[1] = 'A';
@@ -149,7 +150,7 @@ void VoicePacketSender::generateVoicePacket() {
 		frameId++;
 		justSentDup = true;
 	} else {
-		uint8_t destination[100];
+
 		destination[0] = 'D';
 		destination[1] = 'A';
 		destination[2] = 'T';

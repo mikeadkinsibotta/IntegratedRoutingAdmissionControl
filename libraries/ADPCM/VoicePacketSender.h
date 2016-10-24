@@ -16,6 +16,7 @@
 #include <ThreadController.h>
 #include <CompressionTable.h>
 #include <VoiceSetting.h>
+#include "TraceMessage.h"
 #include <math.h>
 
 class VoicePacketSender {
