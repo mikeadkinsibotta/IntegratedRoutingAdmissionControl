@@ -21,7 +21,7 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const uint8_t TRACE_INTERVAL = 2000;
-const uint8_t END_TIME = 200;
+const uint8_t END_TIME = 100;
 const uint8_t PAYLOAD_SIZE = 76;
 const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 200;
@@ -32,9 +32,12 @@ const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 1.90;
+const float DISTANCE_THRESHOLD = 1.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
+
 bool endMessageSent = false;
+uint8_t nextHopSwitchListSize = 0;
+uint8_t nextHopSwitchListIndex = 0;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -50,6 +53,7 @@ Thread * pathLoss = new Thread();
 Thread * generateVoice = new Thread();
 Thread * calculateThroughput = new Thread();
 Thread * debugHeartbeatTable = new Thread();
+Thread * endMessage = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
@@ -129,7 +133,9 @@ void broadcastHeartbeat() {
 
 		//kill Sender
 		if (!myAddress.equals(sinkAddress)) {
-			heartbeatProtocol->sendEndMessage();
+			nextHopSwitchListSize = heartbeatProtocol->getNextHopSwitchList().size();
+			(*endMessage).enabled = true;
+
 		}
 		controller.remove(sendInital);
 		controller.remove(pathLoss);
@@ -137,6 +143,15 @@ void broadcastHeartbeat() {
 		controller.remove(generateVoice);
 		controller.remove(debugHeartbeatTable);
 		endMessageSent = true;
+	}
+}
+
+void sendEndMessage() {
+	if (nextHopSwitchListIndex < nextHopSwitchListSize) {
+		heartbeatProtocol->sendEndMessage(nextHopSwitchListIndex);
+		nextHopSwitchListIndex++;
+	} else {
+		(*endMessage).enabled = false;
 	}
 }
 
@@ -251,6 +266,11 @@ void setupThreads() {
 	(*debugHeartbeatTable).setInterval(DEBUG_HEARTBEAT_TABLE);
 	(*debugHeartbeatTable).onRun(debugHeartbeat);
 
+	(*endMessage).ThreadName = "Send End Messages";
+	(*endMessage).enabled = false;
+	(*endMessage).setInterval(60);
+	(*endMessage).onRun(sendEndMessage);
+
 	controller.add(responseThread);
 	controller.add(sendInital);
 	controller.add(pathLoss);
@@ -258,4 +278,5 @@ void setupThreads() {
 	controller.add(generateVoice);
 	controller.add(heartbeat);
 	controller.add(debugHeartbeatTable);
+	controller.add(endMessage);
 }
