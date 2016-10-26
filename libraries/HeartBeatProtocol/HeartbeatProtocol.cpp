@@ -72,12 +72,6 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 
 	seqNum++;
 
-//	if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
-//		noNeighborcalculatePathQualityNextHop();
-//	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
-//		withNeighborcalculatePathQualityNextHop();
-//	}
-
 }
 
 void HeartbeatProtocol::reCalculateNeighborhoodCapacity() {
@@ -190,62 +184,6 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 			}
 		}
 	}
-}
-
-void HeartbeatProtocol::printNeighborHoodTable() {
-	SerialUSB.println();
-	SerialUSB.print("MyAddress: ");
-	myAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(", DataRate: ");
-	SerialUSB.print(dataRate);
-	SerialUSB.print(", SeqNum: ");
-	SerialUSB.print(seqNum);
-	SerialUSB.print(", HopsToSink: ");
-	SerialUSB.print(hopsToSink);
-	SerialUSB.print(", QualityOfPath: ");
-	SerialUSB.print(qualityOfPath);
-	SerialUSB.print(", NeighborhoodCapacity: ");
-	SerialUSB.print(neighborhoodCapacity);
-	SerialUSB.print(", RouteFlag: ");
-	SerialUSB.print(routeFlag);
-	SerialUSB.print(", GenerateData: ");
-	SerialUSB.print(generateData);
-	SerialUSB.print(", SinkAddress: ");
-	sinkAddress.printAddressASCII(&SerialUSB);
-	SerialUSB.print(", NextHopAddress: ");
-	nextHop.getAddress().printAddressASCII(&SerialUSB);
-	SerialUSB.println();
-
-	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
-			++it) {
-
-		SerialUSB.print("NeighborAddress: ");
-		it->first.printAddressASCII(&SerialUSB);
-		SerialUSB.print(", DataRate: ");
-		SerialUSB.print(it->second.getDataRate());
-		SerialUSB.print(", SeqNum: ");
-		SerialUSB.print(it->second.getSeqNum());
-		SerialUSB.print(", HopsToSink: ");
-		SerialUSB.print(it->second.getHopsToSink());
-		SerialUSB.print(", QualityOfPath: ");
-		SerialUSB.print(it->second.getQualityOfPath());
-		SerialUSB.print(", NeighborhoodCapacity: ");
-		SerialUSB.print(it->second.getNeighborhoodCapacity());
-		SerialUSB.print(", RouteFlag: ");
-		SerialUSB.print(it->second.isRouteFlag());
-		SerialUSB.print(", SinkAddress: ");
-		it->second.getSinkAddress().printAddressASCII(&SerialUSB);
-		SerialUSB.print(", NextHopAddress: ");
-		it->second.getNextHop().printAddressASCII(&SerialUSB);
-		SerialUSB.print(", RSSI: ");
-		SerialUSB.print(it->second.getRssi());
-		SerialUSB.print(", GenerateData: ");
-		SerialUSB.print(it->second.isGenerateData());
-		SerialUSB.print(", RelativeDistanceAvg: ");
-		SerialUSB.println(it->second.getRelativeDistanceAvg(), 4);
-
-	}
-	SerialUSB.println();
 }
 
 void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
@@ -539,6 +477,62 @@ void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessa
 	neighbor->setHopsToSink(heartbeatMessage.getHopsToSink());
 	neighbor->setGenerateData(heartbeatMessage.isGenerateData());
 
+}
+
+void HeartbeatProtocol::printNeighborHoodTable() {
+	SerialUSB.println();
+	SerialUSB.print("MyAddress: ");
+	myAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", DataRate: ");
+	SerialUSB.print(dataRate);
+	SerialUSB.print(", SeqNum: ");
+	SerialUSB.print(seqNum);
+	SerialUSB.print(", HopsToSink: ");
+	SerialUSB.print(hopsToSink);
+	SerialUSB.print(", QualityOfPath: ");
+	SerialUSB.print(qualityOfPath);
+	SerialUSB.print(", NeighborhoodCapacity: ");
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.print(", RouteFlag: ");
+	SerialUSB.print(routeFlag);
+	SerialUSB.print(", GenerateData: ");
+	SerialUSB.print(generateData);
+	SerialUSB.print(", SinkAddress: ");
+	sinkAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", NextHopAddress: ");
+	nextHop.getAddress().printAddressASCII(&SerialUSB);
+	SerialUSB.println();
+
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+
+		SerialUSB.print("NeighborAddress: ");
+		it->first.printAddressASCII(&SerialUSB);
+		SerialUSB.print(", DataRate: ");
+		SerialUSB.print(it->second.getDataRate());
+		SerialUSB.print(", SeqNum: ");
+		SerialUSB.print(it->second.getSeqNum());
+		SerialUSB.print(", HopsToSink: ");
+		SerialUSB.print(it->second.getHopsToSink());
+		SerialUSB.print(", QualityOfPath: ");
+		SerialUSB.print(it->second.getQualityOfPath());
+		SerialUSB.print(", NeighborhoodCapacity: ");
+		SerialUSB.print(it->second.getNeighborhoodCapacity());
+		SerialUSB.print(", RouteFlag: ");
+		SerialUSB.print(it->second.isRouteFlag());
+		SerialUSB.print(", SinkAddress: ");
+		it->second.getSinkAddress().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", NextHopAddress: ");
+		it->second.getNextHop().printAddressASCII(&SerialUSB);
+		SerialUSB.print(", RSSI: ");
+		SerialUSB.print(it->second.getRssi());
+		SerialUSB.print(", GenerateData: ");
+		SerialUSB.print(it->second.isGenerateData());
+		SerialUSB.print(", RelativeDistanceAvg: ");
+		SerialUSB.println(it->second.getRelativeDistanceAvg(), 4);
+
+	}
+	SerialUSB.println();
 }
 
 bool HeartbeatProtocol::isRouteFlag() const {
