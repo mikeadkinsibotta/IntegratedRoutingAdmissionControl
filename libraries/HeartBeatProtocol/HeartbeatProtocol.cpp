@@ -28,7 +28,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
 		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
-		const bool generateData) {
+		const bool generateData, const float distanceDifference) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -41,6 +41,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->dataRate = 0;
 	this->neighborhoodCapacity = MAX_FLT;
 	this->generateData = generateData;
+	this->distanceDifference = distanceDifference;
 	timeoutLength = 0;
 	nextHop = Neighbor();
 	digitalWrite(13, HIGH);
@@ -311,7 +312,7 @@ void HeartbeatProtocol::lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& f
 		/*
 		 *1.  Look for neighbor with fewest hops
 		 *2.  If hops are the same, check if neighbor has smaller qop
-		 *3.  If hops the same, qop the same, then choose based on smaller relative distance
+		 *3.  If hops the same, qop the same, then choose based on smaller relative distance, only switch though if its a large difference
 		 */
 
 		if (neighbor.getHopsToSink() > it->getHopsToSink()) {
@@ -322,8 +323,15 @@ void HeartbeatProtocol::lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& f
 			neighbor = *it;
 		} else if (neighbor.getHopsToSink() == it->getHopsToSink() && qop == path
 				&& neighbor.getRelativeDistanceAvg() > it->getRelativeDistanceAvg()) {
-			neighbor = *it;
-			qop = path;
+
+			//We are in this block cause only relative distance is left for criteria for switching hops.
+			//But we don't want to use this too much cause it will cause a nexthop bounce effect.
+
+			double differenceDistance = abs(neighbor.getRelativeDistanceAvg() - it->getRelativeDistanceAvg());
+			if (differenceDistance > distanceDifference) {
+				neighbor = *it;
+				qop = path;
+			}
 		}
 	}
 }

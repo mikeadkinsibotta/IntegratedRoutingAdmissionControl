@@ -41,6 +41,7 @@ class HeartbeatProtocol {
 		uint8_t hopsToSink;
 		unsigned long timeoutLength;
 		bool generateData;
+		float distanceDifference;
 
 		void buildSaturationTable();
 		void reCalculateNeighborhoodCapacity();
@@ -54,7 +55,7 @@ class HeartbeatProtocol {
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
 				const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
-				const bool generateData);
+				const bool generateData, const float distanceDifference);
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response);
 		void purgeNeighborhoodTable();
