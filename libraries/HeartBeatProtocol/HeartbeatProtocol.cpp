@@ -188,20 +188,11 @@ void HeartbeatProtocol::purgeNeighborhoodTable() {
 
 void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
-//Add 1 to include myself
-	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
-	uint8_t qop = UINT8_MAX;
-	Neighbor neighbor;
-	std::vector < Neighbor > filterTable;
-	std::vector < Neighbor > generateTable;
-	std::vector < Neighbor > noGenerateTable;
+	vector < Neighbor > filterTable;
 
 	digitalWrite(13, HIGH);
 	SerialUSB.println("I need a nextHop!");
-	/* If no neighbor is currently selected:
-	 * - Pick neighbor with smallest quality of path
-	 * - If quality of path is the same, pick with shorter relative distance
-	 */
+
 	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
 			++it) {
 		if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress))) {
@@ -211,41 +202,67 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 	//check if any neighbors have routes
 	if (filterTable.size() > 0) {
+		Neighbor neighbor;
+		neighbor.setHopsToSink(UINT8_MAX);
+		uint8_t qop = UINT8_MAX;
 
-		for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
-			if (it->isGenerateData()) {
-				generateTable.push_back(*it);
-			} else {
-				noGenerateTable.push_back(*it);
-			}
+		lookForBetterHop(neighbor, filterTable, qop);
+
+		qualityOfPath = qop;
+		nextHop = neighbor;
+		unsigned long timepoint = millis();
+		NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
+		nextHopSwitchList.push_back(nextHopSwitch);
+		routeFlag = true;
+		digitalWrite(13, LOW);
+		SerialUSB.println("Set next Hop");
+		nextHop.getAddress().printAddress(&SerialUSB);
+
+	} else {
+		//reset path if path does not exist
+		qualityOfPath = 0;
+		nextHop = Neighbor();
+		unsigned long timepoint = millis();
+		NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
+		nextHopSwitchList.push_back(nextHopSwitch);
+		routeFlag = false;
+		digitalWrite(13, HIGH);
+	}
+}
+
+void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
+
+	//TODO
+	/*Quality of path is not union as described in proposal.  If we have
+	 * a path in which two nodes both affect the same neighbor node we count
+	 * that neighbor node twice.  We don't union.  Union would eliminate duplicate nodes and only count
+	 * the neighbor once.
+	 */
+
+	//Neighbor is already selected.  Should I make some adjustments?
+	//SerialUSB.print("Should I adjust my nextHop neighbor?  ");
+//	unsigned long timeStamp = nextHop.getTimeStamp();
+//	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
+//	unsigned long diff = timeStamp - previousTimeStamp;
+//	diff = diff / 1000.0;
+//	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
+	std::vector < Neighbor > filterTable;
+
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		if (it->second.isRouteFlag() && !(it->second.getNextHop().equals(myAddress)) && !(it->second.equals(nextHop))) {
+			filterTable.push_back(it->second);
 		}
+	}
 
-		//Avoid generating data neighbors if possible
-		if (noGenerateTable.size() > 0) {
-			filterTable = generateTable;
-		} else {
-			filterTable = noGenerateTable;
-		}
+	//Check if any other neighbors have next hops, if not don't do anything
+	if (filterTable.size() > 0) {
+		uint8_t qop = nextHop.getQualityOfPath();
+		Neighbor neighbor = nextHop;
+		lookForBetterHop(neighbor, filterTable, qop);
 
-		for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
-			uint8_t path = neighborHoodSize + it->getQualityOfPath();
-			if (path < qop) {
-				qop = path;
-				if (neighbor.equals(Neighbor())) {
-					neighbor = *it;
-				}
-
-			} else if (qop == path && nextHop.getHopsToSink() > it->getHopsToSink()) {
-				double relativeDistanceCurrent = neighbor.getRelativeDistanceAvg();
-				double relativeDistanceNew = it->getRelativeDistanceAvg();
-				if (relativeDistanceCurrent > relativeDistanceNew) {
-					neighbor = *it;
-				}
-			}
-		}
-
-		//Make sure route exists
-		if (qop != UINT8_MAX) {
+		// Only need to make switch if we found neighbor with better route
+		if (!neighbor.equals(nextHop)) {
 			qualityOfPath = qop;
 			nextHop = neighbor;
 			unsigned long timepoint = millis();
@@ -254,15 +271,59 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 			routeFlag = true;
 			digitalWrite(13, LOW);
 
+		}
+	}
+
+//	SerialUSB.print("  Difference from last timeStamp:  ");
+//	SerialUSB.print(diff);
+//	SerialUSB.print(" seconds   ");
+//	SerialUSB.print("Difference distance: ");
+//	SerialUSB.print(distanceDiff);
+//
+//	if (abs(diff - 0) > EPISLON) {
+//		double speed = distanceDiff / diff;
+//		SerialUSB.print("   Speed: ");
+//		SerialUSB.print(speed, 12);
+//		SerialUSB.println(" mps");
+//	}
+}
+
+void HeartbeatProtocol::lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& filterTable, uint8_t& qop) const {
+
+	vector < Neighbor > secondaryChoiceTable;
+	vector < Neighbor > primaryChoiceTable;
+
+	for (vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
+
+		if (it->isGenerateData()) {
+			secondaryChoiceTable.push_back(*it);
 		} else {
-			//reset path if path does not exist
-			qualityOfPath = 0;
-			nextHop = Neighbor();
-			unsigned long timepoint = millis();
-			NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
-			nextHopSwitchList.push_back(nextHopSwitch);
-			routeFlag = false;
-			digitalWrite(13, HIGH);
+			primaryChoiceTable.push_back(*it);
+		}
+	}
+
+	//Avoid generating data neighbors or neighbors with not much difference in distance if possible
+	filterTable = primaryChoiceTable.size() > 0 ? secondaryChoiceTable : primaryChoiceTable;
+
+	for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
+		const uint8_t path = neighborhoodTable.size() + 1 + it->getQualityOfPath();
+
+		/*
+		 *1.  Look for neighbor with fewest hops
+		 *2.  If hops are the same, check if neighbor has smaller qop
+		 *3.  If hops the same, qop the same, then choose based on smaller relative distance
+		 */
+
+		if (neighbor.getHopsToSink() > it->getHopsToSink()) {
+			neighbor = *it;
+			qop = path;
+		} else if (neighbor.getHopsToSink() == it->getHopsToSink() && path < qop) {
+			qop = path;
+			neighbor = *it;
+		} else if (neighbor.getHopsToSink() == it->getHopsToSink() && qop == path
+				&& neighbor.getRelativeDistanceAvg() > it->getRelativeDistanceAvg()) {
+			neighbor = *it;
+			qop = path;
 		}
 	}
 }
@@ -282,82 +343,6 @@ void HeartbeatProtocol::manipulateRoute() {
 			digitalWrite(13, LOW);
 		}
 	}
-}
-
-void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
-
-//TODO
-	/*Quality of path is not union as described in proposal.  If we have
-	 * a path in which two nodes both affect the same neighbor node we count
-	 * that neighbor node twice.  We don't union.  Union would eliminate duplicate nodes and only count
-	 * the neighbor once.
-	 */
-
-//Neighbor is already selected.  Should I make some adjustments?
-//SerialUSB.print("Should I adjust my nextHop neighbor?  ");
-	unsigned long timeStamp = nextHop.getTimeStamp();
-	unsigned long previousTimeStamp = nextHop.getPreviousTimeStamp();
-	unsigned long diff = timeStamp - previousTimeStamp;
-	diff = diff / 1000.0;
-	double distanceDiff = abs(nextHop.getRelativeDistanceAvg() - nextHop.getPreviousRelativeDistance());
-
-//Check quality of path
-//Add 1 to include myself
-	uint8_t neighborHoodSize = neighborhoodTable.size() + 1;
-
-//Get qop for nextHop
-	uint8_t nextHopQop = nextHop.getQualityOfPath();
-
-//Update my own quality of path
-	uint8_t currentQop = neighborHoodSize + nextHopQop;
-
-//TODO check for paths with better qob and check for paths with fewer hops.
-//SerialUSB.println("Checking neighbors for better path...");
-
-//Don't make any changes if manipulate flag is on.
-	if (!manipulate) {
-
-		for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
-				++it) {
-
-			//check if neighbor has a path first
-			//make sure that this next hop is also not generating data
-			if (it->second.isRouteFlag() && (!it->second.isGenerateData() && nextHop.isGenerateData())) {
-				//SerialUSB.print("Neighbor: ");
-				//it->first.printAddressASCII(&SerialUSB);
-				//SerialUSB.println(" has route");
-
-				//check if this route has lower qop
-				//if it has a lower qop switch
-				//if the qop is the same pick the neighbor with the lower number of hops
-				uint8_t qopForThisPath = neighborHoodSize + it->second.getQualityOfPath();
-				if (qualityOfPath > qopForThisPath) {
-					nextHop = it->second;
-					unsigned long timepoint = millis();
-					NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
-					nextHopSwitchList.push_back(nextHopSwitch);
-				} else if (qualityOfPath == qopForThisPath && nextHop.getHopsToSink() > it->second.getHopsToSink()) {
-					nextHop = it->second;
-					unsigned long timepoint = millis();
-					NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
-					nextHopSwitchList.push_back(nextHopSwitch);
-				}
-			}
-		}
-	}
-
-//	SerialUSB.print("  Difference from last timeStamp:  ");
-//	SerialUSB.print(diff);
-//	SerialUSB.print(" seconds   ");
-//	SerialUSB.print("Difference distance: ");
-//	SerialUSB.print(distanceDiff);
-//
-//	if (abs(diff - 0) > EPISLON) {
-//		double speed = distanceDiff / diff;
-//		SerialUSB.print("   Speed: ");
-//		SerialUSB.print(speed, 12);
-//		SerialUSB.println(" mps");
-//	}
 }
 
 void HeartbeatProtocol::buildSaturationTable() {
