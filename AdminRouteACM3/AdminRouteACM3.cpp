@@ -20,8 +20,8 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const uint8_t TRACE_INTERVAL = 2000;
-const uint8_t END_TIME = 200;
+const unsigned long TRACE_INTERVAL = 2000;
+const unsigned long END_TIME = 280;
 const uint8_t PAYLOAD_SIZE = 76;
 const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 200;
@@ -32,7 +32,7 @@ const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 0.95;
+const float DISTANCE_THRESHOLD = 1.70;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
 
