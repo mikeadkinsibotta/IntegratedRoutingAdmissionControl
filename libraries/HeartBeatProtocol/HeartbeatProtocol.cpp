@@ -216,8 +216,6 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 		nextHopSwitchList.push_back(nextHopSwitch);
 		routeFlag = true;
 		digitalWrite(13, LOW);
-		SerialUSB.println("Set next Hop");
-		nextHop.getAddress().printAddress(&SerialUSB);
 
 	} else {
 		//reset path if path does not exist
@@ -264,6 +262,7 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
 		// Only need to make switch if we found neighbor with better route
 		if (!neighbor.equals(nextHop)) {
+
 			qualityOfPath = qop;
 			nextHop = neighbor;
 			unsigned long timepoint = millis();
@@ -304,7 +303,7 @@ void HeartbeatProtocol::lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& f
 	}
 
 	//Avoid generating data neighbors or neighbors with not much difference in distance if possible
-	filterTable = primaryChoiceTable.size() > 0 ? secondaryChoiceTable : primaryChoiceTable;
+	filterTable = primaryChoiceTable.size() > 0 ? primaryChoiceTable : secondaryChoiceTable;
 
 	for (std::vector<Neighbor>::iterator it = filterTable.begin(); it != filterTable.end(); ++it) {
 		const uint8_t path = neighborhoodTable.size() + 1 + it->getQualityOfPath();
@@ -329,6 +328,8 @@ void HeartbeatProtocol::lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& f
 
 			double differenceDistance = abs(neighbor.getRelativeDistanceAvg() - it->getRelativeDistanceAvg());
 			if (differenceDistance > distanceDifference) {
+				SerialUSB.print("Difference:  ");
+				SerialUSB.println(differenceDistance);
 				neighbor = *it;
 				qop = path;
 			}
