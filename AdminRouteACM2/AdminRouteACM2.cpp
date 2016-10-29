@@ -16,12 +16,12 @@
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 3;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
-const unsigned long TRACE_INTERVAL = 2000;
-const unsigned long END_TIME = 280;
+const unsigned long TRACE_INTERVAL = 10000;
+const unsigned long END_TIME = 200;
 const uint8_t PAYLOAD_SIZE = 76;
 const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 200;
@@ -32,7 +32,7 @@ const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 6.40;
+const float DISTANCE_THRESHOLD = 7.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
 
@@ -55,6 +55,7 @@ Thread * generateVoice = new Thread();
 Thread * calculateThroughput = new Thread();
 Thread * debugHeartbeatTable = new Thread();
 Thread * endMessage = new Thread();
+Thread * threadMessage = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
@@ -74,8 +75,7 @@ void setup() {
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
 			xbee, SENDER, DIFFERENCE_DISTANCE);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
-			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE,
-			TRACE_INTERVAL);
+			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamManager,
 			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
@@ -123,6 +123,14 @@ void sendVoicePacket() {
 	if (!nextHop.equals(Neighbor())) {
 		voicePacketSender->generateVoicePacket();
 	}
+}
+
+void sendTracePacket() {
+
+	if ((*generateVoice).enabled) {
+		voicePacketSender->sendTracePacket();
+	}
+
 }
 
 void broadcastHeartbeat() {
@@ -233,7 +241,7 @@ void setupThreads() {
 	(*heartbeat).enabled = true;
 	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
 	(*heartbeat).onRun(broadcastHeartbeat);
-	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE));
+	heartbeatProtocol->setTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE) + 250);
 
 	//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";
@@ -269,8 +277,13 @@ void setupThreads() {
 
 	(*endMessage).ThreadName = "Send End Messages";
 	(*endMessage).enabled = false;
-	(*endMessage).setInterval(60);
+	(*endMessage).setInterval(500);
 	(*endMessage).onRun(sendEndMessage);
+
+	(*threadMessage).ThreadName = "Thread Messages";
+	(*threadMessage).enabled = SENDER;
+	(*threadMessage).setInterval(TRACE_INTERVAL);
+	(*threadMessage).onRun(sendEndMessage);
 
 	controller.add(responseThread);
 	controller.add(sendInital);
@@ -280,4 +293,5 @@ void setupThreads() {
 	controller.add(heartbeat);
 	controller.add(debugHeartbeatTable);
 	controller.add(endMessage);
+	controller.add(threadMessage);
 }

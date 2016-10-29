@@ -14,7 +14,6 @@ VoicePacketSender::VoicePacketSender() {
 	sinkAddress = XBeeAddress64();
 	previousHop = XBeeAddress64();
 	frameId = 0;
-	tracePacketInterval = 0;
 	myNextHop = XBeeAddress64();
 	heartbeatProtocol = 0;
 	xbee = XBee();
@@ -29,8 +28,8 @@ VoicePacketSender::VoicePacketSender() {
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
 		Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize,
-		const uint8_t tracePacketInterval) {
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+		const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -42,7 +41,6 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	frameId = 0;
 	injectionRate = 0;
 	myNextHop = XBeeAddress64();
-	this->tracePacketInterval = tracePacketInterval;
 	previousHop = XBeeAddress64();
 	//If I don't past the pointer, it just makes a copy of the heartbeat protocol during assignment,
 	//If I make changes to the heartbeat protocol outside the class the member variable does not pick up the changes.
@@ -174,10 +172,6 @@ void VoicePacketSender::generateVoicePacket() {
 		xbee.send(tx);
 		frameId++;
 		justSentDup = false;
-	}
-
-	if (frameId % tracePacketInterval == 0) {
-		sendTracePacket();
 	}
 
 }

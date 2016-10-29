@@ -37,7 +37,6 @@ class VoicePacketSender {
 		float injectionRate;
 		uint8_t payloadSize;
 		uint8_t frameId;
-		uint8_t tracePacketInterval;
 		bool justSentDup = false;
 
 		XBeeAddress64 packetDestination;
@@ -45,14 +44,13 @@ class VoicePacketSender {
 		XBeeAddress64 previousHop;
 
 		void updateDataRate(uint8_t dataLoss);
-		void sendTracePacket();
 
 	public:
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
 				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
 				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-				const uint8_t payloadSize, const uint8_t tracePacketInterval);
+				const uint8_t payloadSize);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
@@ -67,6 +65,7 @@ class VoicePacketSender {
 		void handlePathPacket(const Rx64Response &response);
 		void handleTracePacket(const Rx64Response &response);
 		void resetFrameID();
+		void sendTracePacket();
 };
 
 #endif /* LIBRARIES_ADPCM_VOICEPACKETSENDER_H_ */
