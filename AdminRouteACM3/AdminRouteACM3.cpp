@@ -151,6 +151,7 @@ void broadcastHeartbeat() {
 		controller.remove(calculateThroughput);
 		controller.remove(generateVoice);
 		controller.remove(debugHeartbeatTable);
+		controller.remove(threadMessage);
 		endMessageSent = true;
 	}
 }
@@ -283,7 +284,7 @@ void setupThreads() {
 	(*threadMessage).ThreadName = "Thread Messages";
 	(*threadMessage).enabled = SENDER;
 	(*threadMessage).setInterval(TRACE_INTERVAL);
-	(*threadMessage).onRun(sendEndMessage);
+	(*threadMessage).onRun(sendTracePacket);
 
 	controller.add(responseThread);
 	controller.add(sendInital);
