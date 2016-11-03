@@ -11,8 +11,7 @@
 #include <pcadpcm.h>
 #include <XBee.h>
 #include <VoiceStreamsManager.h>
-#include <VoicePacketSender.h>
-#include <HeartbeatProtocol.h>>
+#include <HeartbeatProtocol.h>
 #include <ThreadController.h>
 #include <CompressionTable.h>
 #include <VoiceSetting.h>
