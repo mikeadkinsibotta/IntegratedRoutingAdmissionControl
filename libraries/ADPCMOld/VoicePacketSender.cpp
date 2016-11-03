@@ -16,7 +16,7 @@ VoicePacketSender::VoicePacketSender() {
 	myNextHop = XBeeAddress64();
 	aodv = 0;
 	xbee = XBee();
-	voiceStreamStatManager = 0;
+	voiceStreamManager = 0;
 	pathLoss = 0;
 	injectionRate = 0;
 	payloadSize = 0;
@@ -25,16 +25,15 @@ VoicePacketSender::VoicePacketSender() {
 }
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
-		VoiceStreamStatManager * voiceStreamStatManager, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-		const uint8_t payloadSize) {
+		VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress,
+		const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
 	admcpm = ADPCM();
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
-	this->voiceStreamStatManager = voiceStreamStatManager;
+	this->voiceStreamManager = voiceStreamManager;
 	this->payloadSize = payloadSize;
 	frameId = 0;
 	injectionRate = 0;
@@ -189,14 +188,14 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 		//need to forward to next hop
 		Serial.print("ForwardData");
 
-		voiceStreamStatManager->updateStreamsIntermediateNode(packetSource, previousHop);
+		voiceStreamManager->updateStreamsIntermediateNode(packetSource, previousHop);
 
 		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
 
 		xbee.send(tx);
 
 	} else {
-		voiceStreamStatManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
+		voiceStreamManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
 	}
 
@@ -221,7 +220,7 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 	if (!myAddress.equals(packetSource)) {
 
 		XBeeAddress64 nextHop;
-		voiceStreamStatManager->getStreamPreviousHop(packetSource, nextHop);
+		voiceStreamManager->getStreamPreviousHop(packetSource, nextHop);
 
 		SerialUSB.print("Forward Path Packet - Stream Sender: ");
 		packetSource.printAddressASCII(&SerialUSB);

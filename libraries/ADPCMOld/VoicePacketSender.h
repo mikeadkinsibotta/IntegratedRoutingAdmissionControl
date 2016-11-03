@@ -17,6 +17,7 @@
 #include <VoiceSetting.h>
 #include <math.h>
 #include "TraceMessage.h"
+#include "HeartbeatMessage.h"
 
 class VoicePacketSender {
 	private:
@@ -25,7 +26,7 @@ class VoicePacketSender {
 		ADPCM admcpm;
 		XBee xbee;
 		AODV * aodv;
-		VoiceStreamStatManager * voiceStreamStatManager;
+		VoiceStreamManager * voiceStreamManager;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
@@ -44,7 +45,7 @@ class VoicePacketSender {
 
 	public:
 		VoicePacketSender();
-		VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss, VoiceStreamStatManager * voiceStreamStatManager,
+		VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss, VoiceStreamManager * voiceStreamManager,
 				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
 				const float dupSetting, const uint8_t payloadSize);
 		void generateVoicePacket();
