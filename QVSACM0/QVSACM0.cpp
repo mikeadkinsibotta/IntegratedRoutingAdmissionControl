@@ -29,7 +29,7 @@ unsigned long STREAM_DELAY_START_BEGIN = 0;
 XBee xbee = XBee();
 VoicePacketSender * voicePacketSender;
 AdmissionControl * admissionControl;
-VoiceStreamStatManager * voiceStreamStatManager;
+VoiceStreamManager * voiceStreamManager;
 AODV * aodv;
 
 ThreadController controller = ThreadController();
@@ -53,11 +53,11 @@ void setup() {
 	SerialUSB.println();
 
 	aodv = new AODV(xbee, myAddress, broadcastAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
-	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
-	voicePacketSender = new VoicePacketSender(xbee, aodv, &pathLoss, voiceStreamStatManager, myAddress, sinkAddress,
+	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
+	voicePacketSender = new VoicePacketSender(xbee, aodv, &pathLoss, voiceStreamManager, myAddress, sinkAddress,
 			CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, aodv, voiceStreamStatManager,
-			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, aodv, voiceStreamManager, voicePacketSender,
+			GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -107,7 +107,7 @@ void sendVoicePacket() {
 }
 
 void sendPathPacket() {
-	voiceStreamStatManager->sendPathPacket();
+	voiceStreamManager->sendPathPacket();
 }
 
 void clearBuffer() {
