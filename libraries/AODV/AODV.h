@@ -13,7 +13,6 @@
 #include "RREQ.h"
 #include "RREP.h"
 #include "RoutingTableEntry.h"
-#include "Neighbor.h"
 
 #define SENDER false
 

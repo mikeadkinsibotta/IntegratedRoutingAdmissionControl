@@ -16,6 +16,7 @@
 #include <vector>
 #include "HeartbeatMessage.h"
 #include <Saturation.h>
+#include "Neighbor.h"
 
 using namespace std;
 
