@@ -450,15 +450,6 @@ bool AODV::checkRouteTimer() {
 
 }
 
-//const XBeeAddress64& AODV::setNextHop() {
-//	if (routingTable.count(sinkAddress) == 0) {
-//		return XBeeAddress64();
-//	}
-//
-//	RoutingTableEntry entry = routingTable[sinkAddress];
-//	nextHop = entry.getNextHop();
-//
-//}
 
 void AODV::printRoutingTable() {
 
@@ -489,7 +480,7 @@ void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 		SerialUSB.println("Sending Init");
 
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
-		uint8_t * injectionRateP = (uint8_t *) &injectionRate;
+		const uint8_t * injectionRateP = reinterpret_cast<uint8_t*>(&injectionRate);
 
 		SerialUSB.print("Injection Rate: ");
 		SerialUSB.println(injectionRate);

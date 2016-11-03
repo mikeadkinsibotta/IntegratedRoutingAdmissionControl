@@ -22,25 +22,15 @@ HeartbeatMessage::HeartbeatMessage(const float dataRate, const XBeeAddress64& do
 
 void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
-	const uint8_t * dataRateP = (uint8_t *) &dataRate;
+	const uint8_t * dataRateP = reinterpret_cast<uint8_t*>(&dataRate);
 
 	payload[0] = 'B';
 	payload[1] = 'E';
 	payload[2] = 'A';
 	payload[3] = 'T';
 	payload[4] = '\0';
-	payload[5] = dataRateP[0];
-	payload[6] = dataRateP[1];
-	payload[7] = dataRateP[2];
-	payload[8] = dataRateP[3];
-	payload[9] = (downStreamNeighbor.getMsb() >> 24) & 0xff;
-	payload[10] = (downStreamNeighbor.getMsb() >> 16) & 0xff;
-	payload[11] = (downStreamNeighbor.getMsb() >> 8) & 0xff;
-	payload[12] = downStreamNeighbor.getMsb() & 0xff;
-	payload[13] = (downStreamNeighbor.getLsb() >> 24) & 0xff;
-	payload[14] = (downStreamNeighbor.getLsb() >> 16) & 0xff;
-	payload[15] = (downStreamNeighbor.getLsb() >> 8) & 0xff;
-	payload[16] = downStreamNeighbor.getLsb() & 0xff;
+	addFloat(payload, dataRateP, 5);
+	addAddressToMessage(payload, downStreamNeighbor, 9);
 
 }
 
@@ -49,17 +39,8 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	const uint8_t* dataPtr = response.getData() + 5;
 
 	senderAddress = response.getRemoteAddress64();
-
-	float * dataRateP = (float*) (dataPtr);
-	dataRate = *dataRateP;
-
-	dataPtr += 4;
-
-	downStreamNeighbor.setMsb(
-			(uint32_t(dataPtr[0]) << 24) + (uint32_t(dataPtr[1]) << 16) + (uint16_t(dataPtr[2]) << 8) + dataPtr[3]);
-
-	downStreamNeighbor.setLsb(
-			(uint32_t(dataPtr[4]) << 24) + (uint32_t(dataPtr[5]) << 16) + (uint16_t(dataPtr[6]) << 8) + dataPtr[7]);
+	memcpy(&dataRate, dataPtr, sizeof(float));
+	setAddress(dataPtr, downStreamNeighbor, 9);
 
 }
 
