@@ -147,8 +147,6 @@ void broadcastHeartbeat() {
 
 		}
 		controller.remove(sendInital);
-		controller.remove(pathLoss);
-		controller.remove(calculateThroughput);
 		controller.remove(generateVoice);
 		controller.remove(debugHeartbeatTable);
 		controller.remove(threadMessage);
