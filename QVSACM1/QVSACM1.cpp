@@ -4,40 +4,47 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define VOICE_DATA_INTERVAL 2
-#define SENDER true
+#define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
 #define SINK_ADDRESS_2 0x40B519CC
 #define BROADCAST_ADDRESS_1 0x00000000
 #define BROADCAST_ADDRESS_2 0x0000FFFF
-#define PAYLOAD_SIZE 76
 //#define BROADCAST_ADDRESS_1 0x0013A200
 //#define BROADCAST_ADDRESS_2 0x40B317FA
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 30;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
-const uint8_t CODEC_SETTTING = 3;
-const unsigned long REQUEST_STREAM = 3000;
-const unsigned long GRANT_TIMEOUT_LENGTH = 300;
-const unsigned long REJECT_TIMEOUT_LENGTH = 100;
-const unsigned long HEARTBEAT_INTERVAL = 15000;
-const unsigned long PATHLOSS_INTERVAL = 8000;
+const uint8_t CODEC_SETTTING = 2;
+const unsigned long TRACE_INTERVAL = 10000;
+const uint8_t PAYLOAD_SIZE = 76;
+const uint8_t VOICE_DATA_INTERVAL = 2;
+const unsigned long REQUEST_STREAM = 200;
+const unsigned long GRANT_TIMEOUT_LENGTH = 50;
+const unsigned long REJECT_TIMEOUT_LENGTH = 10;
+const unsigned long HEARTBEAT_INTERVAL = 500;
+const unsigned long PATHLOSS_INTERVAL = 10000;
+const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
+const float DISTANCE_THRESHOLD = 7.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 
 XBee xbee = XBee();
 VoicePacketSender * voicePacketSender;
 AdmissionControl * admissionControl;
-VoiceStreamStatManager * voiceStreamStatManager;
+VoiceStreamManager * voiceStreamManager;
 AODV * aodv;
 
 ThreadController controller = ThreadController();
-Thread heartbeat = Thread();
-Thread sendInital = Thread();
-Thread responseThread = Thread();
-Thread pathLoss = Thread();
-Thread generateVoice = Thread();
+Thread * heartbeat = new Thread();
+Thread * sendInital = new Thread();
+Thread * responseThread = new Thread();
+Thread * pathLoss = new Thread();
+Thread * generateVoice = new Thread();
+Thread * calculateThroughput = new Thread();
+Thread * debugHeartbeatTable = new Thread();
+Thread * endMessage = new Thread();
+Thread * threadMessage = new Thread();
 
 XBeeAddress64 broadcastAddress = XBeeAddress64(BROADCAST_ADDRESS_1, BROADCAST_ADDRESS_2);
 XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
@@ -52,12 +59,12 @@ void setup() {
 	myAddress.printAddressASCII(&SerialUSB);
 	SerialUSB.println();
 
+	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	aodv = new AODV(xbee, myAddress, broadcastAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING);
-	voiceStreamStatManager = new VoiceStreamStatManager(xbee, PAYLOAD_SIZE);
-	voicePacketSender = new VoicePacketSender(xbee, aodv, &pathLoss, voiceStreamStatManager, myAddress, sinkAddress,
-			CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, aodv, voiceStreamStatManager,
-			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
+	voicePacketSender = new VoicePacketSender(xbee, aodv, pathLoss, calculateThroughput, voiceStreamManager, myAddress,
+			sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
+	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, aodv, voiceStreamManager, voicePacketSender,
+			GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
 
 	digitalWrite(13, LOW);
@@ -90,11 +97,27 @@ void arduinoSetup() {
 
 }
 
-void startPathDiscovery() {
+void sendInitPacket() {
 
 	if (millis() - STREAM_DELAY_START_BEGIN > STREAM_DELAY_START) {
 		aodv->getRoute();
 	}
+}
+
+void sendVoicePacket() {
+
+	XBeeAddress64 nextHop = aodv->getNextHop(sinkAddress);
+	if (!nextHop.equals(XBeeAddress64())) {
+		voicePacketSender->generateVoicePacket();
+	}
+}
+
+void sendTracePacket() {
+
+	if ((*generateVoice).enabled) {
+		voicePacketSender->sendTracePacket();
+	}
+
 }
 
 void broadcastHeartbeat() {
@@ -102,12 +125,12 @@ void broadcastHeartbeat() {
 			aodv->getNextHop(sinkAddress));
 }
 
-void sendVoicePacket() {
-	voicePacketSender->generateVoicePacket();
+void sendPathPacket() {
+	voiceStreamManager->sendPathPacket();
 }
 
-void sendPathPacket() {
-	voiceStreamStatManager->sendPathPacket();
+void runCalculateThroughput() {
+	voiceStreamManager->calculateThroughput();
 }
 
 void clearBuffer() {
@@ -119,41 +142,31 @@ void listenForResponses() {
 	admissionControl->checkTimers();
 
 	if (xbee.readPacketNoTimeout(DEBUG)) {
-		if (xbee.getResponse().getApiId() == RX_64_RESPONSE) {
-			Rx64Response response;
-			xbee.getResponse().getRx64Response(response);
-			uint8_t* data = response.getData();
 
-			XBeeAddress64 senderAddress = response.getRemoteAddress64();
+		Rx64Response response;
+		xbee.getResponse().getRx64Response(response);
+		uint8_t* data = response.getData();
 
-			if (response.getRelativeDistance() < 4.00 && (senderAddress.equals(sinkAddress))) {
+		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < DISTANCE_THRESHOLD) {
 
-				char control[5];
-
-				for (int i = 0; i < 5; i++) {
-					control[i] = data[i];
-				}
-
-				if (!strcmp(control, "RREQ") || !strcmp(control, "RREP")) {
-					//routing data
-					aodv->listenForResponses(response, control);
-				} else if (!strcmp(control, "DATA")) {
-					//voice data
+			switch (data[0]) {
+				case 'D':
 					voicePacketSender->handleDataPacket(response);
-				} else if (!strcmp(control, "PATH")) {
-					//path loss packet
+					break;
+				case 'P':
 					voicePacketSender->handlePathPacket(response);
-				} else if (!strcmp(control, "BEAT")) {
-					admissionControl->receiveHeartBeat(voicePacketSender->getInjectionRate(), response);
-				} else if (!strcmp(control, "INIT")) {
+					break;
+				case 'I':
 					admissionControl->handleInitPacket(response);
-				} else if (!strcmp(control, "REDJ")) {
+					break;
+				case 'R':
 					admissionControl->handleREDJPacket(response);
-				} else if (!strcmp(control, "GRNT")) {
-					admissionControl->handleGRANTPacket(response, sendInital.enabled, generateVoice.enabled);
-				} else if (!strcmp(control, "TRCE")) {
+					break;
+				case 'G':
+					admissionControl->handleGRANTPacket(response, (*sendInital).enabled, (*generateVoice).enabled);
+					break;
+				case 'T':
 					voicePacketSender->handleTracePacket(response);
-				}
 			}
 		} else if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
 			TxStatusResponse response;
@@ -169,39 +182,55 @@ void listenForResponses() {
 
 void setupThreads() {
 
-	responseThread.ThreadName = "Packet Listener";
-	responseThread.enabled = true;
-	responseThread.setInterval(1);
-	responseThread.onRun(listenForResponses);
+	(*responseThread).ThreadName = "Packet Listener";
+	(*responseThread).enabled = true;
+	(*responseThread).setInterval(1);
+	(*responseThread).onRun(listenForResponses);
 
-	heartbeat.ThreadName = "Broadcast Heartbeat";
-	heartbeat.enabled = true;
-	heartbeat.setInterval(HEARTBEAT_INTERVAL + random(100));
-	heartbeat.onRun(broadcastHeartbeat);
+	(*heartbeat).ThreadName = "Broadcast Heartbeat";
+	(*heartbeat).enabled = true;
+	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
+	(*heartbeat).onRun(broadcastHeartbeat);
 
-	pathLoss.ThreadName = "Send Path Loss";
-	pathLoss.enabled = false;
-	pathLoss.setInterval(PATHLOSS_INTERVAL + random(100));
-	pathLoss.onRun(sendPathPacket);
+	//Set to true after receiving first data packet
+	(*pathLoss).ThreadName = "Send Path Loss";
+	(*pathLoss).enabled = false;
+	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
+	(*pathLoss).onRun(sendPathPacket);
 
-	generateVoice.ThreadName = "Send Voice Data";
-	generateVoice.enabled = false;
-	generateVoice.setInterval(VOICE_DATA_INTERVAL);
-	generateVoice.onRun(sendVoicePacket);
+	//Set to true after being admitted by admission control
+	(*generateVoice).ThreadName = "Send Voice Data";
+	(*generateVoice).enabled = false;
+	(*generateVoice).setInterval(VOICE_DATA_INTERVAL);
+	(*generateVoice).onRun(sendVoicePacket);
 
-	sendInital.ThreadName = "Send Voice Data";
+	(*sendInital).ThreadName = "Send Voice Data";
 	if (SENDER) {
-		sendInital.enabled = true;
+		(*sendInital).enabled = true;
 	} else {
-		sendInital.enabled = false;
+		(*sendInital).enabled = false;
 	}
-	sendInital.setInterval(REQUEST_STREAM);
-	sendInital.onRun(startPathDiscovery);
+	(*sendInital).setInterval(REQUEST_STREAM);
+	(*sendInital).onRun(sendInitPacket);
 
-	controller.add(&responseThread);
-	controller.add(&heartbeat);
-	controller.add(&sendInital);
-	controller.add(&pathLoss);
-	controller.add(&generateVoice);
+	//Set to true after receiving first data packet
+	(*calculateThroughput).ThreadName = "Calculate Throughput";
+	(*calculateThroughput).enabled = false;
+	(*calculateThroughput).setInterval(CALCULATE_THROUGHPUT_INTERVAL);
+	(*calculateThroughput).onRun(runCalculateThroughput);
 
+	(*threadMessage).ThreadName = "Thread Messages";
+	(*threadMessage).enabled = SENDER;
+	(*threadMessage).setInterval(TRACE_INTERVAL);
+	(*threadMessage).onRun(sendTracePacket);
+
+	controller.add(responseThread);
+	controller.add(sendInital);
+	controller.add(pathLoss);
+	controller.add(calculateThroughput);
+	controller.add(generateVoice);
+	controller.add(heartbeat);
+	controller.add(debugHeartbeatTable);
+	controller.add(endMessage);
+	controller.add(threadMessage);
 }

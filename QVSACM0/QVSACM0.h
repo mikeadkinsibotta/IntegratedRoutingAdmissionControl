@@ -16,12 +16,17 @@
 //end of add your includes here
 
 //add your function definitions for the project AdminRoute1 here
-void broadcastHeartbeat();
-void sendVoicePacket();
-void startPathDiscovery();
-void sendPathPacket();
+void setup();
+void loop();
 void arduinoSetup();
+void sendInitPacket();
+void sendVoicePacket();
+void sendTracePacket();
+void broadcastHeartbeat();
+void sendPathPacket();
+void runCalculateThroughput();
 void clearBuffer();
+void listenForResponses();
 void setupThreads();
 
 //Do not add code below this line
