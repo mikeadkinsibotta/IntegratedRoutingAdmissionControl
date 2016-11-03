@@ -63,6 +63,39 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
 }
 
+void HeartbeatMessage::addAddressToMessage(uint8_t payload[], const XBeeAddress64& address, const uint8_t i) {
+
+	payload[i] = (address.getMsb() >> 24) & 0xff;
+	payload[i + 1] = (address.getMsb() >> 16) & 0xff;
+	payload[i + 2] = (address.getMsb() >> 8) & 0xff;
+	payload[i + 3] = address.getMsb() & 0xff;
+	payload[i + 4] = (address.getLsb() >> 24) & 0xff;
+	payload[i + 5] = (address.getLsb() >> 16) & 0xff;
+	payload[i + 6] = (address.getLsb() >> 8) & 0xff;
+	payload[i + 7] = address.getLsb() & 0xff;
+
+}
+
+void HeartbeatMessage::addFloat(uint8_t payload[], const uint8_t * num, const uint8_t i) {
+	payload[i] = num[0];
+	payload[i + 1] = num[1];
+	payload[i + 2] = num[2];
+	payload[i + 3] = num[3];
+
+}
+
+void HeartbeatMessage::setAddress(const uint8_t * dataPtr, XBeeAddress64& address, const uint8_t i) {
+
+	address.setMsb(
+			(uint32_t(dataPtr[i]) << 24) + (uint32_t(dataPtr[i + 1]) << 16) + (uint16_t(dataPtr[i + 2]) << 8)
+					+ dataPtr[i + 3]);
+
+	address.setLsb(
+			(uint32_t(dataPtr[i + 4]) << 24) + (uint32_t(dataPtr[i + 5]) << 16) + (uint16_t(dataPtr[i + 6]) << 8)
+					+ dataPtr[i + 7]);
+
+}
+
 const XBeeAddress64& HeartbeatMessage::getSenderAddress() const {
 	return senderAddress;
 }
