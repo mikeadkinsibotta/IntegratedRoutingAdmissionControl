@@ -12,12 +12,14 @@ VoicePacketSender::VoicePacketSender() {
 	admcpm = ADPCM();
 	myAddress = XBeeAddress64();
 	sinkAddress = XBeeAddress64();
+	previousHop = XBeeAddress64();
 	frameId = 0;
 	myNextHop = XBeeAddress64();
 	aodv = 0;
 	xbee = XBee();
 	voiceStreamManager = 0;
 	pathLoss = 0;
+	calculateThroughput = 0;
 	injectionRate = 0;
 	payloadSize = 0;
 	compressionTable.buildCompressionLookUpTable();
@@ -25,8 +27,9 @@ VoicePacketSender::VoicePacketSender() {
 }
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
-		VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress,
-		const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize) {
+		Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
+		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+		const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -38,7 +41,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
 	frameId = 0;
 	injectionRate = 0;
 	myNextHop = XBeeAddress64();
-
+	previousHop = XBeeAddress64();
 	//If I don't past the pointer, it just makes a copy of the heartbeat protocol during assignment,
 	//If I make changes to the heartbeat protocol outside the class the member variable does not pick up the changes.
 	//Thats why I need the pointer.
@@ -46,6 +49,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
 
 	this->xbee = xbee;
 	this->pathLoss = pathLoss;
+	this->calculateThroughput = calculateThroughput;
 
 	compressionTable.buildCompressionLookUpTable();
 
@@ -55,8 +59,6 @@ void VoicePacketSender::generateVoicePacket() {
 
 	injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 
-	//TODO fixed heartbeat
-	//heartbeatProtocol->setDataRate(injectionRate);
 	myNextHop = aodv->getNextHop(sinkAddress);
 
 	//uint8_t * payload = (uint8_t*) malloc(sizeof(uint8_t) * payloadSize);
@@ -114,16 +116,30 @@ void VoicePacketSender::generateVoicePacket() {
 	uint8_t combinedSize = 0;
 
 	bool r = (random(100)) < (dupSetting * 100);
+
+	uint8_t destination[100];
+	memset(destination, 0, sizeof(destination));
+
 	if (dupSetting != 0 && r && !justSentDup) {
 		frameId--;
 
-		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-				codecSetting };
+		destination[0] = 'D';
+		destination[1] = 'A';
+		destination[2] = 'T';
+		destination[3] = 'A';
+		destination[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		destination[21] = frameId;
+		destination[22] = codecSetting;
+
+//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -132,13 +148,23 @@ void VoicePacketSender::generateVoicePacket() {
 		justSentDup = true;
 	} else {
 
-		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-				codecSetting };
+		destination[0] = 'D';
+		destination[1] = 'A';
+		destination[2] = 'T';
+		destination[3] = 'A';
+		destination[4] = '\0';
+		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
+		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		destination[21] = frameId;
+		destination[22] = codecSetting;
+//
+//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
+//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
+//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
+//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
+//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
+//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
+//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -147,56 +173,39 @@ void VoicePacketSender::generateVoicePacket() {
 		justSentDup = false;
 	}
 
-	if (frameId % 150 == 0) {
-		sendTracePacket();
-	}
-
 }
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
-	myNextHop = aodv->getNextHop(sinkAddress);
 
 	//Extract the packet's final destination
-	XBeeAddress64 packetDestination;
-	XBeeAddress64 packetSource;
-	XBeeAddress64 previousHop;
-
-	uint8_t * dataPtr = response.getData();
-
-	packetSource.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
-
-	packetSource.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
-
-	packetDestination.setMsb(
-			(uint32_t(dataPtr[13]) << 24) + (uint32_t(dataPtr[14]) << 16) + (uint16_t(dataPtr[15]) << 8) + dataPtr[16]);
-
-	packetDestination.setLsb(
-			(uint32_t(dataPtr[17]) << 24) + (uint32_t(dataPtr[18]) << 16) + (uint16_t(dataPtr[19]) << 8) + dataPtr[20]);
-
-	previousHop.setMsb(
-			(uint32_t(response.getFrameData()[0]) << 24) + (uint32_t(response.getFrameData()[1]) << 16)
-					+ (uint16_t(response.getFrameData()[2]) << 8) + response.getFrameData()[3]);
-	previousHop.setLsb(
-			(uint32_t(response.getFrameData()[4]) << 24) + (uint32_t(response.getFrameData()[5]) << 16)
-					+ (uint16_t(response.getFrameData()[6]) << 8) + response.getFrameData()[7]);
 
 	//check to see if the packet final destination is this node's address
 	//If not setup another request to forward it.
+
+	uint8_t * dataPtr = response.getData();
+
+	previousHop = response.getRemoteAddress64();
+
+	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
+	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
+
 	if (!myAddress.equals(packetDestination)) {
+
+	myNextHop = aodv->getNextHop(sinkAddress);
+
 		//need to forward to next hop
-		Serial.print("ForwardData");
+		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
+		xbee.send(tx);
 
 		voiceStreamManager->updateStreamsIntermediateNode(packetSource, previousHop);
 
-		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
-
-		xbee.send(tx);
-
 	} else {
+
+		uint8_t * dataPtr = response.getData();
+
 		voiceStreamManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
 		(*pathLoss).enabled = true;
+		(*calculateThroughput).enabled = true;
 	}
 
 }
@@ -207,15 +216,9 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 	uint8_t * dataPtr = response.getData();
 
-	packetSource.setMsb(
-			(uint32_t(dataPtr[5]) << 24) + (uint32_t(dataPtr[6]) << 16) + (uint16_t(dataPtr[7]) << 8) + dataPtr[8]);
-
-	packetSource.setLsb(
-			(uint32_t(dataPtr[9]) << 24) + (uint32_t(dataPtr[10]) << 16) + (uint16_t(dataPtr[11]) << 8) + dataPtr[12]);
+	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
 
 	uint8_t dataLoss = dataPtr[13];
-	uint8_t totalPacketSent = dataPtr[14];
-	uint8_t totalPacketReceived = dataPtr[15];
 
 	if (!myAddress.equals(packetSource)) {
 
@@ -237,38 +240,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 	}
 }
-
-uint8_t* VoicePacketSender::addDestinationToPayload(const XBeeAddress64& packetSource,
-		const XBeeAddress64& packetDestination, const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize,
-		const uint8_t frameId) {
-
-	uint8_t destination[] = { 'D', 'A', 'T', 'A', '\0', (packetSource.getMsb() >> 24) & 0xff, (packetSource.getMsb()
-			>> 16) & 0xff, (packetSource.getMsb() >> 8) & 0xff, packetSource.getMsb() & 0xff, (packetSource.getLsb()
-			>> 24) & 0xff, (packetSource.getLsb() >> 16) & 0xff, (packetSource.getLsb() >> 8) & 0xff,
-			packetSource.getLsb() & 0xff, (packetDestination.getMsb() >> 24) & 0xff, (packetDestination.getMsb() >> 16)
-					& 0xff, (packetDestination.getMsb() >> 8) & 0xff, packetDestination.getMsb() & 0xff,
-			(packetDestination.getLsb() >> 24) & 0xff, (packetDestination.getLsb() >> 16) & 0xff,
-			(packetDestination.getLsb() >> 8) & 0xff, packetDestination.getLsb() & 0xff, frameId, codecSetting };
-
-	uint8_t* result = (uint8_t*) malloc(sizeof(destination) + sizePayload);
-	resultSize = sizeof(destination) + sizePayload;
-	memcpy(result, destination, sizeof(destination));
-	memcpy(result + sizeof(destination), payload, sizePayload);
-
-	return result;
-
-}
-
-/*void VoicePacketSender::sendStreamRestart(const XBeeAddress64& dataSenderAddress) {
-
- uint8_t payload[] = { 'R', 'S', 'T', 'R', '\0', (dataSenderAddress.getMsb() >> 24) & 0xff,
- (dataSenderAddress.getMsb() >> 16) & 0xff, (dataSenderAddress.getMsb() >> 8) & 0xff,
- dataSenderAddress.getMsb() & 0xff, (dataSenderAddress.getLsb() >> 24) & 0xff, (dataSenderAddress.getLsb()
- >> 16) & 0xff, (dataSenderAddress.getLsb() >> 8) & 0xff, dataSenderAddress.getLsb() & 0xff };
- Tx64Request tx = Tx64Request(myNextHop, payload, sizeof(payload));
- xbee.send(tx);
-
- }*/
 
 void VoicePacketSender::updateDataRate(uint8_t dataLoss) {
 
@@ -331,14 +302,8 @@ void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 
 		for (int j = 0; j < traceMessage.getAddressListLength(); ++j) {
 
-			traceMessagePayLoad[i] = (traceMessage.getAddresses().at(j).getMsb() >> 24) & 0xff;
-			traceMessagePayLoad[i + 1] = (traceMessage.getAddresses().at(j).getMsb() >> 16) & 0xff;
-			traceMessagePayLoad[i + 2] = (traceMessage.getAddresses().at(j).getMsb() >> 8) & 0xff;
-			traceMessagePayLoad[i + 3] = traceMessage.getAddresses().at(j).getMsb() & 0xff;
-			traceMessagePayLoad[i + 4] = (traceMessage.getAddresses().at(j).getLsb() >> 24) & 0xff;
-			traceMessagePayLoad[i + 5] = (traceMessage.getAddresses().at(j).getLsb() >> 16) & 0xff;
-			traceMessagePayLoad[i + 6] = (traceMessage.getAddresses().at(j).getLsb() >> 8) & 0xff;
-			traceMessagePayLoad[i + 7] = traceMessage.getAddresses().at(j).getLsb() & 0xff;
+			HeartbeatMessage::addAddressToMessage(traceMessagePayLoad, traceMessage.getAddresses()[j], i);
+
 			i += 8;
 		}
 

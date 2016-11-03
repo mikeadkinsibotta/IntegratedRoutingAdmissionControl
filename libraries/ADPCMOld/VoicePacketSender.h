@@ -15,7 +15,6 @@
 #include <ThreadController.h>
 #include <CompressionTable.h>
 #include <VoiceSetting.h>
-#include <math.h>
 #include "TraceMessage.h"
 #include "HeartbeatMessage.h"
 
@@ -33,21 +32,24 @@ class VoicePacketSender {
 
 		Compression compressionTable;
 		Thread * pathLoss;
+		Thread * calculateThroughput;
 		float injectionRate;
 		uint8_t payloadSize;
 		uint8_t frameId;
 		bool justSentDup = false;
 
-		uint8_t* addDestinationToPayload(const XBeeAddress64& packetSource, const XBeeAddress64& packetDestination,
-				const uint8_t * payload, const uint8_t sizePayload, uint8_t& resultSize, const uint8_t frameId);
+		XBeeAddress64 packetDestination;
+		XBeeAddress64 packetSource;
+		XBeeAddress64 previousHop;
+
 		void updateDataRate(uint8_t dataLoss);
-		void sendTracePacket();
 
 	public:
 		VoicePacketSender();
-		VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss, VoiceStreamManager * voiceStreamManager,
-				const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const uint8_t codecSetting,
-				const float dupSetting, const uint8_t payloadSize);
+		VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
+				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
+				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
+				const uint8_t payloadSize);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 
@@ -62,6 +64,7 @@ class VoicePacketSender {
 		void handlePathPacket(const Rx64Response &response);
 		void handleTracePacket(const Rx64Response &response);
 		void resetFrameID();
+		void sendTracePacket();
 		float getInjectionRate() const;
 };
 
