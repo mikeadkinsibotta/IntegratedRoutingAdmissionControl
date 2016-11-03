@@ -10,7 +10,7 @@ const float MAX_FLT = 9999.0;
 const uint8_t HEARTBEAT_PAYLOAD_SIZE = 17;
 AdmissionControl::AdmissionControl() {
 	aodv = 0;
-	voiceStreamStatManager = 0;
+	voiceStreamManager = 0;
 	voicePacketSender = 0;
 	grantTimeoutLength = 0;
 	rejcTimeoutLength = 0;
@@ -20,12 +20,12 @@ AdmissionControl::AdmissionControl() {
 }
 
 AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-		AODV * aodv, VoiceStreamStatManager * voiceStreamStatManager, VoicePacketSender * voicePacketSender,
+		AODV * aodv, VoiceStreamManager * voiceStreamManager, VoicePacketSender * voicePacketSender,
 		const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength) {
 	this->myAddress = myAddress;
 	this->sinkAddress = sinkAddress;
 	this->aodv = aodv;
-	this->voiceStreamStatManager = voiceStreamStatManager;
+	this->voiceStreamManager = voiceStreamManager;
 	this->voicePacketSender = voicePacketSender;
 	this->xbee = xbee;
 	this->grantTimeoutLength = grantTimeoutLength;
@@ -116,7 +116,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	float dataRate = *dataRateP;
 
 //remove any old streams
-	voiceStreamStatManager->removeStream(senderAddress);
+	voiceStreamManager->removeStream(senderAddress);
 
 	PotentialStream potentialStream = PotentialStream(senderAddress, receivedAddress, grantTimeoutLength,
 			rejcTimeoutLength, dataRate);

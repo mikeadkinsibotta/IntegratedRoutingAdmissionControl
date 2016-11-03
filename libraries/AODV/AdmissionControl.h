@@ -25,7 +25,7 @@ class AdmissionControl {
 		XBee xbee;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
-		VoiceStreamStatManager * voiceStreamStatManager;
+		VoiceStreamManager * voiceStreamManager;
 		AODV * aodv;
 		VoicePacketSender * voicePacketSender;
 		unsigned long grantTimeoutLength;
@@ -41,7 +41,7 @@ class AdmissionControl {
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-				AODV * aodv, VoiceStreamStatManager * voiceStreamStatManager, VoicePacketSender * voicePacketSender,
+				AODV * aodv, VoiceStreamManager * voiceStreamManager, VoicePacketSender * voicePacketSender,
 				const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength);
 
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
