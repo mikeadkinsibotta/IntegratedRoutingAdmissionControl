@@ -6,11 +6,11 @@
 #define DEBUG false
 #define SENDER false
 #define SINK_ADDRESS_1 0x0013A200
-#define SINK_ADDRESS_2 0x40B519CC
-#define BROADCAST_ADDRESS_1 0x00000000
-#define BROADCAST_ADDRESS_2 0x0000FFFF
-//#define BROADCAST_ADDRESS_1 0x0013A200
-//#define BROADCAST_ADDRESS_2 0x40B317FA
+#define SINK_ADDRESS_2 0x40B317F6
+//#define BROADCAST_ADDRESS_1 0x00000000
+//#define BROADCAST_ADDRESS_2 0x0000FFFF
+#define BROADCAST_ADDRESS_1 0x0013A200
+#define BROADCAST_ADDRESS_2 0x40B317F6
 
 const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
 
@@ -22,7 +22,7 @@ const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 200;
 const unsigned long GRANT_TIMEOUT_LENGTH = 50;
 const unsigned long REJECT_TIMEOUT_LENGTH = 10;
-const unsigned long HEARTBEAT_INTERVAL = 500;
+const unsigned long HEARTBEAT_INTERVAL = 5000;
 const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
@@ -114,15 +114,15 @@ void sendVoicePacket() {
 
 void sendTracePacket() {
 
-	if ((*generateVoice).enabled) {
-		voicePacketSender->sendTracePacket();
-	}
+//	if ((*generateVoice).enabled) {
+//		voicePacketSender->sendTracePacket();
+//	}
 
 }
 
 void broadcastHeartbeat() {
-	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
-			aodv->getNextHop(sinkAddress));
+//	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
+//			aodv->getNextHop(sinkAddress));
 }
 
 void sendPathPacket() {
@@ -150,6 +150,9 @@ void listenForResponses() {
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < DISTANCE_THRESHOLD) {
 
 			switch (data[0]) {
+				case 'R':
+					aodv->listenForResponses(response);
+					break;
 				case 'D':
 					voicePacketSender->handleDataPacket(response);
 					break;
@@ -159,7 +162,10 @@ void listenForResponses() {
 				case 'I':
 					admissionControl->handleInitPacket(response);
 					break;
-				case 'R':
+				case 'B':
+					admissionControl->receiveHeartBeat(response);
+					break;
+				case 'J':
 					admissionControl->handleREDJPacket(response);
 					break;
 				case 'G':
@@ -192,13 +198,13 @@ void setupThreads() {
 	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
 	(*heartbeat).onRun(broadcastHeartbeat);
 
-	//Set to true after receiving first data packet
+//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";
 	(*pathLoss).enabled = false;
 	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
 	(*pathLoss).onRun(sendPathPacket);
 
-	//Set to true after being admitted by admission control
+//Set to true after being admitted by admission control
 	(*generateVoice).ThreadName = "Send Voice Data";
 	(*generateVoice).enabled = false;
 	(*generateVoice).setInterval(VOICE_DATA_INTERVAL);
@@ -213,7 +219,7 @@ void setupThreads() {
 	(*sendInital).setInterval(REQUEST_STREAM);
 	(*sendInital).onRun(sendInitPacket);
 
-	//Set to true after receiving first data packet
+//Set to true after receiving first data packet
 	(*calculateThroughput).ThreadName = "Calculate Throughput";
 	(*calculateThroughput).enabled = false;
 	(*calculateThroughput).setInterval(CALCULATE_THROUGHPUT_INTERVAL);
@@ -230,7 +236,6 @@ void setupThreads() {
 	controller.add(calculateThroughput);
 	controller.add(generateVoice);
 	controller.add(heartbeat);
-	controller.add(debugHeartbeatTable);
 	controller.add(endMessage);
 	controller.add(threadMessage);
 }
