@@ -6,6 +6,15 @@
  */
 #include <PotentialStream.h>
 
+PotentialStream::PotentialStream() {
+	this->sourceAddress = XBeeAddress64();
+	this->upStreamNeighbor = XBeeAddress64();
+	this->increasedDataRate = 0;
+	grantTimer = Timer();
+	rejcTimer = Timer();
+	onPath = false;
+}
+
 PotentialStream::PotentialStream(const XBeeAddress64& sourceAddress, const XBeeAddress64& upStreamNeighbor,
 		const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength, const float increasedDataRate) {
 	this->sourceAddress = sourceAddress;
