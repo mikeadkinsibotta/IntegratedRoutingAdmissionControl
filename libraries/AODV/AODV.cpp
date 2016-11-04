@@ -1,8 +1,5 @@
 #include "AODV.h"
 
-#define DEBUG true
-#define PRINT_ROUTE_DEBUG true
-
 const uint8_t AODV::rreqC[] = { 'R', 'R', 'E', 'Q', '\0' };
 const uint8_t AODV::rrepC[] = { 'R', 'R', 'E', 'P', '\0' };
 void AODV::listenForResponses(Rx64Response& response, const char control[]) {
@@ -58,6 +55,7 @@ void AODV::getRoute() {
 	broadcastId++;
 	if (routingTable.count(sinkAddress) == 0) {
 		SerialUSB.println("No Route, starting PathDiscovery");
+		digitalWrite(13, HIGH);
 		pathDiscovery (sinkAddress);
 	}
 
@@ -478,6 +476,7 @@ void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 
 	if (!nextHop.equals(XBeeAddress64())) {
 		SerialUSB.println("Sending Init");
+		digitalWrite(13, LOW);
 
 		float injectionRate = 64.00 * (codecSetting / 16.00) * (1.00 + dupSetting);
 		const uint8_t * injectionRateP = reinterpret_cast<uint8_t*>(&injectionRate);
