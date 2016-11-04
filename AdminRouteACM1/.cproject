@@ -86,6 +86,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/XBee}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/VoiceSettings}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/AdmissionControlNew}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/PotentialStream}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.2047842174" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -104,6 +105,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/XBee}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/VoiceSettings}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/AdmissionControlNew}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM1/Libraries/PotentialStream}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.1099092273" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>

@@ -41,6 +41,11 @@
 			<locationURI>ArduinoPivateLibPath/HeartBeatProtocol</locationURI>
 		</link>
 		<link>
+			<name>Libraries/PotentialStream</name>
+			<type>2</type>
+			<locationURI>ArduinoPivateLibPath/PotentialStream</locationURI>
+		</link>
+		<link>
 			<name>Libraries/VoiceStatistics</name>
 			<type>2</type>
 			<locationURI>ArduinoPivateLibPath/VoiceStatistics</locationURI>
