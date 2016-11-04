@@ -2,20 +2,18 @@
 
 const uint8_t AODV::rreqC[] = { 'R', 'R', 'E', 'Q', '\0' };
 const uint8_t AODV::rrepC[] = { 'R', 'R', 'E', 'P', '\0' };
-void AODV::listenForResponses(Rx64Response& response, const char control[]) {
+void AODV::listenForResponses(Rx64Response& response) {
 
 	XBeeAddress64 remoteSender = response.getRemoteAddress64();
 	uint8_t* data = response.getData();
 
-	if (!strcmp(control, "RREQ")) {
+	if (data[3] == 'Q') {
 		//RREQ
-		//Serial.print("HandlingRREQ");
 		RREQ rreq = RREQ(response.getData());
 
 		handleRREQ(rreq, remoteSender);
 
-	} else if (!strcmp(control, "RREP")) {
-		//	Serial.print("HandlingRREP");
+	} else if (data[3] == 'P') {
 		//RREP
 		RREP rrep = RREP(response.getData());
 		handleRREP(rrep, remoteSender);
@@ -92,8 +90,6 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 
 		RoutingTableEntry forwardPathEntry = RoutingTableEntry(remoteSender, remoteSender, 1, 0, millis());
 
-		SerialUSB.println("Sender now in table");
-
 		SerialUSB.print("Destination Address: ");
 		forwardPathEntry.getDestinationAddress().printAddressASCII(&SerialUSB);
 		SerialUSB.println();
@@ -108,7 +104,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 	}
 	//have I received this RREQ from this source before?
 	if (find(req)) {
-		SerialUSB.print("  I have received RREQ from this source ");
+		SerialUSB.print("I have received RREQ from this source ");
 		req.getSourceAddr().printAddressASCII(&SerialUSB);
 		SerialUSB.println();
 

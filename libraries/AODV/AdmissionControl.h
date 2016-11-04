@@ -13,32 +13,31 @@
 #include <VoiceStreamsManager.h>
 #include <VoicePacketSender.h>
 #include <Thread.h>
-#include <vector>
-#include "HeartbeatMessage.h"
+#include <Neighbor.h>
 #include <Saturation.h>
-#include "Neighbor.h"
+#include <map>
+#include <vector>
 
 using namespace std;
 
 class AdmissionControl {
 	private:
-		vector<PotentialStream> potentialStreams;
+		std::map<XBeeAddress64, PotentialStream> potentialStreams;
 		XBee xbee;
 		XBeeAddress64 myAddress;
 		XBeeAddress64 sinkAddress;
-		VoiceStreamManager * voiceStreamManager;
 		AODV * aodv;
+		VoiceStreamManager * voiceStreamManager;
 		VoicePacketSender * voicePacketSender;
 		unsigned long grantTimeoutLength;
 		unsigned long rejcTimeoutLength;
-		vector<Neighbor> neighborhoodTable;
-		float localCapacity;
-		Saturation satT[7];
-
 		void addPotentialStream(PotentialStream& potentialStream, const float addDataRate);
-		bool checkLocalCapacity(const PotentialStream& potentialStream) const;
+		bool checkLocalCapacity(const PotentialStream& potentialStream);
 		void getLocalCapacity(float myDataRate);
 		void buildSaturationTable();
+		std::vector<Neighbor> neighborhoodTable;
+		float localCapacity;
+		Saturation satT[6];
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
@@ -54,8 +53,8 @@ class AdmissionControl {
 		void handleGRANTPacket(const Rx64Response &response, bool& initThreadActive, bool& voiceThreadActive);
 		void checkTimers();
 		bool removePotentialStream(const XBeeAddress64& packetSource);
-		void printPotentialStreams() const;
-		void receiveHeartBeat(const float myDataRate, const Rx64Response& response);
+		void printPotentialStreams();
+		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage);
 		void broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadCastAddress,

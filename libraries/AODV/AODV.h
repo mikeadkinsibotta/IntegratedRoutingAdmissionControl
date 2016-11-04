@@ -52,7 +52,7 @@ class AODV {
 		bool routeExists(const XBeeAddress64& address, uint32_t seqNum, uint8_t hopCount, RoutingTableEntry &found);
 		void getRoute();
 //		const XBeeAddress64& setNextHop();
-		void listenForResponses(Rx64Response& response, const char control[]);
+		void listenForResponses(Rx64Response& response);
 		const XBeeAddress64& getNextHop(const XBeeAddress64& destination);
 		bool checkRouteTimer();
 		void purgeExpiredRoutes();

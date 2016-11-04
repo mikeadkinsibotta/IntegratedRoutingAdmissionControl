@@ -26,10 +26,9 @@ VoicePacketSender::VoicePacketSender() {
 
 }
 
-VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss,
-		Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-		const uint8_t payloadSize) {
+VoicePacketSender::VoicePacketSender(XBee& xbee, AODV * aodv, Thread * pathLoss, Thread * calculateThroughput,
+		VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress,
+		const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
@@ -224,10 +223,6 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 		XBeeAddress64 nextHop;
 		voiceStreamManager->getStreamPreviousHop(packetSource, nextHop);
-
-		SerialUSB.print("Forward Path Packet - Stream Sender: ");
-		packetSource.printAddressASCII(&SerialUSB);
-		SerialUSB.println();
 
 		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
