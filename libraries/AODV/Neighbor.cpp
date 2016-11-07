@@ -58,3 +58,14 @@ bool Neighbor::timerExpired() {
 void Neighbor::updateTimeStamp() {
 	timeStamp = millis();
 }
+
+void Neighbor::printNeighbor() const {
+	SerialUSB.print('<');
+	address.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", ");
+	SerialUSB.print(dataRate);
+	SerialUSB.print(", ");
+	SerialUSB.print("DownStreamNeighbor:  ");
+	downStreamNeighbor.printAddressASCII(&SerialUSB);
+	SerialUSB.println('>');
+}

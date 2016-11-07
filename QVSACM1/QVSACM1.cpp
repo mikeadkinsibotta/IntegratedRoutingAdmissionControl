@@ -121,8 +121,7 @@ void sendTracePacket() {
 }
 
 void broadcastHeartbeat() {
-	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
-			aodv->getNextHop(sinkAddress));
+	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), aodv->getNextHop(sinkAddress));
 }
 
 void sendPathPacket() {

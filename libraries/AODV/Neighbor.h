@@ -35,6 +35,7 @@ class Neighbor {
 		unsigned long getTimeStamp() const;
 		bool timerExpired();
 		void updateTimeStamp();
+		void printNeighbor() const;
 };
 
 #endif

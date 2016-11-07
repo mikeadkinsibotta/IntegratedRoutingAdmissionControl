@@ -301,16 +301,14 @@ bool AdmissionControl::checkLocalCapacity(const PotentialStream& potentialStream
 	return false;
 }
 
-void AdmissionControl::broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadcastAddress,
-		const XBeeAddress64& downStreamNeighbor) {
+void AdmissionControl::broadcastHeartBeat(const float myDataRate, const XBeeAddress64& downStreamNeighbor) {
 
 	HeartbeatMessage message = HeartbeatMessage(myDataRate, downStreamNeighbor);
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 	message.generateBeatMessage(payload);
-
-	Tx64Request tx = Tx64Request(broadcastAddress, payload, sizeof(payload));
+	Tx64Request tx = Tx64Request(XBeeAddress64(0x00000000, 0x0000FFFF), payload, sizeof(payload));
 	xbee.send(tx);
-    aodv->purgeExpiredNeighbors(neighborhoodTable);
+	aodv->purgeExpiredNeighbors(neighborhoodTable);
 }
 
 void AdmissionControl::receiveHeartBeat(const Rx64Response& response) {

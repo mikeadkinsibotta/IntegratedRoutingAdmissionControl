@@ -414,11 +414,22 @@ void AODV::purgeExpiredNeighbors(std::map<XBeeAddress64, Neighbor> &neighbors) {
 
 	for (std::map<XBeeAddress64, RoutingTableEntry>::iterator it = routingTable.begin(); it != routingTable.end();) {
 
-		Neighbor neighbor = neighbors[it->second.getNextHop()];
-		if (neighbor.timerExpired()) {
-			//erase the route and erase the neighbor
-			routingTable.erase(it++);
-			neighbors.erase(neighbor.getAddress());
+		if (neighbors.find(it->second.getNextHop()) != neighbors.end()) {
+			Neighbor neighbor = neighbors[it->second.getNextHop()];
+
+			if (neighbor.timerExpired()) {
+				//erase the route and erase the neighbor
+				SerialUSB.print("Purging Expired Route Next Hop:  ");
+				neighbor.getAddress().printAddressASCII(&SerialUSB);
+				SerialUSB.print("  Destination: ");
+				it->second.getDestinationAddress().printAddressASCII(&SerialUSB);
+				SerialUSB.println();
+
+				routingTable.erase(it++);
+				neighbors.erase(neighbor.getAddress());
+			} else {
+				++it;
+			}
 		} else {
 			++it;
 		}
@@ -507,9 +518,11 @@ void AODV::sendInitPacket(const uint8_t codecSetting, const float dupSetting) {
 const XBeeAddress64& AODV::getNextHop(const XBeeAddress64& destination) {
 	if (routingTable.find(destination) != routingTable.end()) {
 		RoutingTableEntry entry = routingTable[destination];
+		digitalWrite(13, LOW);
 		return entry.getNextHop();
 
 	}
+	digitalWrite(13, HIGH);
 	return XBeeAddress64();
 }
 

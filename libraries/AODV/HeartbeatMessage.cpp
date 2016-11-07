@@ -36,10 +36,10 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 
 void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 
-	const uint8_t* dataPtr = response.getData() + 5;
+	const uint8_t* dataPtr = response.getData();
 
 	senderAddress = response.getRemoteAddress64();
-	memcpy(&dataRate, dataPtr, sizeof(float));
+	memcpy(&dataRate, dataPtr + 5, sizeof(float));
 	setAddress(dataPtr, downStreamNeighbor, 9);
 
 }

@@ -58,8 +58,7 @@ class AdmissionControl {
 		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
 		void updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage);
-		void broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadCastAddress,
-				const XBeeAddress64& downStreamNeighbor);
+		void broadcastHeartBeat(const float myDataRate, const XBeeAddress64& downStreamNeighbor);
 		unsigned long getNeighborTimeoutLength() const;
 		void setNeighborTimeoutLength(unsigned long neighborTimeoutLength);
 
