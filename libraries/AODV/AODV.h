@@ -13,6 +13,7 @@
 #include "RREQ.h"
 #include "RREP.h"
 #include "RoutingTableEntry.h"
+#include "Neighbor.h"
 
 #define SENDER false
 
@@ -55,7 +56,7 @@ class AODV {
 		void listenForResponses(Rx64Response& response);
 		const XBeeAddress64& getNextHop(const XBeeAddress64& destination);
 		bool checkRouteTimer();
-		void purgeExpiredRoutes();
+		void purgeExpiredNeighbors(std::map<XBeeAddress64, Neighbor> &neighbors);
 		void printRoutingTable();
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		const XBeeAddress64& getBroadcastAddress() const;

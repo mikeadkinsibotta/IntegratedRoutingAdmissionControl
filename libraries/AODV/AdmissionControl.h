@@ -35,9 +35,10 @@ class AdmissionControl {
 		bool checkLocalCapacity(const PotentialStream& potentialStream);
 		void getLocalCapacity(float myDataRate);
 		void buildSaturationTable();
-		std::vector<Neighbor> neighborhoodTable;
+		std::map<XBeeAddress64, Neighbor> neighborhoodTable;
 		float localCapacity;
 		Saturation satT[6];
+		unsigned long neighborTimeoutLength;
 	public:
 		AdmissionControl();
 		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
@@ -56,9 +57,11 @@ class AdmissionControl {
 		void printPotentialStreams();
 		void receiveHeartBeat(const Rx64Response& response);
 		void updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage);
-		void updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage);
+		void updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage);
 		void broadcastHeartBeat(const float myDataRate, const XBeeAddress64& broadCastAddress,
 				const XBeeAddress64& downStreamNeighbor);
+		unsigned long getNeighborTimeoutLength() const;
+		void setNeighborTimeoutLength(unsigned long neighborTimeoutLength);
 
 };
 

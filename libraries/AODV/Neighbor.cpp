@@ -5,14 +5,19 @@ Neighbor::Neighbor() {
 	address = XBeeAddress64();
 	downStreamNeighbor = XBeeAddress64();
 	dataRate = 0;
+	timeStamp = 0;
+	timeoutLength = 0;
 
 }
 
-Neighbor::Neighbor(const float dataRate, const XBeeAddress64& address, const XBeeAddress64& downStreamNeighbor) {
+Neighbor::Neighbor(const float dataRate, const XBeeAddress64& address, const XBeeAddress64& downStreamNeighbor,
+		unsigned long timeoutLength) {
 
 	this->address = address;
 	this->downStreamNeighbor = downStreamNeighbor;
 	this->dataRate = dataRate;
+	timeStamp = millis();
+	this->timeoutLength = timeoutLength;
 }
 
 const XBeeAddress64& Neighbor::getAddress() const {
@@ -37,4 +42,19 @@ const XBeeAddress64& Neighbor::getDownStreamNeighbor() const {
 
 void Neighbor::setDownStreamNeighbor(const XBeeAddress64& downStreamNeighbor) {
 	this->downStreamNeighbor = downStreamNeighbor;
+}
+
+unsigned long Neighbor::getTimeStamp() const {
+	return timeStamp;
+}
+
+bool Neighbor::timerExpired() {
+	if (millis() - timeStamp > timeoutLength) {
+		return true;
+	}
+	return false;
+}
+
+void Neighbor::updateTimeStamp() {
+	timeStamp = millis();
 }

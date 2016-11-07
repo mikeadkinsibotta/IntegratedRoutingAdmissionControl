@@ -197,6 +197,7 @@ void setupThreads() {
 	(*heartbeat).enabled = true;
 	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
 	(*heartbeat).onRun(broadcastHeartbeat);
+	admissionControl->setNeighborTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE) + 250);
 
 	//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";

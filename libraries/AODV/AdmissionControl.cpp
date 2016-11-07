@@ -30,6 +30,7 @@ AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAdd
 	this->xbee = xbee;
 	this->grantTimeoutLength = grantTimeoutLength;
 	this->rejcTimeoutLength = rejcTimeoutLength;
+	this->neighborTimeoutLength = neighborTimeoutLength;
 	localCapacity = MAX_FLT;
 	buildSaturationTable();
 
@@ -309,7 +310,7 @@ void AdmissionControl::broadcastHeartBeat(const float myDataRate, const XBeeAddr
 
 	Tx64Request tx = Tx64Request(broadcastAddress, payload, sizeof(payload));
 	xbee.send(tx);
-
+    aodv->purgeExpiredNeighbors(neighborhoodTable);
 }
 
 void AdmissionControl::receiveHeartBeat(const Rx64Response& response) {
@@ -322,28 +323,28 @@ void AdmissionControl::receiveHeartBeat(const Rx64Response& response) {
 
 }
 
-void AdmissionControl::updateNeighbor(Neighbor& neighbor, const HeartbeatMessage& heartbeatMessage) {
-	neighbor.setDataRate(heartbeatMessage.getDataRate());
-	neighbor.setDownStreamNeighbor(heartbeatMessage.getDownStreamNeighbor());
+void AdmissionControl::updateNeighbor(Neighbor * neighbor, const HeartbeatMessage& heartbeatMessage) {
+	neighbor->setDataRate(heartbeatMessage.getDataRate());
+	neighbor->setDownStreamNeighbor(heartbeatMessage.getDownStreamNeighbor());
+	neighbor->updateTimeStamp();
 }
 
 void AdmissionControl::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
 
 	bool found = false;
 
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		if (neighborhoodTable.at(i).getAddress().equals(heartbeatMessage.getSenderAddress())) {
-			updateNeighbor(neighborhoodTable.at(i), heartbeatMessage);
-			found = true;
-			break;
-		}
+	if (neighborhoodTable.find(heartbeatMessage.getSenderAddress()) != neighborhoodTable.end()) {
+		Neighbor * neighbor = &neighborhoodTable[heartbeatMessage.getSenderAddress()];
+		updateNeighbor(neighbor, heartbeatMessage);
+
 	}
 
-	if (!found) {
+	else {
 		//Sets timestamp when constructor is called.
 		Neighbor neighbor = Neighbor(heartbeatMessage.getDataRate(), heartbeatMessage.getSenderAddress(),
-				heartbeatMessage.getDownStreamNeighbor());
-		neighborhoodTable.push_back(neighbor);
+				heartbeatMessage.getDownStreamNeighbor(), neighborTimeoutLength);
+		neighborhoodTable.insert(pair<XBeeAddress64, Neighbor>(neighbor.getAddress(), neighbor));
+
 	}
 }
 
@@ -351,11 +352,12 @@ void AdmissionControl::getLocalCapacity(float myDataRate) {
 
 	localCapacity = MAX_FLT;
 	float neighborhoodRate = 0;
-	for (int i = 0; i < neighborhoodTable.size(); i++) {
-		neighborhoodRate += neighborhoodTable.at(i).getDataRate();
-		if (neighborhoodTable.at(i).getDownStreamNeighbor().equals(myAddress)) {
+	for (std::map<XBeeAddress64, Neighbor>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end();
+			++it) {
+		neighborhoodRate += it->second.getDataRate();
+		if (it->second.getDownStreamNeighbor().equals(myAddress)) {
 			//Account for forwarding any data
-			myDataRate += neighborhoodTable.at(i).getDataRate();
+			myDataRate += it->second.getDataRate();
 		}
 
 	}
@@ -376,3 +378,12 @@ void AdmissionControl::buildSaturationTable() {
 	satT[4] = Saturation(6, 111.42);
 
 }
+
+unsigned long AdmissionControl::getNeighborTimeoutLength() const {
+	return neighborTimeoutLength;
+}
+
+void AdmissionControl::setNeighborTimeoutLength(unsigned long neighborTimeoutLength) {
+	this->neighborTimeoutLength = neighborTimeoutLength;
+}
+

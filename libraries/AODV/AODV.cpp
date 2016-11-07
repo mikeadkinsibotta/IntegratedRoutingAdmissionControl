@@ -410,21 +410,17 @@ bool AODV::find(const RREQ& req) {
 	return true;
 }
 
-void AODV::purgeExpiredRoutes() {
+void AODV::purgeExpiredNeighbors(std::map<XBeeAddress64, Neighbor> &neighbors) {
 
-	std::map < XBeeAddress64, RoutingTableEntry > newRoutingTable;
+	for (std::map<XBeeAddress64, RoutingTableEntry>::iterator it = routingTable.begin(); it != routingTable.end();) {
 
-	vector < XBeeAddress64 > v;
-	for (std::map<XBeeAddress64, RoutingTableEntry>::iterator it = routingTable.begin(); it != routingTable.end();
-			++it) {
-		v.push_back(it->first);
-	}
-
-	uint8_t size = routingTable.size();
-	for (int i = 0; i < routingTable.size(); ++i) {
-
-		if (millis() - routingTable[v.at(i)].getExperiationTime() > 3000) {
-			routingTable[v.at(i)].setActive(false);
+		Neighbor neighbor = neighbors[it->second.getNextHop()];
+		if (neighbor.timerExpired()) {
+			//erase the route and erase the neighbor
+			routingTable.erase(it++);
+			neighbors.erase(neighbor.getAddress());
+		} else {
+			++it;
 		}
 	}
 
@@ -439,7 +435,6 @@ bool AODV::checkRouteTimer() {
 	return true;
 
 }
-
 
 void AODV::printRoutingTable() {
 
