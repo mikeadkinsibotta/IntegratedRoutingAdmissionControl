@@ -190,7 +190,7 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	if (!myAddress.equals(packetDestination)) {
 
-	myNextHop = aodv->getNextHop(sinkAddress);
+		myNextHop = aodv->getNextHop(sinkAddress);
 
 		//need to forward to next hop
 		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
@@ -217,20 +217,18 @@ void VoicePacketSender::handlePathPacket(const Rx64Response &response) {
 
 	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
 
-	uint8_t dataLoss = dataPtr[13];
-
 	if (!myAddress.equals(packetSource)) {
 
-		XBeeAddress64 nextHop;
-		voiceStreamManager->getStreamPreviousHop(packetSource, nextHop);
+		Tx64Request tx = Tx64Request(previousHop, ACK_OPTION, response.getData(), response.getDataLength(),
+				DEFAULT_FRAME_ID);
 
-		Tx64Request tx = Tx64Request(nextHop, response.getData(), response.getDataLength());
 		xbee.send(tx);
 
 	} else {
 		SerialUSB.println("Received Path Packet");
 
 		//Returned to the original sender, update packet loss
+		uint8_t dataLoss = dataPtr[13];
 		updateDataRate(dataLoss);
 
 	}

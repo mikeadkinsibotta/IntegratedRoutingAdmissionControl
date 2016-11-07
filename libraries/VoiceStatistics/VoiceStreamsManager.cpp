@@ -78,7 +78,7 @@ void VoiceStreamManager::sendPathPacket() {
 
 	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end();) {
 
-		const XBeeAddress64 &dataSenderAddress = it->second.getSenderAddress();
+		const XBeeAddress64 dataSenderAddress = it->second.getSenderAddress();
 		const uint8_t dataLoss = it->second.getPacketLoss();
 		const uint8_t totalPacketsSent = it->second.getTotalPacketsSent();
 		const uint8_t totalPacketsRecieved = it->second.getTotalPacketsRecieved();

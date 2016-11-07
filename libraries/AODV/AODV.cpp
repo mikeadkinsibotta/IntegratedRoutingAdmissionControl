@@ -160,10 +160,6 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 		if (req.getDestAddr().equals(myAddress)) {
 			if (sourceSequenceNum + 1 == req.getDestSeqNum())
 				sourceSequenceNum++;
-			SerialUSB.println("I am the sink, I will send a RREP");
-			SerialUSB.print("My Address:  ");
-			myAddress.printAddressASCII(&SerialUSB);
-			SerialUSB.println();
 
 			RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), sourceSequenceNum, 0, 3000);
 
@@ -179,7 +175,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 					routeReply.getLifeTime() };
 
 			RoutingTableEntry rrepRoute = routingTable[req.getSourceAddr()];
-			routeReply.print();
+
 			Tx64Request tx = Tx64Request(rrepRoute.getNextHop(), ACK_OPTION, payload, sizeof(payload),
 					DEFAULT_FRAME_ID);
 			xbee.send(tx);
@@ -205,7 +201,7 @@ void AODV::handleRREQ(RREQ& req, const XBeeAddress64& remoteSender) {
 				SerialUSB.println("Here I am an intermediate and I have a route to destination");
 				RREP routeReply = RREP(req.getSourceAddr(), req.getDestAddr(), forwardRoute.getSeqNumDest(),
 						forwardRoute.getHopCount(), millis() - forwardRoute.getExperiationTime());
-				routeReply.print();
+
 				uint8_t payload[] = { rrepC[0], rrepC[1], rrepC[2], rrepC[3], rrepC[4],
 						routeReply.getSourceAddr().getMsb() >> 24, routeReply.getSourceAddr().getMsb() >> 16,
 						routeReply.getSourceAddr().getMsb() >> 8, routeReply.getSourceAddr().getMsb(),

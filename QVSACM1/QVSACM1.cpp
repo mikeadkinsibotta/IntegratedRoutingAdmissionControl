@@ -114,15 +114,15 @@ void sendVoicePacket() {
 
 void sendTracePacket() {
 
-//	if ((*generateVoice).enabled) {
-//		voicePacketSender->sendTracePacket();
-//	}
+	if ((*generateVoice).enabled) {
+		voicePacketSender->sendTracePacket();
+	}
 
 }
 
 void broadcastHeartbeat() {
-//	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
-//			aodv->getNextHop(sinkAddress));
+	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
+			aodv->getNextHop(sinkAddress));
 }
 
 void sendPathPacket() {
@@ -198,13 +198,13 @@ void setupThreads() {
 	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
 	(*heartbeat).onRun(broadcastHeartbeat);
 
-//Set to true after receiving first data packet
+	//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";
 	(*pathLoss).enabled = false;
 	(*pathLoss).setInterval(PATHLOSS_INTERVAL + random(200));
 	(*pathLoss).onRun(sendPathPacket);
 
-//Set to true after being admitted by admission control
+	//Set to true after being admitted by admission control
 	(*generateVoice).ThreadName = "Send Voice Data";
 	(*generateVoice).enabled = false;
 	(*generateVoice).setInterval(VOICE_DATA_INTERVAL);
@@ -219,7 +219,7 @@ void setupThreads() {
 	(*sendInital).setInterval(REQUEST_STREAM);
 	(*sendInital).onRun(sendInitPacket);
 
-//Set to true after receiving first data packet
+	//Set to true after receiving first data packet
 	(*calculateThroughput).ThreadName = "Calculate Throughput";
 	(*calculateThroughput).enabled = false;
 	(*calculateThroughput).setInterval(CALCULATE_THROUGHPUT_INTERVAL);

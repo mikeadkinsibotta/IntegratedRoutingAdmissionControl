@@ -114,15 +114,15 @@ void sendVoicePacket() {
 
 void sendTracePacket() {
 
-//	if ((*generateVoice).enabled) {
-//		voicePacketSender->sendTracePacket();
-//	}
+	if ((*generateVoice).enabled) {
+		voicePacketSender->sendTracePacket();
+	}
 
 }
 
 void broadcastHeartbeat() {
-//	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
-//			aodv->getNextHop(sinkAddress));
+	admissionControl->broadcastHeartBeat(voicePacketSender->getInjectionRate(), broadcastAddress,
+			aodv->getNextHop(sinkAddress));
 }
 
 void sendPathPacket() {
