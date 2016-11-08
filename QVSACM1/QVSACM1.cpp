@@ -12,7 +12,7 @@
 #define BROADCAST_ADDRESS_1 0x0013A200
 #define BROADCAST_ADDRESS_2 0x40B317F6
 
-const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
+const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 2;
 
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
@@ -196,7 +196,7 @@ void setupThreads() {
 	(*heartbeat).enabled = true;
 	(*heartbeat).setInterval(HEARTBEAT_INTERVAL + random(200));
 	(*heartbeat).onRun(broadcastHeartbeat);
-	admissionControl->setNeighborTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE) + 250);
+	admissionControl->setNeighborTimeoutLength(((*heartbeat).getInterval() * NUM_MISSED_HB_BEFORE_PURGE) + 200);
 
 	//Set to true after receiving first data packet
 	(*pathLoss).ThreadName = "Send Path Loss";
