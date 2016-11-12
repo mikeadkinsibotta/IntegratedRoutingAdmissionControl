@@ -22,7 +22,6 @@ class AdmissionControl {
 		std::map<XBeeAddress64, PotentialStream> potentialStreams;
 		XBee xbee;
 		XBeeAddress64 myAddress;
-		XBeeAddress64 sinkAddress;
 		HeartbeatProtocol * heartbeatProtocol;
 		VoiceStreamManager * voiceStreamManager;
 		VoicePacketSender * voicePacketSender;
@@ -32,10 +31,9 @@ class AdmissionControl {
 		bool checkLocalCapacity(const PotentialStream& potentialStream);
 	public:
 		AdmissionControl();
-		AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
-				HeartbeatProtocol * heartbeatProtocol, VoiceStreamManager * voiceStreamManager,
-				VoicePacketSender * voicePacketSender, const unsigned long grantTimeoutLength,
-				const unsigned long rejcTimeoutLength);
+		AdmissionControl(const XBeeAddress64& myAddress, const XBee& xbee, HeartbeatProtocol * heartbeatProtocol,
+				VoiceStreamManager * voiceStreamManager, VoicePacketSender * voicePacketSender,
+				const unsigned long grantTimeoutLength, const unsigned long rejcTimeoutLength);
 
 		void sendInitPacket(const uint8_t codecSetting, const float dupSetting);
 		void intializationSenderTimeout();

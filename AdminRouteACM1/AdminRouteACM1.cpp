@@ -77,8 +77,8 @@ void setup() {
 			xbee, SENDER, DIFFERENCE_DISTANCE, IS_SINK);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
-	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamManager,
-			voicePacketSender, GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
+	admissionControl = new AdmissionControl(myAddress, xbee, heartbeatProtocol, voiceStreamManager, voicePacketSender,
+			GRANT_TIMEOUT_LENGTH, REJECT_TIMEOUT_LENGTH);
 	setupThreads();
 
 	digitalWrite(13, LOW);

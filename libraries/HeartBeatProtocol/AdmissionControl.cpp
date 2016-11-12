@@ -15,12 +15,11 @@ AdmissionControl::AdmissionControl() {
 
 }
 
-AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, const XBee& xbee,
+AdmissionControl::AdmissionControl(const XBeeAddress64& myAddress, const XBee& xbee,
 		HeartbeatProtocol * heartbeatProtocol, VoiceStreamManager * voiceStreamManager,
 		VoicePacketSender * voicePacketSender, const unsigned long grantTimeoutLength,
 		const unsigned long rejcTimeoutLength) {
 	this->myAddress = myAddress;
-	this->sinkAddress = sinkAddress;
 	this->heartbeatProtocol = heartbeatProtocol;
 	this->voiceStreamManager = voiceStreamManager;
 	this->voicePacketSender = voicePacketSender;
@@ -36,7 +35,7 @@ void AdmissionControl::checkTimers() {
 				it != potentialStreams.end();) {
 			XBeeAddress64 sourceAddress = it->first;
 
-			if (it->second.getGrantTimer().timeoutTimer() && myAddress.equals(sinkAddress)) {
+			if (it->second.getGrantTimer().timeoutTimer() && myAddress.equals(heartbeatProtocol->getSinkAddress())) {
 				//Only sink should send grant message when timer expires
 				XBeeAddress64 nextHop = it->second.getUpStreamNeighbor();
 				sendGRANTPacket(sourceAddress, nextHop);
@@ -153,7 +152,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 	//remove any old streams
 	voiceStreamManager->removeStream(senderAddress);
 
-	if (nextHop.equals(sinkAddress) && myAddress.equals(sinkAddress)) {
+	if (nextHop.equals(heartbeatProtocol->getSinkAddress()) && myAddress.equals(heartbeatProtocol->getSinkAddress())) {
 		//sink node
 		SerialUSB.print("Receiving request for new stream via: ");
 		receivedAddress.printAddressASCII(&SerialUSB);
@@ -203,7 +202,7 @@ void AdmissionControl::handleInitPacket(const Rx64Response &response) {
 		potentialStream.setOnPath(true);
 		addPotentialStream(potentialStream, dataRate);
 
-	} else if (!myAddress.equals(sinkAddress)) {
+	} else if (!myAddress.equals(heartbeatProtocol->getSinkAddress())) {
 		//node affected but not node on path and not sink node.
 		SerialUSB.print("Receiving not on path request for new stream via: ");
 		receivedAddress.printAddressASCII(&SerialUSB);
@@ -226,7 +225,7 @@ void AdmissionControl::handleREDJPacket(Rx64Response &response) {
 
 	HeartbeatMessage::setAddress(dataPtr, senderAddress, 5);
 
-	if (myAddress.equals(sinkAddress)) {
+	if (myAddress.equals(heartbeatProtocol->getSinkAddress())) {
 		removePotentialStream(senderAddress);
 	} else {
 		sendREDJPacket(senderAddress);
