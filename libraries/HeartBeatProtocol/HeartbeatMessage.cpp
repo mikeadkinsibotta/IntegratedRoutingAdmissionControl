@@ -203,3 +203,11 @@ uint8_t HeartbeatMessage::getHopsToSink() const {
 bool HeartbeatMessage::isGenerateData() const {
 	return generateData;
 }
+
+bool HeartbeatMessage::isIsSink() const {
+	return is_sink;
+}
+
+void HeartbeatMessage::setIsSink(bool isSink) {
+	is_sink = isSink;
+}
