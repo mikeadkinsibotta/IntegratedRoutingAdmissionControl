@@ -80,7 +80,7 @@ class HeartbeatProtocol {
 		void sendEndMessage(const uint8_t nextHopSwitchIndex);
 		void handleEndPacket(const Rx64Response &response);
 		const vector<NextHopSwitch>& getNextHopSwitchList() const;
-
+		const XBeeAddress64& getSinkAddress() const;
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

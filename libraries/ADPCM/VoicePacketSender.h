@@ -27,7 +27,6 @@ class VoicePacketSender {
 		HeartbeatProtocol * heartbeatProtocol;
 		VoiceStreamManager * voiceStreamManager;
 		XBeeAddress64 myAddress;
-		XBeeAddress64 sinkAddress;
 		XBeeAddress64 myNextHop;
 
 		Compression compressionTable;
@@ -48,8 +47,7 @@ class VoicePacketSender {
 		VoicePacketSender();
 		VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
 				Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
-				const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-				const uint8_t payloadSize);
+				const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize);
 		void generateVoicePacket();
 		void handleDataPacket(const Rx64Response &response);
 

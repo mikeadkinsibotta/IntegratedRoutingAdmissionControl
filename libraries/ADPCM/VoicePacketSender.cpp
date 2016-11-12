@@ -11,7 +11,6 @@ VoicePacketSender::VoicePacketSender() {
 	dupSetting = 0.0;
 	admcpm = ADPCM();
 	myAddress = XBeeAddress64();
-	sinkAddress = XBeeAddress64();
 	previousHop = XBeeAddress64();
 	frameId = 0;
 	myNextHop = XBeeAddress64();
@@ -28,14 +27,12 @@ VoicePacketSender::VoicePacketSender() {
 
 VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatProtocol, Thread * pathLoss,
 		Thread * calculateThroughput, VoiceStreamManager * voiceStreamManager, const XBeeAddress64& myAddress,
-		const XBeeAddress64& sinkAddress, const uint8_t codecSetting, const float dupSetting,
-		const uint8_t payloadSize) {
+		const uint8_t codecSetting, const float dupSetting, const uint8_t payloadSize) {
 
 	this->codecSetting = codecSetting;
 	this->dupSetting = dupSetting;
 	admcpm = ADPCM();
 	this->myAddress = myAddress;
-	this->sinkAddress = sinkAddress;
 	this->voiceStreamManager = voiceStreamManager;
 	this->payloadSize = payloadSize;
 	frameId = 0;
@@ -130,7 +127,7 @@ void VoicePacketSender::generateVoicePacket() {
 		destination[3] = 'A';
 		destination[4] = '\0';
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
-		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
 		destination[21] = frameId;
 		destination[22] = codecSetting;
 
@@ -155,7 +152,7 @@ void VoicePacketSender::generateVoicePacket() {
 		destination[3] = 'A';
 		destination[4] = '\0';
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
-		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
+		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
 		destination[21] = frameId;
 		destination[22] = codecSetting;
 //
@@ -287,7 +284,7 @@ void VoicePacketSender::handleTracePacket(const Rx64Response &response) {
 	TraceMessage traceMessage;
 	traceMessage.transcribeMessage(response);
 
-	if (!myAddress.equals(sinkAddress)) {
+	if (!myAddress.equals(heartbeatProtocol->getSinkAddress())) {
 
 		uint8_t traceMessagePayLoad[62];
 		memset(traceMessagePayLoad, 0, sizeof(traceMessagePayLoad));
@@ -326,14 +323,6 @@ const XBeeAddress64& VoicePacketSender::getMyNextHop() const {
 
 void VoicePacketSender::setMyNextHop(const XBeeAddress64& myNextHop) {
 	this->myNextHop = myNextHop;
-}
-
-const XBeeAddress64& VoicePacketSender::getSinkAddress() const {
-	return sinkAddress;
-}
-
-void VoicePacketSender::setSinkAddress(const XBeeAddress64& sinkAddress) {
-	this->sinkAddress = sinkAddress;
 }
 
 uint8_t VoicePacketSender::getCodecSetting() const {

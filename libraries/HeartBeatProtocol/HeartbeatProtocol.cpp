@@ -49,7 +49,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	digitalWrite(13, HIGH);
 	hopsToSink = 0;
 
-	if (myAddress.equals(sinkAddress)) {
+	if (is_sink) {
 		routeFlag = true;
 		digitalWrite(13, LOW);
 	}
@@ -119,11 +119,12 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 
 	if (manipulate) {
 		manipulateRoute();
-	} else if (!myAddress.equals(sinkAddress) && nextHop.equals(Neighbor())) {
+	} else if (!is_sink && nextHop.equals(Neighbor())) {
 		noNeighborcalculatePathQualityNextHop();
-	} else if (!myAddress.equals(sinkAddress) && !nextHop.equals(Neighbor())) {
+	} else if (!is_sink && !nextHop.equals(Neighbor())) {
 		withNeighborcalculatePathQualityNextHop();
 	}
+
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
@@ -573,4 +574,8 @@ void HeartbeatProtocol::setXbee(const XBee& xbee) {
 
 const vector<NextHopSwitch>& HeartbeatProtocol::getNextHopSwitchList() const {
 	return nextHopSwitchList;
+}
+
+const XBeeAddress64& HeartbeatProtocol::getSinkAddress() const {
+	return sinkAddress;
 }
