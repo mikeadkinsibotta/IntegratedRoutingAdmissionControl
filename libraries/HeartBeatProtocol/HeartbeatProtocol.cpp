@@ -10,7 +10,7 @@
 #define SINK_ADDRESS_2 0x40B519CC
 #define DEBUG false
 
-const uint8_t HEARTBEAT_PAYLOAD_SIZE = 34;
+const uint8_t HEARTBEAT_PAYLOAD_SIZE = 35;
 const float MAX_FLT = 9999.0;
 const float EPISLON = 0.001;
 
@@ -24,11 +24,12 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	buildSaturationTable();
 	nextHop = Neighbor();
 	hopsToSink = 0;
+	is_sink = false;
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
 		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
-		const bool generateData, const float distanceDifference) {
+		const bool generateData, const float distanceDifference, const bool is_sink) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
@@ -42,6 +43,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	this->neighborhoodCapacity = MAX_FLT;
 	this->generateData = generateData;
 	this->distanceDifference = distanceDifference;
+	this->is_sink = is_sink;
 	timeoutLength = 0;
 	nextHop = Neighbor();
 	digitalWrite(13, HIGH);
@@ -61,7 +63,7 @@ void HeartbeatProtocol::broadcastHeartBeat() {
 	}
 
 	HeartbeatMessage message = HeartbeatMessage(myAddress, sinkAddress, nextHop.getAddress(), seqNum, dataRate,
-			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink, generateData);
+			qualityOfPath, neighborhoodCapacity, routeFlag, hopsToSink, generateData, is_sink);
 
 	uint8_t payload[HEARTBEAT_PAYLOAD_SIZE];
 

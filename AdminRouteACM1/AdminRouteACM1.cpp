@@ -9,9 +9,9 @@
 #define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
-#define MANIPULATE true
+#define MANIPULATE false
 #define MANIPULATE_ADDRESS_1 0x0013A200
-#define MANIPULATE_ADDRESS_2 0x40B317F6
+#define MANIPULATE_ADDRESS_2 0x4102FC32
 #define DEBUG_HEARTBEAT false
 //#define HEARTBEAT_ADDRESS_1 0x0013A200
 //#define HEARTBEAT_ADDRESS_2 0x40B317F6
@@ -35,6 +35,7 @@ const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
 const float DISTANCE_THRESHOLD = 7.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
+const bool IS_SINK = false;
 
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;
@@ -73,7 +74,7 @@ void setup() {
 
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
 	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
-			xbee, SENDER, DIFFERENCE_DISTANCE);
+			xbee, SENDER, DIFFERENCE_DISTANCE, IS_SINK);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, sinkAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, sinkAddress, xbee, heartbeatProtocol, voiceStreamManager,

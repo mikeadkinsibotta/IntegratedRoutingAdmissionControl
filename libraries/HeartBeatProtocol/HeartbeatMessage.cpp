@@ -19,11 +19,13 @@ HeartbeatMessage::HeartbeatMessage() {
 	rssi = 0;
 	hopsToSink = 0;
 	generateData = false;
+	is_sink = false;
 }
 
 HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBeeAddress64& sinkAddress,
 		const XBeeAddress64& myNextHop, const uint8_t seqNum, const float dataRate, const uint8_t qualityOfPath,
-		const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink, const bool generateData) {
+		const float neighborhoodCapacity, const bool routeFlag, const uint8_t hopsToSink, const bool generateData,
+		const bool is_sink) {
 
 	this->senderAddress = senderAddress;
 	this->sinkAddress = sinkAddress;
@@ -36,6 +38,7 @@ HeartbeatMessage::HeartbeatMessage(const XBeeAddress64& senderAddress, const XBe
 	this->routeFlag = routeFlag;
 	this->hopsToSink = hopsToSink;
 	this->generateData = generateData;
+	this->is_sink = is_sink;
 	rssi = 0;
 
 }
@@ -87,11 +90,12 @@ void HeartbeatMessage::generateBeatMessage(uint8_t payload[]) {
 	payload[23] = routeFlag;
 	payload[24] = hopsToSink;
 	payload[25] = generateData;
+	payload[26] = is_sink;
 
 	addAddressToMessage(payload, sinkAddress, 5);
 	addAddressToMessage(payload, myNextHop, 13);
-	addFloat(payload, dataRateP, 26);
-	addFloat(payload, neighborhoodCapacityP, 30);
+	addFloat(payload, dataRateP, 27);
+	addFloat(payload, neighborhoodCapacityP, 31);
 
 }
 
@@ -145,9 +149,10 @@ void HeartbeatMessage::transcribeHeartbeatPacket(const Rx64Response& response) {
 	routeFlag = dataPtr[18];
 	hopsToSink = dataPtr[19];
 	generateData = dataPtr[20];
+	is_sink = dataPtr[21];
 
-	memcpy(&dataRate, dataPtr + 21, sizeof(float));
-	memcpy(&neighborhoodCapacity, dataPtr + 25, sizeof(float));
+	memcpy(&dataRate, dataPtr + 22, sizeof(float));
+	memcpy(&neighborhoodCapacity, dataPtr + 26, sizeof(float));
 
 }
 
