@@ -51,6 +51,7 @@ class HeartbeatProtocol {
 		void withNeighborcalculatePathQualityNextHop();
 		void manipulateRoute();
 		void lookForBetterHop(Neighbor& neighbor, vector<Neighbor>& filterTable, uint8_t& qop) const;
+		void switchSinks(const HeartbeatMessage& heartbeatMessage);
 
 	public:
 		HeartbeatProtocol();
@@ -81,6 +82,7 @@ class HeartbeatProtocol {
 		void handleEndPacket(const Rx64Response &response);
 		const vector<NextHopSwitch>& getNextHopSwitchList() const;
 		const XBeeAddress64& getSinkAddress() const;
+
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

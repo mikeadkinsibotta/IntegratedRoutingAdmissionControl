@@ -52,6 +52,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	if (is_sink) {
 		routeFlag = true;
 		digitalWrite(13, LOW);
+		this->sinkAddress = myAddress;
 	}
 	buildSaturationTable();
 }
@@ -110,19 +111,25 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);
 
+	updateNeighborHoodTable(message);
+	reCalculateNeighborhoodCapacity();
+
 	if (message.getSenderAddress().equals(nextHop.getAddress())) {
 		hopsToSink = message.getHopsToSink() + 1;
 	}
 
-	updateNeighborHoodTable(message);
-	reCalculateNeighborhoodCapacity();
+	if (message.isIsSink()) {
+		//Check if we should go to another sink
+		switchSinks(message);
+	} else {
 
-	if (manipulate) {
-		manipulateRoute();
-	} else if (!is_sink && nextHop.equals(Neighbor())) {
-		noNeighborcalculatePathQualityNextHop();
-	} else if (!is_sink && !nextHop.equals(Neighbor())) {
-		withNeighborcalculatePathQualityNextHop();
+		if (manipulate) {
+			manipulateRoute();
+		} else if (!is_sink && nextHop.equals(Neighbor())) {
+			noNeighborcalculatePathQualityNextHop();
+		} else if (!is_sink && !nextHop.equals(Neighbor())) {
+			withNeighborcalculatePathQualityNextHop();
+		}
 	}
 
 }
@@ -473,6 +480,16 @@ void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessa
 	neighbor->updateTimeStamp();
 	neighbor->setHopsToSink(heartbeatMessage.getHopsToSink());
 	neighbor->setGenerateData(heartbeatMessage.isGenerateData());
+
+}
+
+void HeartbeatProtocol::switchSinks(const HeartbeatMessage& heartbeatMessage) {
+	double differenceDistance = abs(nextHop.getRelativeDistanceAvg() - heartbeatMessage.getRelativeDistance());
+	if (differenceDistance > distanceDifference) {
+		SerialUSB.print("Difference:  ");
+		SerialUSB.println(differenceDistance);
+		sinkAddress = heartbeatMessage.getSenderAddress();
+	}
 
 }
 
