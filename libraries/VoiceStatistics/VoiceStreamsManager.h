@@ -38,7 +38,7 @@ class VoiceStreamManager {
 
 		void removeStream(const XBeeAddress64& packetSource);
 		void sendPathPacket();
-		void calculateThroughput();
+		void calculateThroughput(const double lastDistanceMeasurement);
 		uint8_t getPayloadSize() const;
 };
 

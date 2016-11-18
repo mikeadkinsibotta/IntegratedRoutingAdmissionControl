@@ -39,6 +39,7 @@ const float DIFFERENCE_DISTANCE = 0.60;
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;
 uint8_t nextHopSwitchListIndex = 0;
+double lastDistanceMeasurement = 0;
 
 XBee xbee = XBee();
 HeartbeatProtocol * heartbeatProtocol;
@@ -172,7 +173,7 @@ void sendPathPacket() {
 }
 
 void runCalculateThroughput() {
-	voiceStreamManager->calculateThroughput();
+	voiceStreamManager->calculateThroughput(lastDistanceMeasurement);
 }
 
 void clearBuffer() {
@@ -191,7 +192,7 @@ void listenForResponses() {
 		uint8_t* data = response.getData();
 
 		if (xbee.getResponse().getApiId() == RX_64_RESPONSE && response.getRelativeDistance() < DISTANCE_THRESHOLD) {
-
+			lastDistanceMeasurement = response.getRelativeDistance();
 			switch (data[0]) {
 				case 'E':
 					heartbeatProtocol->handleEndPacket(response);
@@ -280,7 +281,7 @@ void setupThreads() {
 	(*endMessage).onRun(sendEndMessage);
 
 	(*threadMessage).ThreadName = "Thread Messages";
-	(*threadMessage).enabled = SENDER;
+	(*threadMessage).enabled = false;
 	(*threadMessage).setInterval(TRACE_INTERVAL);
 	(*threadMessage).onRun(sendTracePacket);
 

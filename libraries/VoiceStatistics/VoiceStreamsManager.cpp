@@ -117,13 +117,13 @@ void VoiceStreamManager::getStreamPreviousHop(const XBeeAddress64& packetSource,
 	}
 }
 
-void VoiceStreamManager::calculateThroughput() {
+void VoiceStreamManager::calculateThroughput(const double lastDistanceMeasurement) {
 	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
 		if (setTimeDifference) {
 			timeDifference = (millis() / 1000.0);
 			setTimeDifference = false;
 		}
-		it->second.calculateThroughput(timeDifference);
+		it->second.calculateThroughput(timeDifference, lastDistanceMeasurement);
 	}
 }
 

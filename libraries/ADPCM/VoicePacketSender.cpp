@@ -134,14 +134,6 @@ void VoicePacketSender::generateVoicePacket() {
 		destination[21] = frameId;
 		destination[22] = codecSetting;
 
-//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-//				codecSetting };
-
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
 		xbee.send(tx);
@@ -158,14 +150,6 @@ void VoicePacketSender::generateVoicePacket() {
 		HeartbeatMessage::addAddressToMessage(destination, sinkAddress, 13);
 		destination[21] = frameId;
 		destination[22] = codecSetting;
-//
-//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 

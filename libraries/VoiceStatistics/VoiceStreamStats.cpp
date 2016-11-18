@@ -71,7 +71,7 @@ double VoiceStreamStats::getThroughput() const {
 	return throughput;
 }
 
-void VoiceStreamStats::calculateThroughput(const double timeDifference) {
+void VoiceStreamStats::calculateThroughput(const double timeDifference, const double lastDistanceMeasurement) {
 
 	if (totalPacketsRecieved == 0) {
 		numNoPacketReceived++;
@@ -142,7 +142,10 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 			SerialUSB.print("  Compression Last Packet: ");
 			SerialUSB.print(codecSetting);
 
-			SerialUSB.print(" Average Moving R-Quality ");
+			SerialUSB.print("  Last Distance: ");
+			SerialUSB.print(lastDistanceMeasurement);
+
+			SerialUSB.print("  Average Moving R-Quality ");
 			SerialUSB.println(voiceQualityMovingAverage);
 		}
 	}
