@@ -20,7 +20,7 @@ Neighbor::Neighbor() {
 	previousRelativeDistance = 0;
 	hopsToSink = 0;
 	generateData = 0;
-
+	relativeDistanceAvg = 0;
 }
 
 Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, float dataRate, uint8_t seqNum,
@@ -40,12 +40,11 @@ Neighbor::Neighbor(const XBeeAddress64& address, const XBeeAddress64& nextHop, f
 	this->rssi = rssi;
 	this->packetLoss = 0;
 	this->generateData = generateData;
-	addToRelativeDistance(relativeDistance);
 	timeStamp = millis();
 	previousTimeStamp = timeStamp;
 	this->timeoutLength = timeoutLength;
-	previousRelativeDistance = 0;
-	relativeDistanceAvg = 0;
+	addToRelativeDistance(relativeDistance);
+
 }
 
 void Neighbor::addToRelativeDistance(const double relativeDistance) {
@@ -54,16 +53,17 @@ void Neighbor::addToRelativeDistance(const double relativeDistance) {
 	} else {
 		previousRelativeDistance = relativeDistanceQueue.back();
 		relativeDistanceQueue.pop_back();
-
-		double total = 0;
-		for (int i = 0; i < MOVING_AVERAGE_SIZE; ++i) {
-			total += relativeDistanceQueue[i];
-		}
-
-		relativeDistanceAvg = total / MOVING_AVERAGE_SIZE;
-
+		relativeDistanceQueue.push_front(relativeDistance);
 	}
 
+	const uint8_t moving_average_size = relativeDistanceQueue.size();
+
+	double total = 0;
+	for (int i = 0; i < moving_average_size; ++i) {
+		total += relativeDistanceQueue[i];
+	}
+
+	relativeDistanceAvg = total / moving_average_size;
 }
 
 const XBeeAddress64& Neighbor::getAddress() const {
@@ -175,13 +175,28 @@ void Neighbor::setRssi(double rssi) {
 }
 
 void Neighbor::printNeighbor() const {
-	Serial.print('<');
-	address.printAddress(&Serial);
-	Serial.print(',');
-	Serial.print(dataRate);
-	Serial.print(',');
-	Serial.print(neighborhoodCapacity);
-	Serial.print('>');
+	SerialUSB.println();
+	SerialUSB.print("MyAddress: ");
+	address.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", DataRate: ");
+	SerialUSB.print(dataRate);
+	SerialUSB.print(", SeqNum: ");
+	SerialUSB.print(seqNum);
+	SerialUSB.print(", HopsToSink: ");
+	SerialUSB.print(hopsToSink);
+	SerialUSB.print(", QualityOfPath: ");
+	SerialUSB.print(qualityOfPath);
+	SerialUSB.print(", NeighborhoodCapacity: ");
+	SerialUSB.print(neighborhoodCapacity);
+	SerialUSB.print(", RouteFlag: ");
+	SerialUSB.print(routeFlag);
+	SerialUSB.print(", RelativeDistanceAvg: ");
+	SerialUSB.print(relativeDistanceAvg);
+	SerialUSB.print(", SinkAddress: ");
+	sinkAddress.printAddressASCII(&SerialUSB);
+	SerialUSB.print(", NextHopAddress: ");
+	nextHop.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 }
 
 const XBeeAddress64& Neighbor::getNextHop() const {
