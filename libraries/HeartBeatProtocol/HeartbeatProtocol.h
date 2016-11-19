@@ -56,8 +56,8 @@ class HeartbeatProtocol {
 	public:
 		HeartbeatProtocol();
 		HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
-				const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
-				const bool generateData, const float distanceDifference, const bool is_sink);
+				const bool manipulateFlag, const XBeeAddress64& myAddress, XBee& xbee, const bool generateData,
+				const float distanceDifference, const bool is_sink);
 		void broadcastHeartBeat();
 		void receiveHeartBeat(const Rx64Response& response);
 		void purgeNeighborhoodTable();

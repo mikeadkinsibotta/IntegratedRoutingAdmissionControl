@@ -28,12 +28,11 @@ HeartbeatProtocol::HeartbeatProtocol() {
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
-		const bool manipulateFlag, const XBeeAddress64& myAddress, const XBeeAddress64& sinkAddress, XBee& xbee,
-		const bool generateData, const float distanceDifference, const bool is_sink) {
+		const bool manipulateFlag, const XBeeAddress64& myAddress, XBee& xbee, const bool generateData,
+		const float distanceDifference, const bool is_sink) {
 	this->seqNum = 0;
 	this->xbee = xbee;
 	this->myAddress = myAddress;
-	this->sinkAddress = sinkAddress;
 	this->routeFlag = false;
 	this->broadcastAddress = broadcastAddress;
 	this->manipulateAddress = manipulateAddress;
@@ -118,8 +117,8 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 		hopsToSink = message.getHopsToSink() + 1;
 	}
 
-	if (message.isIsSink()) {
-		//Check if we should go to another sink
+	if (message.isIsSink() && !nextHop.equals(Neighbor())) {
+		//Check if we should go to another sink?
 		switchSinks(message);
 	} else {
 
@@ -221,6 +220,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 
 		qualityOfPath = qop;
 		nextHop = neighbor;
+		sinkAddress = neighbor.getSinkAddress();
 		unsigned long timepoint = millis();
 		NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
 		nextHopSwitchList.push_back(nextHopSwitch);
@@ -275,6 +275,7 @@ void HeartbeatProtocol::withNeighborcalculatePathQualityNextHop() {
 
 			qualityOfPath = qop;
 			nextHop = neighbor;
+			sinkAddress = neighbor.getSinkAddress();
 			unsigned long timepoint = millis();
 			NextHopSwitch nextHopSwitch = NextHopSwitch(timepoint, nextHop.getAddress());
 			nextHopSwitchList.push_back(nextHopSwitch);
@@ -484,16 +485,18 @@ void HeartbeatProtocol::updateNeighbor(Neighbor * neighbor, const HeartbeatMessa
 }
 
 void HeartbeatProtocol::switchSinks(const HeartbeatMessage& heartbeatMessage) {
+
 	double differenceDistance = abs(nextHop.getRelativeDistanceAvg() - heartbeatMessage.getRelativeDistance());
 	if (differenceDistance > distanceDifference) {
-		SerialUSB.print("Difference:  ");
-		SerialUSB.println(differenceDistance);
-		sinkAddress = heartbeatMessage.getSenderAddress();
+		SerialUSB.println("Switching sink...");
+		sinkAddress = heartbeatMessage.getSinkAddress();
 	}
 
 }
 
 void HeartbeatProtocol::printNeighborHoodTable() {
+	SerialUSB.println("Neighborhood Table:");
+
 	SerialUSB.println();
 	SerialUSB.print("MyAddress: ");
 	myAddress.printAddressASCII(&SerialUSB);

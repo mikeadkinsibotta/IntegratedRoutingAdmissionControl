@@ -118,26 +118,19 @@ void VoicePacketSender::generateVoicePacket() {
 	uint8_t destination[100];
 	memset(destination, 0, sizeof(destination));
 
+	destination[0] = 'D';
+	destination[1] = 'A';
+	destination[2] = 'T';
+	destination[3] = 'A';
+	destination[4] = '\0';
+
 	if (dupSetting != 0 && r && !justSentDup) {
 		frameId--;
 
-		destination[0] = 'D';
-		destination[1] = 'A';
-		destination[2] = 'T';
-		destination[3] = 'A';
-		destination[4] = '\0';
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
 		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
 		destination[21] = frameId;
 		destination[22] = codecSetting;
-
-//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -146,23 +139,10 @@ void VoicePacketSender::generateVoicePacket() {
 		justSentDup = true;
 	} else {
 
-		destination[0] = 'D';
-		destination[1] = 'A';
-		destination[2] = 'T';
-		destination[3] = 'A';
-		destination[4] = '\0';
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
 		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
 		destination[21] = frameId;
 		destination[22] = codecSetting;
-//
-//		uint8_t destination[100] = { 'D', 'A', 'T', 'A', '\0', (myAddress.getMsb() >> 24) & 0xff, (myAddress.getMsb()
-//				>> 16) & 0xff, (myAddress.getMsb() >> 8) & 0xff, myAddress.getMsb() & 0xff, (myAddress.getLsb() >> 24)
-//				& 0xff, (myAddress.getLsb() >> 16) & 0xff, (myAddress.getLsb() >> 8) & 0xff, myAddress.getLsb() & 0xff,
-//				(sinkAddress.getMsb() >> 24) & 0xff, (sinkAddress.getMsb() >> 16) & 0xff, (sinkAddress.getMsb() >> 8)
-//						& 0xff, sinkAddress.getMsb() & 0xff, (sinkAddress.getLsb() >> 24) & 0xff, (sinkAddress.getLsb()
-//						>> 16) & 0xff, (sinkAddress.getLsb() >> 8) & 0xff, sinkAddress.getLsb() & 0xff, frameId,
-//				codecSetting };
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
@@ -186,6 +166,10 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
 	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
 	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
+
+	SerialUSB.println("Destination: ");
+	packetDestination.printAddressASCII(&SerialUSB);
+	SerialUSB.println();
 
 	if (!myAddress.equals(packetDestination)) {
 

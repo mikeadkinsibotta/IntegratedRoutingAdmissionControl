@@ -5,8 +5,6 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define SENDER false
-#define SINK_ADDRESS_1 0x0013A200
-#define SINK_ADDRESS_2 0x40B317F6
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define MANIPULATE false
@@ -35,7 +33,7 @@ const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
 const float DISTANCE_THRESHOLD = 7.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
-const bool IS_SINK = false;
+const bool IS_SINK = true;
 
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;
@@ -60,7 +58,6 @@ Thread * threadMessage = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
-XBeeAddress64 sinkAddress = XBeeAddress64(SINK_ADDRESS_1, SINK_ADDRESS_2);
 XBeeAddress64 myAddress;
 
 void setup() {
@@ -73,8 +70,8 @@ void setup() {
 	SerialUSB.println();
 
 	voiceStreamManager = new VoiceStreamManager(xbee, PAYLOAD_SIZE);
-	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, sinkAddress,
-			xbee, SENDER, DIFFERENCE_DISTANCE, IS_SINK);
+	heartbeatProtocol = new HeartbeatProtocol(heartBeatAddress, manipulateAddress, MANIPULATE, myAddress, xbee, SENDER,
+			DIFFERENCE_DISTANCE, IS_SINK);
 	voicePacketSender = new VoicePacketSender(xbee, heartbeatProtocol, pathLoss, calculateThroughput,
 			voiceStreamManager, myAddress, CODEC_SETTTING, INITAL_DUPLICATION_SETTING, PAYLOAD_SIZE);
 	admissionControl = new AdmissionControl(myAddress, xbee, heartbeatProtocol, voiceStreamManager, voicePacketSender,
@@ -142,7 +139,7 @@ void broadcastHeartbeat() {
 	if (timepoint > END_TIME && !endMessageSent) {
 
 		//kill Sender
-		if (!myAddress.equals(sinkAddress)) {
+		if (!IS_SINK) {
 			nextHopSwitchListSize = heartbeatProtocol->getNextHopSwitchList().size();
 			(*endMessage).enabled = true;
 
