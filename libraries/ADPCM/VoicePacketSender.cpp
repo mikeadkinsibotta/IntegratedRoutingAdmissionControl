@@ -167,10 +167,6 @@ void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
 	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
 
-	SerialUSB.println("Destination: ");
-	packetDestination.printAddressASCII(&SerialUSB);
-	SerialUSB.println();
-
 	if (!myAddress.equals(packetDestination)) {
 
 		myNextHop = heartbeatProtocol->getNextHop().getAddress();
