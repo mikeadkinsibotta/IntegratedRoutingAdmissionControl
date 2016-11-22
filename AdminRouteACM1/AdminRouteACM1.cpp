@@ -5,7 +5,6 @@
 #define ERROR_LED 12
 #define DEBUG false
 #define SENDER false
-
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define MANIPULATE false
