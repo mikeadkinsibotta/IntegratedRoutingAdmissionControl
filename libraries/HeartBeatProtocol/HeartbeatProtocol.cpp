@@ -110,27 +110,30 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);
 
-	updateNeighborHoodTable(message);
-	reCalculateNeighborhoodCapacity();
+	//only take heartbeat messages from senders
+	//if message is from a sink and I am a sink ignore
+	if (message.isIsSink() && !is_sink) {
+		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
 
-	if (message.getSenderAddress().equals(nextHop.getAddress())) {
-		hopsToSink = message.getHopsToSink() + 1;
-	}
+		if (message.getSenderAddress().equals(nextHop.getAddress())) {
+			hopsToSink = message.getHopsToSink() + 1;
+		}
 
-	if (message.isIsSink() && !nextHop.equals(Neighbor())) {
-		//Check if we should go to another sink?
-		switchSinks(message);
-	} else {
+		if (message.isIsSink() && !nextHop.equals(Neighbor())) {
+			//Check if we should go to another sink?
+			switchSinks(message);
+		} else {
 
-		if (manipulate) {
-			manipulateRoute();
-		} else if (!is_sink && nextHop.equals(Neighbor())) {
-			noNeighborcalculatePathQualityNextHop();
-		} else if (!is_sink && !nextHop.equals(Neighbor())) {
-			withNeighborcalculatePathQualityNextHop();
+			if (manipulate) {
+				manipulateRoute();
+			} else if (!is_sink && nextHop.equals(Neighbor())) {
+				noNeighborcalculatePathQualityNextHop();
+			} else if (!is_sink && !nextHop.equals(Neighbor())) {
+				withNeighborcalculatePathQualityNextHop();
+			}
 		}
 	}
-
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
