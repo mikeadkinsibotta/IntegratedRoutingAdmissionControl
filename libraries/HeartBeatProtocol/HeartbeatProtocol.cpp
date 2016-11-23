@@ -456,6 +456,12 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 		xbee.send(tx);
 
 	} else {
+		SerialUSB.print("#");
+		packetSource.printAddressASCII(&SerialUSB);
+		SerialUSB.print("   #");
+		newNextHop.printAddressASCII(&SerialUSB);
+		SerialUSB.print("   ");
+		SerialUSB.println(timepoint / 1000.0);
 
 		SerialUSB.print("End Message From: ");
 		packetSource.printAddressASCII(&SerialUSB);
