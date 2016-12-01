@@ -33,7 +33,7 @@ const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
 const float DISTANCE_THRESHOLD = 1.80;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
-const bool IS_SINK = false;
+const bool IS_SINK = true;
 
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;

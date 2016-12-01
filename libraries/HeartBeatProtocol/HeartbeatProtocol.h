@@ -43,6 +43,7 @@ class HeartbeatProtocol {
 		bool generateData;
 		float distanceDifference;
 		bool is_sink;
+		uint8_t dataFrameId;
 
 		void buildSaturationTable();
 		void reCalculateNeighborhoodCapacity();
@@ -82,7 +83,7 @@ class HeartbeatProtocol {
 		void handleEndPacket(const Rx64Response &response);
 		const vector<NextHopSwitch>& getNextHopSwitchList() const;
 		const XBeeAddress64& getSinkAddress() const;
-
+		uint8_t * getDataFrameId();
 };
 
 #endif /* LIBRARIES_HEARTBEATPROTOCOL_HEARTBEATPROTOCOL_H_ */

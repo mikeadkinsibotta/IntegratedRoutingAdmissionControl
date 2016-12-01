@@ -25,6 +25,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	nextHop = Neighbor();
 	hopsToSink = 0;
 	is_sink = false;
+	dataFrameId = 0;
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
@@ -47,6 +48,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	nextHop = Neighbor();
 	digitalWrite(13, HIGH);
 	hopsToSink = 0;
+	dataFrameId = 0;
 
 	if (is_sink) {
 		routeFlag = true;
@@ -110,27 +112,30 @@ void HeartbeatProtocol::receiveHeartBeat(const Rx64Response& response) {
 	HeartbeatMessage message;
 	message.transcribeHeartbeatPacket(response);
 
-	updateNeighborHoodTable(message);
-	reCalculateNeighborhoodCapacity();
+	//only take heartbeat messages from senders
+	//if message is from a sink and I am a sink ignore
+	if (message.isIsSink() && !is_sink) {
+		updateNeighborHoodTable(message);
+		reCalculateNeighborhoodCapacity();
 
-	if (message.getSenderAddress().equals(nextHop.getAddress())) {
-		hopsToSink = message.getHopsToSink() + 1;
-	}
+		if (message.getSenderAddress().equals(nextHop.getAddress())) {
+			hopsToSink = message.getHopsToSink() + 1;
+		}
 
-	if (message.isIsSink() && !nextHop.equals(Neighbor())) {
-		//Check if we should go to another sink?
-		switchSinks(message);
-	} else {
+		if (message.isIsSink() && !nextHop.equals(Neighbor())) {
+			//Check if we should go to another sink?
+			switchSinks(message);
+		} else {
 
-		if (manipulate) {
-			manipulateRoute();
-		} else if (!is_sink && nextHop.equals(Neighbor())) {
-			noNeighborcalculatePathQualityNextHop();
-		} else if (!is_sink && !nextHop.equals(Neighbor())) {
-			withNeighborcalculatePathQualityNextHop();
+			if (manipulate) {
+				manipulateRoute();
+			} else if (!is_sink && nextHop.equals(Neighbor())) {
+				noNeighborcalculatePathQualityNextHop();
+			} else if (!is_sink && !nextHop.equals(Neighbor())) {
+				withNeighborcalculatePathQualityNextHop();
+			}
 		}
 	}
-
 }
 
 void HeartbeatProtocol::updateNeighborHoodTable(const HeartbeatMessage& heartbeatMessage) {
@@ -211,7 +216,9 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 	}
 
 	//check if any neighbors have routes
-	if (filterTable.size() > 0) {
+	//we want to make sure we receive a heartbeat from every sink before picking the sink we will sent to.
+	//This prevents just picking the sink that sent the first heartbeat message.
+	if (filterTable.size() > 2) {
 		Neighbor neighbor;
 		neighbor.setHopsToSink(UINT8_MAX);
 		uint8_t qop = UINT8_MAX;
@@ -456,6 +463,12 @@ void HeartbeatProtocol::handleEndPacket(const Rx64Response &response) {
 		xbee.send(tx);
 
 	} else {
+		SerialUSB.print("#");
+		packetSource.printAddressASCII(&SerialUSB);
+		SerialUSB.print("   #");
+		newNextHop.printAddressASCII(&SerialUSB);
+		SerialUSB.print("   ");
+		SerialUSB.println(timepoint / 1000.0);
 
 		SerialUSB.print("End Message From: ");
 		packetSource.printAddressASCII(&SerialUSB);
@@ -490,6 +503,7 @@ void HeartbeatProtocol::switchSinks(const HeartbeatMessage& heartbeatMessage) {
 	if (differenceDistance > distanceDifference) {
 		SerialUSB.println("Switching sink...");
 		sinkAddress = heartbeatMessage.getSinkAddress();
+		dataFrameId = 0;
 	}
 
 }
@@ -594,6 +608,10 @@ void HeartbeatProtocol::setXbee(const XBee& xbee) {
 
 const vector<NextHopSwitch>& HeartbeatProtocol::getNextHopSwitchList() const {
 	return nextHopSwitchList;
+}
+
+uint8_t * HeartbeatProtocol::getDataFrameId() {
+	return &dataFrameId;
 }
 
 const XBeeAddress64& HeartbeatProtocol::getSinkAddress() const {
