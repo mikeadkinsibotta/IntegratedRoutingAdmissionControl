@@ -34,7 +34,7 @@ class VoicePacketSender {
 		Thread * calculateThroughput;
 		float injectionRate;
 		uint8_t payloadSize;
-		uint8_t frameId;
+		uint8_t * frameId;
 		bool justSentDup = false;
 
 		XBeeAddress64 packetDestination;

@@ -25,6 +25,7 @@ HeartbeatProtocol::HeartbeatProtocol() {
 	nextHop = Neighbor();
 	hopsToSink = 0;
 	is_sink = false;
+	dataFrameId = 0;
 }
 
 HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, const XBeeAddress64& manipulateAddress,
@@ -47,6 +48,7 @@ HeartbeatProtocol::HeartbeatProtocol(const XBeeAddress64& broadcastAddress, cons
 	nextHop = Neighbor();
 	digitalWrite(13, HIGH);
 	hopsToSink = 0;
+	dataFrameId = 0;
 
 	if (is_sink) {
 		routeFlag = true;
@@ -501,6 +503,7 @@ void HeartbeatProtocol::switchSinks(const HeartbeatMessage& heartbeatMessage) {
 	if (differenceDistance > distanceDifference) {
 		SerialUSB.println("Switching sink...");
 		sinkAddress = heartbeatMessage.getSinkAddress();
+		dataFrameId = 0;
 	}
 
 }
@@ -605,6 +608,10 @@ void HeartbeatProtocol::setXbee(const XBee& xbee) {
 
 const vector<NextHopSwitch>& HeartbeatProtocol::getNextHopSwitchList() const {
 	return nextHopSwitchList;
+}
+
+uint8_t * HeartbeatProtocol::getDataFrameId() {
+	return &dataFrameId;
 }
 
 const XBeeAddress64& HeartbeatProtocol::getSinkAddress() const {

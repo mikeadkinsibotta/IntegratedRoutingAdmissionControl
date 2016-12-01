@@ -35,7 +35,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	this->myAddress = myAddress;
 	this->voiceStreamManager = voiceStreamManager;
 	this->payloadSize = payloadSize;
-	frameId = 0;
+
 	injectionRate = 0;
 	myNextHop = XBeeAddress64();
 	previousHop = XBeeAddress64();
@@ -43,7 +43,7 @@ VoicePacketSender::VoicePacketSender(XBee& xbee, HeartbeatProtocol * heartbeatPr
 	//If I make changes to the heartbeat protocol outside the class the member variable does not pick up the changes.
 	//Thats why I need the pointer.
 	this->heartbeatProtocol = heartbeatProtocol;
-
+	frameId = heartbeatProtocol->getDataFrameId();
 	this->xbee = xbee;
 	this->pathLoss = pathLoss;
 	this->calculateThroughput = calculateThroughput;
@@ -125,29 +125,29 @@ void VoicePacketSender::generateVoicePacket() {
 	destination[4] = '\0';
 
 	if (dupSetting != 0 && r && !justSentDup) {
-		frameId--;
+		(*frameId)--;
 
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
 		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
-		destination[21] = frameId;
+		destination[21] = *frameId;
 		destination[22] = codecSetting;
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
 		xbee.send(tx);
-		frameId++;
+		(*frameId)++;
 		justSentDup = true;
 	} else {
 
 		HeartbeatMessage::addAddressToMessage(destination, myAddress, 5);
 		HeartbeatMessage::addAddressToMessage(destination, heartbeatProtocol->getSinkAddress(), 13);
-		destination[21] = frameId;
+		destination[21] = *frameId;
 		destination[22] = codecSetting;
 
 		Tx64Request tx = Tx64Request(myNextHop, destination, sizeof(destination));
 
 		xbee.send(tx);
-		frameId++;
+		(*frameId)++;
 		justSentDup = false;
 	}
 
@@ -243,7 +243,7 @@ void VoicePacketSender::updateDataRate(uint8_t dataLoss) {
 }
 
 void VoicePacketSender::resetFrameID() {
-	frameId = 0;
+	(*frameId) = 0;
 }
 
 void VoicePacketSender::sendTracePacket() {
