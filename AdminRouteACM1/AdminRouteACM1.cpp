@@ -278,7 +278,7 @@ void setupThreads() {
 	(*endMessage).onRun(sendEndMessage);
 
 	(*threadMessage).ThreadName = "Thread Messages";
-	(*threadMessage).enabled = SENDER;
+	(*threadMessage).enabled = false;
 	(*threadMessage).setInterval(TRACE_INTERVAL);
 	(*threadMessage).onRun(sendTracePacket);
 
