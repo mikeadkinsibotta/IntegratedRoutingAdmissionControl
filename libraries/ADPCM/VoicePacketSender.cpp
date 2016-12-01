@@ -155,36 +155,36 @@ void VoicePacketSender::generateVoicePacket() {
 
 void VoicePacketSender::handleDataPacket(const Rx64Response &response) {
 
-	//Extract the packet's final destination
-
-	//check to see if the packet final destination is this node's address
-	//If not setup another request to forward it.
+//	//Extract the packet's final destination
+//
+//	//check to see if the packet final destination is this node's address
+//	//If not setup another request to forward it.
+//
+//	uint8_t * dataPtr = response.getData();
+//
+//	previousHop = response.getRemoteAddress64();
+//
+//	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
+//	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
+//
+//	if (!myAddress.equals(packetDestination)) {
+//
+//		myNextHop = heartbeatProtocol->getNextHop().getAddress();
+//
+//		//need to forward to next hop
+//		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
+//		xbee.send(tx);
+//
+//		voiceStreamManager->updateStreamsIntermediateNode(packetSource, previousHop);
+//
+//	} else {
 
 	uint8_t * dataPtr = response.getData();
 
-	previousHop = response.getRemoteAddress64();
-
-	HeartbeatMessage::setAddress(dataPtr, packetDestination, 13);
-	HeartbeatMessage::setAddress(dataPtr, packetSource, 5);
-
-	if (!myAddress.equals(packetDestination)) {
-
-		myNextHop = heartbeatProtocol->getNextHop().getAddress();
-
-		//need to forward to next hop
-		Tx64Request tx = Tx64Request(myNextHop, response.getData(), response.getDataLength());
-		xbee.send(tx);
-
-		voiceStreamManager->updateStreamsIntermediateNode(packetSource, previousHop);
-
-	} else {
-
-		uint8_t * dataPtr = response.getData();
-
-		voiceStreamManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
-		(*pathLoss).enabled = true;
-		(*calculateThroughput).enabled = true;
-	}
+	voiceStreamManager->updateVoiceLoss(packetSource, previousHop, dataPtr);
+	(*pathLoss).enabled = true;
+	(*calculateThroughput).enabled = true;
+	//}
 
 }
 
