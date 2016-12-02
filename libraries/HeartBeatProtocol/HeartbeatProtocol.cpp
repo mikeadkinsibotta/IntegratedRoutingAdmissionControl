@@ -218,7 +218,7 @@ void HeartbeatProtocol::noNeighborcalculatePathQualityNextHop() {
 	//check if any neighbors have routes
 	//we want to make sure we receive a heartbeat from every sink before picking the sink we will sent to.
 	//This prevents just picking the sink that sent the first heartbeat message.
-	if (filterTable.size() > 2) {
+	if (filterTable.size() > 0) {
 		Neighbor neighbor;
 		neighbor.setHopsToSink(UINT8_MAX);
 		uint8_t qop = UINT8_MAX;
