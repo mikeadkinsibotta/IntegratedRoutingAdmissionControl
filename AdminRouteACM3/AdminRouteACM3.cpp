@@ -4,7 +4,7 @@
 #define STATUS_LED 13
 #define ERROR_LED 12
 #define DEBUG false
-#define SENDER true
+#define SENDER false
 #define HEARTBEAT_ADDRESS_1 0x00000000
 #define HEARTBEAT_ADDRESS_2 0x0000FFFF
 #define MANIPULATE false
@@ -19,21 +19,21 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const unsigned long TRACE_INTERVAL = 10000;
-const unsigned long END_TIME = 200;
+const unsigned long END_TIME = 400;
 const uint8_t PAYLOAD_SIZE = 76;
 const uint8_t VOICE_DATA_INTERVAL = 2;
-const unsigned long REQUEST_STREAM = 200;
-const unsigned long GRANT_TIMEOUT_LENGTH = 50;
-const unsigned long REJECT_TIMEOUT_LENGTH = 10;
+const unsigned long REQUEST_STREAM = 100;
+const unsigned long GRANT_TIMEOUT_LENGTH = 30;
+const unsigned long REJECT_TIMEOUT_LENGTH = 8;
 const unsigned long HEARTBEAT_INTERVAL = 500;
 const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 1.80;
+const float DISTANCE_THRESHOLD = 7.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
-const bool IS_SINK = false;
+const bool IS_SINK = true;
 
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;
