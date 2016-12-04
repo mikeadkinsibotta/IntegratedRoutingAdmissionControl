@@ -71,7 +71,7 @@ double VoiceStreamStats::getThroughput() const {
 	return throughput;
 }
 
-void VoiceStreamStats::calculateThroughput(const double timeDifference) {
+void VoiceStreamStats::calculateThroughput() {
 
 	if (totalPacketsRecieved == 0) {
 		numNoPacketReceived++;
@@ -84,8 +84,8 @@ void VoiceStreamStats::calculateThroughput(const double timeDifference) {
 	if (voiceQuality != 0.00) {
 
 		double timepoint = millis() / 1000.0;
-		double timeDiff = timepoint - timeStamp - timeDifference;
-		timeStamp = timepoint - timeDifference;
+		double timeDiff = timepoint - timeStamp;
+		timeStamp = timepoint;
 
 		unsigned long totaldata = totalPacketsRecieved * payloadSize * 8;
 		double inKb = totaldata / 1000.0;

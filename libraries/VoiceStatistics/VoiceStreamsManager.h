@@ -22,8 +22,6 @@ class VoiceStreamManager {
 		std::map<XBeeAddress64, VoiceStreamStats> streams;
 		XBee xbee;
 		uint8_t payloadSize;
-		double timeDifference;
-		bool setTimeDifference = true;
 
 	public:
 		VoiceStreamManager();
