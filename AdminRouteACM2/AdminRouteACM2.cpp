@@ -19,7 +19,7 @@ const uint8_t NUM_MISSED_HB_BEFORE_PURGE = 6;
 const float INITAL_DUPLICATION_SETTING = 0.0;
 const uint8_t CODEC_SETTTING = 2;
 const unsigned long TRACE_INTERVAL = 10000;
-const unsigned long END_TIME = 200;
+const unsigned long END_TIME = 400;
 const uint8_t PAYLOAD_SIZE = 76;
 const uint8_t VOICE_DATA_INTERVAL = 2;
 const unsigned long REQUEST_STREAM = 100;
@@ -30,10 +30,10 @@ const unsigned long PATHLOSS_INTERVAL = 10000;
 const unsigned long CALCULATE_THROUGHPUT_INTERVAL = 8000;
 const unsigned long STREAM_DELAY_START = 5000;
 const unsigned long DEBUG_HEARTBEAT_TABLE = 10000;
-const float DISTANCE_THRESHOLD = 1.80;
+const float DISTANCE_THRESHOLD = 1.00;
 unsigned long STREAM_DELAY_START_BEGIN = 0;
 const float DIFFERENCE_DISTANCE = 0.60;
-const bool IS_SINK = true;
+const bool IS_SINK = false;
 
 bool endMessageSent = false;
 uint8_t nextHopSwitchListSize = 0;
@@ -58,7 +58,6 @@ Thread * threadMessage = new Thread();
 
 XBeeAddress64 heartBeatAddress = XBeeAddress64(HEARTBEAT_ADDRESS_1, HEARTBEAT_ADDRESS_2);
 XBeeAddress64 manipulateAddress = XBeeAddress64(MANIPULATE_ADDRESS_1, MANIPULATE_ADDRESS_2);
-
 XBeeAddress64 myAddress;
 
 void setup() {
