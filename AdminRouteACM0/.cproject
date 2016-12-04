@@ -26,6 +26,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/HeartBeatProtocol}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/VoiceStatistics}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/XBee}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/PotentialStream}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.cpp.sketch.input.1212703832" name="CPP source files" superClass="it.baeyens.arduino.compiler.cpp.sketch.input"/>
 							</tool>
@@ -38,6 +39,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/HeartBeatProtocol}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/VoiceStatistics}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/XBee}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/AdminRouteACM0/Libraries/PotentialStream}&quot;"/>
 								</option>
 								<inputType id="it.baeyens.arduino.compiler.c.sketch.input.1688130405" name="C Source Files" superClass="it.baeyens.arduino.compiler.c.sketch.input"/>
 							</tool>

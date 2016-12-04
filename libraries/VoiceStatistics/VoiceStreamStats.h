@@ -40,7 +40,7 @@ class VoiceStreamStats {
 				const uint8_t payloadSize);
 		const XBeeAddress64& getSenderAddress() const;
 		double getThroughput() const;
-		void calculateThroughput(const double timeDifference);
+		void calculateThroughput();
 		void updateVoiceLoss(const uint8_t * dataPtr);
 		void printRouteEnd() const;
 		void startStream() const;

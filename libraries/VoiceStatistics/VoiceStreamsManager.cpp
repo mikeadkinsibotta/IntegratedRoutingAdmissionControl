@@ -10,19 +10,16 @@
 VoiceStreamManager::VoiceStreamManager() {
 	xbee = XBee();
 	payloadSize = 0;
-	timeDifference = 0;
 }
 
 VoiceStreamManager::VoiceStreamManager(const uint8_t payloadSize) {
 	xbee = XBee();
 	this->payloadSize = payloadSize;
-	timeDifference = 0;
 }
 
 VoiceStreamManager::VoiceStreamManager(XBee& xbee, const uint8_t payloadSize) {
 	this->xbee = xbee;
 	this->payloadSize = payloadSize;
-	timeDifference = 0;
 }
 
 void VoiceStreamManager::removeStream(const XBeeAddress64& packetSource) {
@@ -119,11 +116,8 @@ void VoiceStreamManager::getStreamPreviousHop(const XBeeAddress64& packetSource,
 
 void VoiceStreamManager::calculateThroughput() {
 	for (std::map<XBeeAddress64, VoiceStreamStats>::iterator it = streams.begin(); it != streams.end(); ++it) {
-		if (setTimeDifference) {
-			timeDifference = (millis() / 1000.0);
-			setTimeDifference = false;
-		}
-		it->second.calculateThroughput(timeDifference);
+
+		it->second.calculateThroughput();
 	}
 }
 
